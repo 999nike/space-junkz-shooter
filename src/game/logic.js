@@ -216,7 +216,9 @@ window.updateGame = function updateGame(dt) {
     const e = S.enemies[i];
 
     // Base downward movement
-    e.y += e.speedY * dt;
+  const angle = (30 * Math.PI) / 180;
+e.x += -Math.sin(angle) * e.speedY * dt;
+e.y +=  Math.cos(angle) * e.speedY * dt;
 
     // ZigZag
     if (e.type === "zigzag") {
