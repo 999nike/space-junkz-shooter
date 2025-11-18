@@ -16,15 +16,19 @@ window.shoot = function shoot() {
   const spread = player.weaponLevel;
   const bulletSpeed = 380;
   const base = { y: player.y - 18, radius: 4, colour: "#5be7ff" };
+// 30° diagonal shooting — up-right
+const angle = (30 * Math.PI) / 180;
+const dirX =  Math.sin(angle);
+const dirY = -Math.cos(angle);
 
-  if (spread === 1) {
-    S.bullets.push({
-      x: player.x,
-      vy: -bulletSpeed,
-      vx: 0,
-      ...base
-    });
-  } else if (spread === 2) {
+if (spread === 1) {
+  S.bullets.push({
+    x: player.x,
+    vx: dirX * bulletSpeed,
+    vy: dirY * bulletSpeed,
+    ...base
+  });
+}else if (spread === 2) {
     S.bullets.push(
       {
         x: player.x - 9,
