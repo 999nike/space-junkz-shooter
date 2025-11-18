@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smokey’s Runway</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Use the real game styles from src/game -->
+  <link rel="stylesheet" href="/src/game/game.css" />
+</head>
+<body>
+  <div id="hud">
+    <div class="hud-left">
+      <span>Score:</span> <span id="score">0</span>
+    </div>
+    <div class="hud-right">
+      <span>Lives:</span> <span id="lives">3</span>
+    </div>
+  </div>
+
+  <canvas id="game" width="360" height="640"></canvas>
+
+  <button id="startBtn">START GAME</button>
+  <div id="msg"></div>
+
+  <!-- Load the actual game logic from src/game -->
+  <script type="module" src="/src/game/game.js"></script>
+</body>
+</html>
