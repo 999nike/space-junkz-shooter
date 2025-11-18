@@ -4,27 +4,38 @@ window.initStars = function initStars() {
   S.stars = [];
   for (let i = 0; i < 80; i++) {
     S.stars.push({
-      x: Math.random() * S.W,
-      y: Math.random() * S.H,
-      speed: rand(20, 80),
+      // start mainly in/around the visible area
+      x: rand(0, S.W + 60),
+      y: rand(-60, S.H),
+      speed: rand(40, 120), // a bit faster for F-Zero feel
       size: Math.random() * 2 + 0.5,
       color:
         Math.random() < 0.4
           ? "#4df0ff"
           : Math.random() < 0.7
-            ? "#ff83e6"
-            : "#f9f871"
+          ? "#ff83e6"
+          : "#f9f871"
     });
   }
 };
 
 window.updateStars = function updateStars(dt) {
   const S = window.GameState;
+
+  // 30° tilt from vertical, moving top-right → bottom-left
+  const angle = (30 * Math.PI) / 180;
+  const dirX = -Math.sin(angle); // ~ -0.5  (left)
+  const dirY =  Math.cos(angle); // ~  0.866 (down)
+
   for (const s of S.stars) {
-    s.y += s.speed * dt;
-    if (s.y > S.H) {
-      s.y = -10;
-      s.x = Math.random() * S.W;
+    s.x += dirX * s.speed * dt;
+    s.y += dirY * s.speed * dt;
+
+    // If star goes off bottom-left, respawn near top-right
+    if (s.y > S.H + 40 || s.x < -40) {
+      s.x = rand(S.W * 0.6, S.W + 80);
+      s.y = rand(-80, S.H * 0.4);
+      s.speed = rand(40, 120);
     }
   }
 };
