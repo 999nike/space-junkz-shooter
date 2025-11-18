@@ -4,10 +4,9 @@ window.initStars = function initStars() {
   S.stars = [];
   for (let i = 0; i < 80; i++) {
     S.stars.push({
-      // start mainly in/around the visible area
       x: rand(0, S.W + 60),
       y: rand(-60, S.H),
-      speed: rand(40, 120), // a bit faster for F-Zero feel
+      speed: rand(40, 120),
       size: Math.random() * 2 + 0.5,
       color:
         Math.random() < 0.4
@@ -24,14 +23,14 @@ window.updateStars = function updateStars(dt) {
 
   // 30° tilt from vertical, moving top-right → bottom-left
   const angle = (30 * Math.PI) / 180;
-  const dirX = -Math.sin(angle); // ~ -0.5  (left)
-  const dirY =  Math.cos(angle); // ~  0.866 (down)
+  const dirX = -Math.sin(angle); // ~ -0.5
+  const dirY =  Math.cos(angle); // ~ 0.866
 
   for (const s of S.stars) {
     s.x += dirX * s.speed * dt;
     s.y += dirY * s.speed * dt;
 
-    // If star goes off bottom-left, respawn near top-right
+    // Respawn when off-screen (bottom-left)
     if (s.y > S.H + 40 || s.x < -40) {
       s.x = rand(S.W * 0.6, S.W + 80);
       s.y = rand(-80, S.H * 0.4);
