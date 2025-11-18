@@ -5,8 +5,7 @@
   <title>Smokey’s Runway</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Use the real game styles from src/game -->
-  <link rel="stylesheet" href="/src/game/game.css" />
+  <link rel="stylesheet" href="./src/game/game.css" />
 </head>
 <body>
   <div id="hud">
@@ -23,8 +22,19 @@
   <button id="startBtn">START GAME</button>
   <div id="msg"></div>
 
-  <!-- Load the actual game logic from src/game -->
-  <script type="module" src="/src/game/engine.js"></script>
-  <script type="module" src="/src/game/game.js"></script>
+  <!-- Scripts MUST be relative paths -->
+  <script type="module" src="./src/game/assets.js"></script>
+  <script type="module" src="./src/game/enemies.js"></script>
+  <script type="module" src="./src/game/engine.js"></script>
+  <script type="module" src="./src/game/input.js"></script>
+  <script type="module" src="./src/game/logic.js"></script>
+  <script type="module" src="./src/game/player.js"></script>
+  <script type="module" src="./src/game/renderer.js"></script>
+  <script type="module" src="./src/game/game.js"></script>
+
+  <!-- Eruda (mobile console) -->
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
+
 </body>
 </html>
