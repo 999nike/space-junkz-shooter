@@ -4,7 +4,7 @@ window.GameState = {
   // Canvas + drawing
   canvas: null,
   ctx: null,
-  W: 360,
+  W: 480,
   H: 640,
 
   // UI
