@@ -70,6 +70,10 @@ window.drawRunway = function drawRunway(ctx) {
 // ---------- BULLETS ----------
 window.drawBullets = function drawBullets(ctx) {
   const S = window.GameState;
+
+  // Safety: sprites not ready yet
+  if (!S.sprites) return;
+
   const img = S.sprites.playerBullet;
   if (!img) return;
 
@@ -79,13 +83,15 @@ window.drawBullets = function drawBullets(ctx) {
   for (const b of S.bullets) {
     ctx.save();
     ctx.translate(b.x, b.y);
+
     ctx.drawImage(
       img,
-      -w * 0.5,   // center sprite
+      -w * 0.5,
       -h * 0.5,
       w,
       h
     );
+
     ctx.restore();
   }
 };
