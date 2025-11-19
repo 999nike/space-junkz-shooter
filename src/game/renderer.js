@@ -115,5 +115,54 @@ window.drawGame = function drawGame() {
   window.drawParticles(ctx);
 
   // Player
-  window.drawPlayer(ctx);
+// ----------- THRUSTER FLAME FX -----------
+ctx.save();
+const p = S.player;
+
+// Flame origin (slightly behind ship)
+const angle = (30 * Math.PI) / 180;
+const fx = p.x - Math.cos(angle) * 14;
+const fy = p.y + Math.sin(angle) * 14;
+
+// Flickering plasma flame
+ctx.globalAlpha = 0.45 + Math.random() * 0.25;
+ctx.fillStyle = "rgba(120,200,255,0.8)";
+ctx.beginPath();
+ctx.ellipse(
+  fx + (p.bank * 6),
+  fy + 22,
+  6 + Math.random() * 2,
+  18 + Math.random() * 6,
+  0,
+  0,
+  Math.PI * 2
+);
+ctx.fill();
+
+// Inner core
+ctx.globalAlpha = 0.75;
+ctx.fillStyle = "#ffffff";
+ctx.beginPath();
+ctx.ellipse(
+  fx + (p.bank * 6),
+  fy + 16,
+  2.4,
+  7,
+  0,
+  0,
+  Math.PI * 2
+);
+ctx.fill();
+
+// Subtle motion blur
+ctx.globalAlpha = 0.18;
+ctx.fillStyle = "rgba(100,200,255,0.4)";
+ctx.beginPath();
+ctx.moveTo(p.x - 20, p.y + 30);
+ctx.lineTo(p.x - 55, p.y + 70);
+ctx.lineTo(p.x - 8, p.y + 45);
+ctx.closePath();
+ctx.fill();
+
+ctx.restore();
 };
