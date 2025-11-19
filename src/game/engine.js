@@ -23,17 +23,28 @@ window.shoot = function shoot() {
   const baseAngle =
     typeof player.angle === "number" ? player.angle : -Math.PI / 2;
 
-  function makeBullet(angleOffset, colour) {
-    const a = baseAngle + angleOffset;
-    return {
-      x: player.x,
-      y: player.y,
-      radius: 4,
-      colour,
-      vx: Math.cos(a) * bulletSpeed,
-      vy: Math.sin(a) * bulletSpeed
-    };
-  }
+function makeBullet(angleOffset, colour) {
+  const a = baseAngle + angleOffset;
+  return {
+    x: player.x,
+    y: player.y,
+
+    // collision radius slightly bigger for sprite
+    radius: 6,
+
+    colour,
+
+    // movement
+    vx: Math.cos(a) * bulletSpeed,
+    vy: Math.sin(a) * bulletSpeed,
+
+    // --- SPRITE ANIMATION DATA ---
+    frame: 0,
+    frameTimer: 0,
+    frameSpeed: 0.06,    // how fast it animates
+    frameCount: 4        // Bullet_player.png = 4 frames wide
+  };
+}
 
   if (spread === 1) {
     // SINGLE SHOT
