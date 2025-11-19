@@ -175,24 +175,29 @@ window.updateGame = function updateGame(dt) {
   const player = S.player;
 
  // ----- Player movement -----
-  let dx = 0;
-  let dy = 0;
-  const keys = S.keys || {};
-  if (keys["arrowleft"] || keys["a"]) dx -= 1;
-  if (keys["arrowright"] || keys["d"]) dx += 1;
-  if (keys["arrowup"] || keys["w"]) dy -= 1;
-  if (keys["arrowdown"] || keys["s"]) dy += 1;
+let dx = 0;
+let dy = 0;
+const keys = S.keys || {};
+if (keys["arrowleft"] || keys["a"]) dx -= 1;
+if (keys["arrowright"] || keys["d"]) dx += 1;
+if (keys["arrowup"] || keys["w"]) dy -= 1;
+if (keys["arrowdown"] || keys["s"]) dy += 1;
 
-  if (dx || dy) {
-    const len = Math.hypot(dx, dy) || 1;
-    dx /= len;
-    dy /= len;
-    player.x += dx * player.speed * dt;
-    player.y += dy * player.speed * dt;
+if (dx || dy) {
+  const len = Math.hypot(dx, dy) || 1;
+  dx /= len;
+  dy /= len;
+  player.x += dx * player.speed * dt;
+  player.y += dy * player.speed * dt;
 
-    // Keyboard-only players still rotate in movement direction
-    player.angle = Math.atan2(dy, dx);
-  }
+  // ❌ no angle update here – mouse controls facing direction
+}
+
+// Full-screen movement with a small safe border
+player.x = clamp(player.x, 24, S.W - 24);
+player.y = clamp(player.y, 24, S.H - 24);
+
+if (player.invuln > 0) player.invuln -= dt;
 
   // Full-screen movement with a small safe border
   player.x = clamp(player.x, 24, S.W - 24);
