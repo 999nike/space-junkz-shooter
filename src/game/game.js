@@ -4,12 +4,12 @@
   const S = window.GameState;
 
   window.initGame = function initGame() {
-   S.canvas = document.getElementById("game");
-   S.ctx = S.canvas.getContext("2d");
-   S.W = S.canvas.width;
-   S.H = S.canvas.height;
+    S.canvas = document.getElementById("game");
+    S.ctx = S.canvas.getContext("2d");
+    S.W = S.canvas.width;
+    S.H = S.canvas.height;
 
-   // Load ship sprite
+    // Load ship sprite
     S.shipImage = new Image();
     S.shipImage.src = "./src/game/AlphaFighter.png";   // your file
 
