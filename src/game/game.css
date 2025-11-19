@@ -57,21 +57,18 @@ body {
 /* Game canvas */
 
 #game {
-  margin-top: 14px;
+  width: 90vw;       /* 90% of browser width */
+  height: 90vh;      /* 90% of browser height */
+  display: block;
+  margin: 0 auto;
+
   border-radius: 18px;
   border: 2px solid #2f3e7b;
-  background: radial-gradient(circle at 50% 20%, #0c1e4b 0%, #020313 65%);
+
+  background: radial-gradient(circle at 50% 40%, #0c1e4b 0%, #020313 65%);
   box-shadow:
     0 0 0 1px rgba(60, 100, 255, 0.2),
     0 26px 60px rgba(0, 0, 0, 0.95);
-
-  /* ⭐ FIXED SCALING (PATCHED) ⭐ */
-  width: 100%;          /* expands to container width */
-  max-width: 700px;     /* keeps clean arcade ratio */
-  height: auto;         /* preserves aspect ratio */
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* Start button */
