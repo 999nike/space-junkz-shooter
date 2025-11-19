@@ -77,3 +77,34 @@ window.circleHit = function circleHit(a, b, pad = 0) {
   const r = (a.radius || 0) + (b.radius || 0) + pad;
   return dx * dx + dy * dy <= r * r;
 };
+
+// ---------- SPRITE LOADER ----------
+// Centralised place to hang all images used by the renderer / logic.
+// Safe to call multiple times; it just rewires the same objects.
+window.loadSprites = function loadSprites() {
+  const S = window.GameState;
+  if (!S) return;
+
+  const sprites = (S.sprites = S.sprites || {});
+
+  function makeImage(path) {
+    const img = new Image();
+    img.src = path;
+    return img;
+  }
+
+  // Player bullet sheet (multi-frame, animated later)
+  sprites.playerBullet = makeImage("./src/game/assets/Bullet_player.png");
+
+  // Enemy bullet orb
+  sprites.enemyBullet = makeImage("./src/game/assets/Laser.png");
+
+  // Mega-beam shaft (reserved for later step)
+  sprites.megaBeam = makeImage("./src/game/assets/laser.png");
+
+  // Explosion atlas (we’ll animate this in the explosion step)
+  sprites.explosionSheet = makeImage("./src/game/assets/Explo01.png");
+
+  // Boss sprite (Scorpion)
+  sprites.bossScorpion = makeImage("./src/game/oldSCORPIO2.png");
+};
