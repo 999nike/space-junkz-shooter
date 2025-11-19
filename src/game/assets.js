@@ -31,18 +31,24 @@ window.GameState = {
   spawnTimer: 0,
   shootTimer: 0,
 
-shipImage: null,   // new sprite
-fireImage: null,   // optional thruster sprite (future)
+  // Sprites
+  shipImage: null,   // player ship
+  fireImage: null,   // optional thruster sprite (future)
 
-player: {
-  x: 180,
-  y: 560,
-  radius: 22,              // increased for sprite size
-  speed: 250,
-  weaponLevel: 1,          // 1 = single, 2 = twin, 3 = spread
-  invuln: 0,
-  bank: 0                  // -1 left, +1 right, 0 neutral
-}
+  // Player
+  player: {
+    x: 180,
+    y: 560,
+    radius: 22,        // collision radius
+    speed: 250,
+    weaponLevel: 1,    // 1 = single, 2 = twin, 3 = spread
+    invuln: 0,
+    bank: 0            // -1 left, +1 right, 0 neutral
+  },
+
+  // Input state
+  keys: {}
+};
 
 // Helpers
 window.rand = function rand(min, max) {
