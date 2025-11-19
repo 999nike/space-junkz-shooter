@@ -1,23 +1,34 @@
+// ----------- PLAYER RENDERING -----------
+
 window.drawPlayer = function drawPlayer(ctx) {
   const S = window.GameState;
   const p = S.player;
 
+  // If no sprite loaded, stop
   if (!S.shipImage) return;
 
   const img = S.shipImage;
 
-  // tilt banking angle (left = -15°, right = +15°)
-  const bankAngle = p.bank * 0.35;
-
   ctx.save();
-  ctx.translate(p.x, p.y);
-  ctx.rotate(bankAngle);
 
-  const scale = 0.22; // adjust size
+  // Move to player position
+  ctx.translate(p.x, p.y);
+
+  // Banking rotation (left/right tilt)
+  ctx.rotate(p.bank * 0.35); // roughly ±20°
+
+  // Glow FX to hide cut edges
+  ctx.shadowColor = "rgba(120,200,255,0.55)";
+  ctx.shadowBlur = 22;
+
+  // Scale sprite
+  const scale = 0.22; // adjust this if you want bigger/smaller
   const w = img.width * scale;
   const h = img.height * scale;
 
+  // Draw centered
   ctx.drawImage(img, -w / 2, -h / 2, w, h);
+
   ctx.restore();
 
   // Invulnerability ring
