@@ -1,32 +1,49 @@
-// ---------- ENEMY RENDER ----------
+// ----------- ENEMIES -----------
+
+window.updateEnemies = function updateEnemies(dt) {
+  const S = window.GameState;
+
+  // 30° diagonal movement (top-right → bottom-left)
+  const angle = (30 * Math.PI) / 180;
+  const dirX = -Math.sin(angle);  // ~ -0.5
+  const dirY =  Math.cos(angle);  // ~ +0.866
+
+  for (const e of S.enemies) {
+    // Move enemy along diagonal lane
+    e.x += dirX * e.speed * dt;
+    e.y += dirY * e.speed * dt;
+
+    // If off-screen → respawn top-right
+    if (e.y > S.H + 120 || e.x < -120) {
+      e.x = rand(S.W * 0.55, S.W + 150);
+      e.y = rand(-160, S.H * 0.25);
+
+      e.speed = rand(40, 90);     // enemy speed variation
+      e.hp = rand(1, 3);          // reset health
+    }
+  }
+};
+
+// ----------- RENDER -----------
 
 window.drawEnemies = function drawEnemies(ctx) {
   const S = window.GameState;
 
+  ctx.save();
   for (const e of S.enemies) {
-    ctx.save();
-    ctx.fillStyle = e.hitFlash > 0 ? "#ffffff" : e.colour;
+    // Enemy triangle rendering (we’ll replace with sprites later)
+    ctx.fillStyle = e.colour;
+
     ctx.beginPath();
-    ctx.moveTo(e.x, e.y - e.radius);
-    ctx.lineTo(e.x - e.radius * 0.8, e.y + e.radius * 0.8);
-    ctx.lineTo(e.x + e.radius * 0.8, e.y + e.radius * 0.8);
+    ctx.moveTo(e.x, e.y - 12);
+    ctx.lineTo(e.x - 10, e.y + 10);
+    ctx.lineTo(e.x + 10, e.y + 10);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
 
-    // HP bar if more than 1 HP
-    if (e.maxHp > 1) {
-      const barWidth = e.radius * 1.5;
-      const barHeight = 4;
-      const x = e.x - barWidth / 2;
-      const y = e.y - e.radius - 8;
-
-      ctx.fillStyle = "rgba(0,0,0,0.5)";
-      ctx.fillRect(x, y, barWidth, barHeight);
-
-      const hpWidth = (e.hp / e.maxHp) * barWidth;
-      ctx.fillStyle = "#76ff9b";
-      ctx.fillRect(x, y, hpWidth, barHeight);
-    }
+    // Health bar
+    ctx.fillStyle = "#7dff99";
+    ctx.fillRect(e.x - 12, e.y - 20, (e.hp / e.maxhp) * 24, 3);
   }
+  ctx.restore();
 };
