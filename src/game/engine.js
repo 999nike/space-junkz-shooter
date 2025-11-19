@@ -1,19 +1,22 @@
 // ---------- ENGINE INIT (FIXED) ----------
 
-window.GameState = {
+window.GameState = window.GameState || {};
+
+Object.assign(window.GameState, {
   W: 0,
   H: 0,
   canvas: null,
   ctx: null,
-  player: {
+
+  player: Object.assign(window.GameState.player || {}, {
     x: 0,
     y: 0,
     angle: 0,
     speed: 260,
     weaponLevel: 1,
     invuln: 0
-  }
-};
+  })
+});
 
 // Setup canvas + load all sprites
 window.initEngine = function initEngine() {
