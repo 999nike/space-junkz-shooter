@@ -131,6 +131,8 @@ window.resetGameState = function resetGameState() {
   S.livesEl.textContent = S.lives;
 };
 
+
+
 // ---------- MAIN LOOP ----------
 
 window.gameLoop = function gameLoop(timestamp) {
