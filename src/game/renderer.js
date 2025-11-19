@@ -1,90 +1,66 @@
-// ---------- RENDERER ----------
+// ----------- RENDERER -----------
 
 window.drawStars = function drawStars(ctx) {
   const S = window.GameState;
+
+  ctx.save();
+  ctx.fillStyle = "#ffffff";
+
   for (const s of S.stars) {
-    ctx.fillStyle = s.color;
-    ctx.globalAlpha = 0.55;
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.globalAlpha = s.alpha;
+    ctx.fillRect(s.x, s.y, s.size, s.size);
   }
-  ctx.globalAlpha = 1;
+
+  ctx.restore();
 };
 
-window.drawBullets = function drawBullets(ctx) {
+// ----------- UPDATE STARS (DIAGONAL 30° FLOW) -----------
+
+window.updateStars = function updateStars(dt) {
   const S = window.GameState;
-  for (const b of S.bullets) {
-    const grad = ctx.createLinearGradient(b.x, b.y + 10, b.x, b.y - 10);
-    grad.addColorStop(0, "rgba(10,10,20,0)");
-    grad.addColorStop(0.4, b.colour);
-    grad.addColorStop(1, "#ffffff");
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(b.x, b.y + 6);
-    ctx.lineTo(b.x, b.y - 10);
-    ctx.stroke();
+
+  // 30° diagonal movement (top-right → bottom-left)
+  const angle = (30 * Math.PI) / 180;
+  const dirX = -Math.sin(angle);   // ~ -0.5
+  const dirY =  Math.cos(angle);   // ~ +0.866
+
+  for (const s of S.stars) {
+    s.x += dirX * s.speed * dt;
+    s.y += dirY * s.speed * dt;
+
+    // Respawn if off-screen (bottom-left area)
+    if (s.y > S.H + 40 || s.x < -40) {
+      // Spawn top-right area
+      s.x = rand(S.W * 0.55, S.W + 100);
+      s.y = rand(-120, S.H * 0.25);
+
+      s.size = rand(1, 3);
+      s.alpha = rand(0.4, 1);
+      s.speed = rand(25, 90);
+    }
   }
 };
 
-window.drawEnemyBullets = function drawEnemyBullets(ctx) {
-  const S = window.GameState;
-  for (const b of S.enemyBullets) {
-    ctx.fillStyle = b.colour;
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-    ctx.fill();
-  }
-};
+// ----------- MAIN GAME RENDER -----------
 
-window.drawPowerUps = function drawPowerUps(ctx) {
-  const S = window.GameState;
-  for (const p of S.powerUps) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-    g.addColorStop(0, "#ffffff");
-    g.addColorStop(0.4, "#80ffdf");
-    g.addColorStop(1, "#00c6a6");
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.restore();
-  }
-};
-
-window.drawParticles = function drawParticles(ctx) {
-  const S = window.GameState;
-  for (const p of S.particles) {
-    ctx.globalAlpha = Math.max(p.life, 0);
-    ctx.fillStyle = p.colour;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-};
-
-window.drawGame = function drawGame() {
+window.renderGame = function renderGame(dt) {
   const S = window.GameState;
   const ctx = S.ctx;
 
-  // Clear
   ctx.clearRect(0, 0, S.W, S.H);
 
-  // Background gradient
-  const grd = ctx.createLinearGradient(0, 0, 0, S.H);
-  grd.addColorStop(0, "rgba(20,35,80,0.9)");
-  grd.addColorStop(1, "rgba(2,5,18,1)");
-  ctx.fillStyle = grd;
-  ctx.fillRect(0, 0, S.W, S.H);
-
+  // Background stars
   drawStars(ctx);
+
+  // Bullets
+  window.drawBullets(ctx);
+
+  // Enemies
   window.drawEnemies(ctx);
-  drawBullets(ctx);
-  drawEnemyBullets(ctx);
-  drawPowerUps(ctx);
-  drawParticles(ctx);
+
+  // Player
   window.drawPlayer(ctx);
+
+  // Power-ups
+  window.drawPowerUps(ctx);
 };
