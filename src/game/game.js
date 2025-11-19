@@ -6,10 +6,12 @@
   window.initGame = function initGame() {
     S.canvas = document.getElementById("game");
     S.ctx = S.canvas.getContext("2d");
-  S.canvas.width = 480;
-S.canvas.height = 900;
-S.W = S.canvas.width;
-S.H = S.canvas.height;
+
+    // ---- FULL LANDSCAPE CANVAS (90% fullscreen) ----
+    S.canvas.width = window.innerWidth * 0.90;
+    S.canvas.height = window.innerHeight * 0.90;
+    S.W = S.canvas.width;
+    S.H = S.canvas.height;
 
     // Load ship sprite
     S.shipImage = new Image();
