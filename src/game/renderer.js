@@ -170,9 +170,15 @@ window.drawParticles = function drawParticles(ctx) {
 // ---------- BOSS RENDERER ----------
 window.drawScorpionBoss = function drawScorpionBoss(ctx) {
   const S = window.GameState;
-  const img = S.sprites.bossScorpion;
-  const beamImg = S.sprites.megaBeam;
-  if (!img) return;
+
+// Safety: sprites may not be ready on first frames
+if (!S.sprites) return;
+
+const img = S.sprites.bossScorpion;
+const beamImg = S.sprites.megaBeam;
+
+// Safety: boss sprite not ready or boss not spawned
+if (!img) return;
 
   const scale = 0.30;          // mega-boss scale
   const w = img.width * scale;
