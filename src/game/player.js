@@ -1,4 +1,4 @@
-// ----------- PLAYER RENDERING -----------
+// ----------- PLAYER RENDERING (PATCHED CLEAN VERSION) -----------
 
 window.drawPlayer = function drawPlayer(ctx) {
   const S = window.GameState;
@@ -14,24 +14,30 @@ window.drawPlayer = function drawPlayer(ctx) {
   // Move to player position
   ctx.translate(p.x, p.y);
 
-  // Banking rotation (left/right tilt)
-  ctx.rotate(p.bank * 0.35); // roughly ±20°
+  // 🔥 reduced banking tilt (cleaner, less wild)
+  ctx.rotate(p.bank * 0.15);
 
-  // Glow FX to hide cut edges
-  ctx.shadowColor = "rgba(120,200,255,0.55)";
-  ctx.shadowBlur = 22;
+  // 🔥 cleaner glow for 4K
+  ctx.shadowColor = "rgba(120,200,255,0.35)";
+  ctx.shadowBlur = 10;
 
-  // Scale sprite
-  const scale = 0.22; // adjust this if you want bigger/smaller
+  // ⭐ PERFECT scale for your current setup
+  const scale = 0.06;
   const w = img.width * scale;
   const h = img.height * scale;
 
-  // Draw centered
-  ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  // ⭐ centered nicely + lifted slightly to fix "zoom" feeling
+  ctx.drawImage(
+    img,
+    -w * 0.50,  // centered horizontally
+    -h * 0.60,  // lifted to compensate for jet nose length
+    w,
+    h
+  );
 
   ctx.restore();
 
-  // Invulnerability ring
+  // Invulnerability ring (unchanged)
   if (p.invuln > 0) {
     ctx.strokeStyle = "#fffd8b";
     ctx.lineWidth = 2;
