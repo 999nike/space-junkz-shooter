@@ -29,20 +29,14 @@ function makeBullet(angleOffset, colour) {
     x: player.x,
     y: player.y,
 
-    // collision radius slightly bigger for sprite
+    // Collision radius tuned for your glowing orb sprite
     radius: 6,
 
     colour,
 
     // movement
     vx: Math.cos(a) * bulletSpeed,
-    vy: Math.sin(a) * bulletSpeed,
-
-    // --- SPRITE ANIMATION DATA ---
-    frame: 0,
-    frameTimer: 0,
-    frameSpeed: 0.06,    // how fast it animates
-    frameCount: 4        // Bullet_player.png = 4 frames wide
+    vy: Math.sin(a) * bulletSpeed
   };
 }
 
