@@ -51,19 +51,26 @@ window.spawnPowerUp = function spawnPowerUp(x, y) {
   });
 };
 
-// ---------- PARTICLES ----------
+// ---------- EXPLOSIONS (SPRITE SHEET) ----------
 window.spawnExplosion = function spawnExplosion(x, y, colour) {
   const S = window.GameState;
-  for (let i = 0; i < 14; i++) {
-    S.particles.push({
-      x,
-      y,
-      vx: rand(-120, 120),
-      vy: rand(-120, 120),
-      life: rand(0.3, 0.7),
-      colour
-    });
-  }
+
+  // pick row based on colour tint
+  let row = 0; // default yellow
+  if (colour === "#6bffb2") row = 1;   // green enemies
+  else if (colour === "#9bf3ff") row = 2; // cyan bullets/explosions
+  else if (colour === "#4db9ff") row = 3; // deep blue (if needed)
+
+  S.particles.push({
+    x,
+    y,
+    row,
+    frame: 0,
+    frameCount: 5,       // 5 columns per row
+    frameSpeed: 0.08,    // animation speed
+    frameTimer: 0,
+    done: false
+  });
 };
 
 // ---------- ENEMY TYPES / SPAWN ----------
@@ -343,14 +350,22 @@ if (player.invuln > 0) player.invuln -= dt;
     }
   }
 
-  // ----- Particles -----
-  for (let i = S.particles.length - 1; i >= 0; i--) {
-    const p = S.particles[i];
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-    p.life -= dt;
-    if (p.life <= 0) S.particles.splice(i, 1);
+  // ----- Explosions (sprite animation) -----
+for (let i = S.particles.length - 1; i >= 0; i--) {
+  const e = S.particles[i];
+
+  // advance animation
+  e.frameTimer += dt;
+  if (e.frameTimer >= e.frameSpeed) {
+    e.frameTimer = 0;
+    e.frame++;
+
+    if (e.frame >= e.frameCount) {
+      S.particles.splice(i, 1);
+      continue;
+    }
   }
+}
 
   // Lose condition
   if (S.lives <= 0) {
