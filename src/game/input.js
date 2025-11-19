@@ -1,4 +1,4 @@
-// ---------- INPUT ----------
+// ----------- INPUT -----------
 
 (function () {
   const S = window.GameState;
@@ -7,6 +7,7 @@
   window.setupInput = function setupInput() {
     const canvas = S.canvas;
 
+    // Keyboard (still works, optional)
     window.addEventListener("keydown", (e) => {
       S.keys[e.key.toLowerCase()] = true;
     });
@@ -15,32 +16,41 @@
       S.keys[e.key.toLowerCase()] = false;
     });
 
+    // Pointer (mouse + touch)
     function pointerMove(e) {
       const rect = canvas.getBoundingClientRect();
       const cx =
         (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
       const cy =
         (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
       const p = S.player;
-  // Update X/Y
-const oldX = p.x;
+      const oldX = p.x;
 
-p.x = clamp(cx, -20, S.W + 20);
-p.y = clamp(cy, S.H / 2, S.H - 20);
+      // Convert pointer to in-game coords
+      const targetX = clamp(cx, -50, S.W + 50);
+      const targetY = clamp(cy, S.H * 0.45, S.H - 30);
 
-// Banking based on pointer movement
-const deltaX = p.x - oldX;
+      // Update player position
+      p.x = targetX;
+      p.y = targetY;
 
-if (deltaX < -2) {
-    p.bank = Math.max(p.bank - 0.12, -1); // left bank
-} else if (deltaX > 2) {
-    p.bank = Math.min(p.bank + 0.12, 1);  // right bank
-} else {
-    // return to center
-    p.bank *= 0.90;
-}
+      // BANKING – left / right tilt based on movement
+      const deltaX = p.x - oldX;
 
+      if (deltaX < -2) {
+        p.bank = Math.max(p.bank - 0.10, -1); // bank left
+      } else if (deltaX > 2) {
+        p.bank = Math.min(p.bank + 0.10, 1);  // bank right
+      } else {
+        p.bank *= 0.92; // return to center smoothly
+      }
+    }
+
+    // MOUSE
     canvas.addEventListener("mousemove", pointerMove);
+
+    // TOUCH
     canvas.addEventListener(
       "touchmove",
       (e) => {
