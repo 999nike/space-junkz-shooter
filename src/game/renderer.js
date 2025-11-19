@@ -127,16 +127,36 @@ window.drawPowerUps = function drawPowerUps(ctx) {
   }
 };
 
-// Particle (explosion) renderer
+// Explosion renderer (sprite sheet)
 window.drawParticles = function drawParticles(ctx) {
   const S = window.GameState;
+  const sheet = S.sprites.explosionSheet;
+  if (!sheet) return;
 
-  for (const p of S.particles) {
-    ctx.globalAlpha = Math.max(p.life, 0);
-    ctx.fillStyle = p.colour || "#ffffff";
-    ctx.fillRect(p.x, p.y, 3, 3);
+  const rows = 4;
+  const cols = 5;
+
+  const frameW = sheet.width / cols;
+  const frameH = sheet.height / rows;
+
+  for (const e of S.particles) {
+    const sx = e.frame * frameW;
+    const sy = e.row * frameH;
+
+    ctx.save();
+    ctx.translate(e.x, e.y);
+
+    ctx.drawImage(
+      sheet,
+      sx, sy, frameW, frameH,   // source slice
+      -frameW * 0.5,            // center explosion
+      -frameH * 0.5,
+      frameW,
+      frameH
+    );
+
+    ctx.restore();
   }
-  ctx.globalAlpha = 1;
 };
 
 // ---------- MAIN GAME DRAW ----------
