@@ -11,77 +11,45 @@ window.flashMsg = function flashMsg(text) {
   }, 1600);
 };
 
-// ---------- BULLET SYSTEM (F-Zero 30° Diagonal) ----------
+// ---------- BULLET SYSTEM (Angle-based — fires where the ship faces) ----------
 
 window.shoot = function shoot() {
   const S = window.GameState;
   const player = S.player;
   const spread = player.weaponLevel;
-  const bulletSpeed = 380;
+  const bulletSpeed = 520;
 
-  // 30° diagonal (up-right)
-  const angle = (30 * Math.PI) / 180;
-  const dirX = Math.sin(angle);   // ~ +0.5
-  const dirY = -Math.cos(angle);  // ~ -0.866
+  // Fallback angle = straight up if we don't have a mouse angle yet
+  const baseAngle =
+    typeof player.angle === "number" ? player.angle : -Math.PI / 2;
 
-  const base = {
-    x: player.x,
-    y: player.y - 12,
-    radius: 4,
-    colour: "#a8ffff"
-  };
+  function makeBullet(angleOffset, colour) {
+    const a = baseAngle + angleOffset;
+    return {
+      x: player.x,
+      y: player.y,
+      radius: 4,
+      colour,
+      vx: Math.cos(a) * bulletSpeed,
+      vy: Math.sin(a) * bulletSpeed
+    };
+  }
 
   if (spread === 1) {
     // SINGLE SHOT
-    S.bullets.push({
-      ...base,
-      vx: dirX * bulletSpeed,
-      vy: dirY * bulletSpeed,
-    });
-
+    S.bullets.push(makeBullet(0, "#a8ffff"));
   } else if (spread === 2) {
-    // TWIN SHOT
+    // TWIN SHOT (slight angle split)
     S.bullets.push(
-      {
-        ...base,
-        x: player.x - 10,
-        vx: dirX * bulletSpeed,
-        vy: dirY * bulletSpeed,
-      },
-      {
-        ...base,
-        x: player.x + 10,
-        vx: dirX * bulletSpeed,
-        vy: dirY * bulletSpeed,
-      }
+      makeBullet(-0.08, "#a8ffff"),
+      makeBullet(0.08, "#a8ffff")
     );
-
   } else {
-    // 3-WAY SPREAD
+    // 3-WAY SPREAD (center + two coloured side shots)
     S.bullets.push(
-      // CENTER
-      {
-        ...base,
-        vx: dirX * bulletSpeed,
-        vy: dirY * bulletSpeed,
-        colour: "#a8ffff"
-      },
-      // LEFT ANGLE
-      {
-        ...base,
-        x: player.x - 12,
-        vx: dirX * bulletSpeed - 120,
-        vy: dirY * bulletSpeed,
-        colour: "#ff8ad4"
-      },
-      // RIGHT ANGLE
-      {
-        ...base,
-        x: player.x + 12,
-        vx: dirX * bulletSpeed + 120,
-        vy: dirY * bulletSpeed,
-        colour: "#fffd8b"
-      }
+      makeBullet(0, "#a8ffff"),
+      makeBullet(-0.18, "#ff8ad4"),
+      makeBullet(0.18, "#fffd8b")
     );
   }
 };
