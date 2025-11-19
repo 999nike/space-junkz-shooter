@@ -48,10 +48,10 @@ window.drawRunway = function drawRunway(ctx) {
 
   // Diagonal background gradient
   const grd = ctx.createLinearGradient(0, S.H, tiltX, 0);
-  grd.addColorStop(0, "rgba(8, 12, 28, 1)");
+  grd.addColorStop(0,   "rgba(8, 12, 28, 1)");
   grd.addColorStop(0.3, "rgba(16, 32, 70, 1)");
-  grd.addColorStop(0.55, "rgba(10, 22, 48, 1)");
-  grd.addColorStop(1, "rgba(2, 8, 18, 1)");
+  grd.addColorStop(0.55,"rgba(10, 22, 48, 1)");
+  grd.addColorStop(1,   "rgba(2, 8, 18, 1)");
 
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, S.W, S.H);
@@ -73,9 +73,9 @@ window.drawBullets = function drawBullets(ctx) {
 
   for (const b of S.bullets) {
     const grad = ctx.createLinearGradient(b.x, b.y + 10, b.x, b.y - 10);
-    grad.addColorStop(0, "rgba(10,10,20,0)");
+    grad.addColorStop(0,   "rgba(10,10,20,0)");
     grad.addColorStop(0.4, b.colour);
-    grad.addColorStop(1, "#ffffff");
+    grad.addColorStop(1,   "#ffffff");
 
     ctx.strokeStyle = grad;
     ctx.lineWidth = 3;
@@ -85,6 +85,9 @@ window.drawBullets = function drawBullets(ctx) {
     ctx.stroke();
   }
 };
+
+// You should also still have drawEnemyBullets, drawPowerUps, drawParticles
+// (if those ended up getting chopped, shout and I’ll paste them too).
 
 // ---------- MAIN GAME DRAW ----------
 window.drawGame = function drawGame() {
@@ -114,55 +117,6 @@ window.drawGame = function drawGame() {
   // Particles
   window.drawParticles(ctx);
 
-  // Player
-// ----------- THRUSTER FLAME FX -----------
-ctx.save();
-const p = S.player;
-
-// Flame origin (slightly behind ship)
-const angle = (30 * Math.PI) / 180;
-const fx = p.x - Math.cos(angle) * 14;
-const fy = p.y + Math.sin(angle) * 14;
-
-// Flickering plasma flame
-ctx.globalAlpha = 0.45 + Math.random() * 0.25;
-ctx.fillStyle = "rgba(120,200,255,0.8)";
-ctx.beginPath();
-ctx.ellipse(
-  fx + (p.bank * 6),
-  fy + 22,
-  6 + Math.random() * 2,
-  18 + Math.random() * 6,
-  0,
-  0,
-  Math.PI * 2
-);
-ctx.fill();
-
-// Inner core
-ctx.globalAlpha = 0.75;
-ctx.fillStyle = "#ffffff";
-ctx.beginPath();
-ctx.ellipse(
-  fx + (p.bank * 6),
-  fy + 16,
-  2.4,
-  7,
-  0,
-  0,
-  Math.PI * 2
-);
-ctx.fill();
-
-// Subtle motion blur
-ctx.globalAlpha = 0.18;
-ctx.fillStyle = "rgba(100,200,255,0.4)";
-ctx.beginPath();
-ctx.moveTo(p.x - 20, p.y + 30);
-ctx.lineTo(p.x - 55, p.y + 70);
-ctx.lineTo(p.x - 8, p.y + 45);
-ctx.closePath();
-ctx.fill();
-
-ctx.restore();
+  // Player ship + thruster FX (we patched earlier)
+  window.drawPlayer(ctx);
 };
