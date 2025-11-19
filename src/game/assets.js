@@ -43,11 +43,16 @@ window.GameState = {
     speed: 250,
     weaponLevel: 1,    // 1 = single, 2 = twin, 3 = spread
     invuln: 0,
-    bank: 0            // -1 left, +1 right, 0 neutral
+    bank: 0,           // -1 left, +1 right, 0 neutral
+    angle: -Math.PI / 2 // facing "up" by default
   },
 
   // Input state
-  keys: {}
+  keys: {},
+
+  // Pointer tracking (for angle-based shooting)
+  mouseX: 0,
+  mouseY: 0
 };
 
 // Helpers
