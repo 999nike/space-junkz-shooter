@@ -5,10 +5,16 @@ window.updateEnemies = function updateEnemies(dt) {
 
   // 30° diagonal movement (top-right → bottom-left)
   const angle = (30 * Math.PI) / 180;
-  const dirX = -Math.sin(angle);  // ~ -0.5
-  const dirY =  Math.cos(angle);  // ~ +0.866
+  const dirX = -Math.sin(angle);
+  const dirY =  Math.cos(angle);
 
   for (const e of S.enemies) {
+
+    // Skip boss — handled in logic.js
+    if (e.type === "scorpionBoss") {
+      continue;
+    }
+
     // Move enemy along diagonal lane
     e.x += dirX * e.speed * dt;
     e.y += dirY * e.speed * dt;
@@ -18,8 +24,8 @@ window.updateEnemies = function updateEnemies(dt) {
       e.x = rand(S.W * 0.55, S.W + 150);
       e.y = rand(-160, S.H * 0.25);
 
-      e.speed = rand(40, 90);     // enemy speed variation
-      e.hp = rand(1, 3);          // reset health
+      e.speed = rand(40, 90);
+      e.hp = rand(1, 3);
     }
   }
 };
