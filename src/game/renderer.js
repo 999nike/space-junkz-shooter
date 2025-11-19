@@ -70,19 +70,23 @@ window.drawRunway = function drawRunway(ctx) {
 // ---------- BULLETS ----------
 window.drawBullets = function drawBullets(ctx) {
   const S = window.GameState;
+  const img = S.sprites.playerBullet;
+  if (!img) return;
+
+  const w = img.width;
+  const h = img.height;
 
   for (const b of S.bullets) {
-    const grad = ctx.createLinearGradient(b.x, b.y + 10, b.x, b.y - 10);
-    grad.addColorStop(0,   "rgba(10,10,20,0)");
-    grad.addColorStop(0.4, b.colour);
-    grad.addColorStop(1,   "#ffffff");
-
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(b.x, b.y + 6);
-    ctx.lineTo(b.x, b.y - 10);
-    ctx.stroke();
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.drawImage(
+      img,
+      -w * 0.5,   // center sprite
+      -h * 0.5,
+      w,
+      h
+    );
+    ctx.restore();
   }
 };
 
