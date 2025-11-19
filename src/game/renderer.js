@@ -86,8 +86,43 @@ window.drawBullets = function drawBullets(ctx) {
   }
 };
 
-// You should also still have drawEnemyBullets, drawPowerUps, drawParticles
-// (if those ended up getting chopped, shout and I’ll paste them too).
+// ---------- MISSING FUNCTIONS (PATCH) ----------
+
+// Enemy bullets renderer
+window.drawEnemyBullets = function drawEnemyBullets(ctx) {
+  const S = window.GameState;
+
+  for (const b of S.enemyBullets) {
+    ctx.fillStyle = b.colour || "#ffae4b";
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.radius || 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+};
+
+// Power-up renderer
+window.drawPowerUps = function drawPowerUps(ctx) {
+  const S = window.GameState;
+
+  for (const p of S.powerUps) {
+    ctx.fillStyle = "#ffe66b";
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius || 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+};
+
+// Particle (explosion) renderer
+window.drawParticles = function drawParticles(ctx) {
+  const S = window.GameState;
+
+  for (const p of S.particles) {
+    ctx.globalAlpha = Math.max(p.life, 0);
+    ctx.fillStyle = p.colour || "#ffffff";
+    ctx.fillRect(p.x, p.y, 3, 3);
+  }
+  ctx.globalAlpha = 1;
+};
 
 // ---------- MAIN GAME DRAW ----------
 window.drawGame = function drawGame() {
@@ -117,6 +152,6 @@ window.drawGame = function drawGame() {
   // Particles
   window.drawParticles(ctx);
 
-  // Player ship + thruster FX (we patched earlier)
+  // Player ship + thruster FX
   window.drawPlayer(ctx);
 };
