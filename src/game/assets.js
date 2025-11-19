@@ -90,21 +90,25 @@ window.loadSprites = function loadSprites() {
   function makeImage(path) {
     const img = new Image();
     img.src = path;
+
+    img.onerror = () => console.error("❌ Failed to load:", path);
+    img.onload = () => console.log("✅ Loaded:", path);
+
     return img;
   }
 
-  // Player bullet sheet (multi-frame, animated later)
+  // Player bullet
   sprites.playerBullet = makeImage("./src/game/assets/Bullet_player.png");
 
   // Enemy bullet orb
-  sprites.enemyBullet = makeImage("./src/game/assets/Laser.png");
+  sprites.enemyBullet = makeImage("./src/game/assets/Laser.png");  // CASE-SENSITIVE
 
-  // Mega-beam shaft (reserved for later step)
-  sprites.megaBeam = makeImage("./src/game/assets/laser.png");
+  // Mega-beam (tail laser)
+  sprites.megaBeam = makeImage("./src/game/assets/laser.png");     // lower-case file
 
-  // Explosion atlas (we’ll animate this in the explosion step)
+  // Explosion sheet
   sprites.explosionSheet = makeImage("./src/game/assets/Explo01.png");
 
-  // Boss sprite (Scorpion)
+  // Boss (scorpion)
   sprites.bossScorpion = makeImage("./src/game/oldSCORPIO2.png");
 };
