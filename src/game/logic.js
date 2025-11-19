@@ -154,6 +154,30 @@ window.spawnEnemy = function spawnEnemy() {
   S.enemies.push(e);
 };
 
+// ---------- BOSS SPAWN ----------
+window.spawnScorpionBoss = function spawnScorpionBoss() {
+  const S = window.GameState;
+
+  const boss = {
+    type: "scorpionBoss",
+    x: S.W * 0.5,
+    y: -220,          // enters from above screen
+    radius: 80,       // big collision body
+    hp: 500,
+    maxHp: 500,
+
+    // entry + attack state
+    enterComplete: false,
+    attackTimer: 0,
+    clawTimer: 0,
+    laserTimer: 0,
+    laserActive: false,
+    laserCharging: false
+  };
+
+  S.enemies.push(boss);
+};
+
 // ---------- ENEMY DEATH ----------
 window.handleEnemyDeath = function handleEnemyDeath(e) {
   const S = window.GameState;
@@ -180,6 +204,15 @@ window.updateGame = function updateGame(dt) {
   if (!S.running) return;
 
   const player = S.player;
+
+  // ----- Boss spawn timer -----
+  if (!S.bossSpawned) {
+    S.bossTimer = (S.bossTimer || 0) + dt;
+    if (S.bossTimer >= 60) {      // ~1 minute
+      window.spawnScorpionBoss();
+      S.bossSpawned = true;
+    }
+  }
 
  // ----- Player movement -----
 let dx = 0;
@@ -229,9 +262,15 @@ if (player.invuln > 0) player.invuln -= dt;
     S.shootTimer = 0.22;
   }
 
-  // ----- Update enemies -----
+ // ----- Update enemies -----
   for (let i = S.enemies.length - 1; i >= 0; i--) {
     const e = S.enemies[i];
+
+    // Boss handled in its own function (Option C)
+    if (e.type === "scorpionBoss") {
+      window.updateBossScorpion(e, dt);
+      continue;
+    }
 
     // Base downward movement with 30° diagonal
     const angle = (30 * Math.PI) / 180;
@@ -312,12 +351,13 @@ if (player.invuln > 0) player.invuln -= dt;
     if (hit) continue;
   }
 
-  // ----- Enemy bullets -----
+ // ----- Enemy bullets -----
   for (let i = S.enemyBullets.length - 1; i >= 0; i--) {
     const b = S.enemyBullets[i];
     b.y += b.vy * dt;
+    if (b.vx) b.x += b.vx * dt;   // boss claw shots can move sideways
 
-    if (b.y > S.H + 20) {
+    if (b.y > S.H + 40 || b.x < -40 || b.x > S.W + 40) {
       S.enemyBullets.splice(i, 1);
       continue;
     }
@@ -367,6 +407,96 @@ for (let i = S.particles.length - 1; i >= 0; i--) {
   }
 }
 
+// ---------- BOSS LOGIC ----------
+window.updateBossScorpion = function updateBossScorpion(e, dt) {
+  const S = window.GameState;
+  const player = S.player;
+
+  // --- Entry phase: slide down then hover ---
+  if (!e.enterComplete) {
+    e.y += 40 * dt;
+    if (e.y >= 180) {
+      e.enterComplete = true;
+    }
+    return;
+  }
+
+  // --- Hover / horizontal sway ---
+  e.attackTimer = (e.attackTimer || 0) + dt;
+  e.x = S.W * 0.5 + Math.sin(e.attackTimer * 0.5) * 80;
+
+  // ---------- CLAW BULLETS (BLUE) ----------
+  e.clawTimer = (e.clawTimer || 0) - dt;
+  if (e.clawTimer <= 0) {
+    e.clawTimer = 0.7; // burst interval
+
+    const baseY = e.y + 10;
+    const leftX = e.x - 40;
+    const rightX = e.x + 40;
+
+    const dy = player.y - baseY;
+    const dxL = player.x - leftX;
+    const dxR = player.x - rightX;
+    const lenL = Math.hypot(dxL, dy) || 1;
+    const lenR = Math.hypot(dxR, dy) || 1;
+    const speed = 260;
+
+    S.enemyBullets.push(
+      {
+        x: leftX,
+        y: baseY,
+        vx: (dxL / lenL) * speed,
+        vy: (dy / lenL) * speed,
+        radius: 6,
+        colour: "#9bf3ff",
+        type: "bossClaw"   // tells renderer to use blue sprite
+      },
+      {
+        x: rightX,
+        y: baseY,
+        vx: (dxR / lenR) * speed,
+        vy: (dy / lenR) * speed,
+        radius: 6,
+        colour: "#9bf3ff",
+        type: "bossClaw"
+      }
+    );
+  }
+
+  // ---------- TAIL LASER ----------
+  e.laserTimer = (e.laserTimer || 0) + dt;
+  const cycle = 6.0;                  // seconds per pattern cycle
+  const t = e.laserTimer % cycle;
+
+  e.laserCharging = false;
+  e.laserActive = false;
+
+  if (t > 2.0 && t <= 2.8) {
+    // charge phase
+    e.laserCharging = true;
+  } else if (t > 2.8 && t <= 4.2) {
+    // active beam
+    e.laserActive = true;
+
+    const beamX = e.x;
+    const halfWidth = 30;
+    const topY = e.y - 40;
+    const bottomY = S.H + 40;
+
+    if (
+      player.invuln <= 0 &&
+      player.x > beamX - halfWidth &&
+      player.x < beamX + halfWidth &&
+      player.y > topY &&
+      player.y < bottomY
+    ) {
+      damagePlayer();
+      player.invuln = 1.0;
+      spawnExplosion(player.x, player.y + 10, "#ff9977");
+    }
+  }
+};
+  
   // Lose condition
   if (S.lives <= 0) {
     S.running = false;
