@@ -1,5 +1,6 @@
 // ---------- ENGINE / LOOP ----------
 
+// Flash message
 window.flashMsg = function flashMsg(text) {
   const S = window.GameState;
   if (!S.msgEl) return;
@@ -10,66 +11,82 @@ window.flashMsg = function flashMsg(text) {
   }, 1600);
 };
 
+// ---------- BULLET SYSTEM (F-Zero 30° Diagonal) ----------
+
 window.shoot = function shoot() {
   const S = window.GameState;
   const player = S.player;
   const spread = player.weaponLevel;
   const bulletSpeed = 380;
-  const base = { y: player.y - 18, radius: 4, colour: "#5be7ff" };
-// 30° diagonal shooting — up-right
-const angle = (30 * Math.PI) / 180;
-const dirX =  Math.sin(angle);
-const dirY = -Math.cos(angle);
 
-if (spread === 1) {
-  S.bullets.push({
+  // 30° diagonal (up-right)
+  const angle = (30 * Math.PI) / 180;
+  const dirX = Math.sin(angle);   // ~ +0.5
+  const dirY = -Math.cos(angle);  // ~ -0.866
+
+  const base = {
     x: player.x,
-    vx: dirX * bulletSpeed,
-    vy: dirY * bulletSpeed,
-    ...base
-  });
-}else if (spread === 2) {
+    y: player.y - 12,
+    radius: 4,
+    colour: "#a8ffff"
+  };
+
+  if (spread === 1) {
+    // SINGLE SHOT (straight diagonal)
+    S.bullets.push({
+      ...base,
+      vx: dirX * bulletSpeed,
+      vy: dirY * bulletSpeed,
+    });
+
+  } else if (spread === 2) {
+    // TWIN SHOT
     S.bullets.push(
       {
-        x: player.x - 9,
-        vy: -bulletSpeed,
-        vx: 0,
-        ...base
+        ...base,
+        x: player.x - 10,
+        vx: dirX * bulletSpeed,
+        vy: dirY * bulletSpeed,
       },
       {
-        x: player.x + 9,
-        vy: -bulletSpeed,
-        vx: 0,
-        ...base
+        ...base,
+        x: player.x + 10,
+        vx: dirX * bulletSpeed,
+        vy: dirY * bulletSpeed,
       }
     );
+
   } else {
-    // 3-way spread
+    // 3-WAY SPREAD (angled outer shots)
     S.bullets.push(
+      // CENTER
       {
-        x: player.x,
-        vy: -bulletSpeed,
-        vx: 0,
         ...base,
-        colour: "#8effff"
+        vx: dirX * bulletSpeed,
+        vy: dirY * bulletSpeed,
+        colour: "#a8ffff"
       },
+      // LEFT ANGLE
       {
-        x: player.x - 8,
-        vy: -bulletSpeed,
-        vx: -90,
         ...base,
+        x: player.x - 12,
+        vx: dirX * bulletSpeed - 120,
+        vy: dirY * bulletSpeed,
         colour: "#ff8ad4"
       },
+      // RIGHT ANGLE
       {
-        x: player.x + 8,
-        vy: -bulletSpeed,
-        vx: 90,
         ...base,
+        x: player.x + 12,
+        vx: dirX * bulletSpeed + 120,
+        vy: dirY * bulletSpeed,
         colour: "#fffd8b"
       }
     );
   }
 };
+
+// ---------- GAME RESET ----------
 
 window.resetGameState = function resetGameState() {
   const S = window.GameState;
@@ -92,6 +109,8 @@ window.resetGameState = function resetGameState() {
   S.scoreEl.textContent = S.score;
   S.livesEl.textContent = S.lives;
 };
+
+// ---------- MAIN LOOP ----------
 
 window.gameLoop = function gameLoop(timestamp) {
   const S = window.GameState;
