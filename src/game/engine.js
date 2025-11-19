@@ -19,8 +19,8 @@ window.GameState = {
 window.initEngine = function initEngine() {
   const S = window.GameState;
 
-  // Canvas
-  S.canvas = document.getElementById("gameCanvas");
+  // Canvas (FIXED ID)
+  S.canvas = document.getElementById("game");
   S.ctx = S.canvas.getContext("2d");
 
   S.canvas.width = window.innerWidth * 0.90;
@@ -29,18 +29,18 @@ window.initEngine = function initEngine() {
   S.W = S.canvas.width;
   S.H = S.canvas.height;
 
-  // DOM UI
+  // HUD elements
   S.scoreEl = document.getElementById("score");
   S.livesEl = document.getElementById("lives");
   S.msgEl = document.getElementById("msg");
   S.startBtn = document.getElementById("startBtn");
 
-  // Load sprites (CRITICAL FIX)
+  // Load sprites (CRITICAL)
   if (typeof window.loadSprites === "function") {
     window.loadSprites();
   }
 
-  // Player start pos
+  // Player spawn position
   S.player.x = S.W / 2;
   S.player.y = S.H - 80;
 
@@ -131,7 +131,14 @@ window.resetGameState = function resetGameState() {
   S.livesEl.textContent = S.lives;
 };
 
-
+// ---------- ENGINE STARTUP ----------
+window.addEventListener("load", () => {
+  window.initEngine();
+  window.initStars();
+  window.resetGameState();
+  window.setupInput();
+  window.flashMsg("Press START to play");
+});
 
 // ---------- MAIN LOOP ----------
 
