@@ -95,19 +95,27 @@ window.drawBullets = function drawBullets(ctx) {
 // Enemy bullets renderer
 window.drawEnemyBullets = function drawEnemyBullets(ctx) {
   const S = window.GameState;
-  const img = S.sprites.enemyBullet;
-  if (!img) return;
-
-  const w = img.width;
-  const h = img.height;
+  const yellow = S.sprites.enemyBullet;
+  const blue   = S.sprites.playerBullet;
+  if (!yellow && !blue) return;
 
   for (const b of S.enemyBullets) {
+    const img =
+      b.type === "bossClaw"
+        ? (blue || yellow)
+        : (yellow || blue);
+
+    if (!img) continue;
+
+    const w = img.width;
+    const h = img.height;
+
     ctx.save();
     ctx.translate(b.x, b.y);
     ctx.drawImage(
       img,
-      -w * 0.5,   // center horizontally
-      -h * 0.5,   // center vertically
+      -w * 0.5,
+      -h * 0.5,
       w,
       h
     );
@@ -159,6 +167,72 @@ window.drawParticles = function drawParticles(ctx) {
   }
 };
 
+// ---------- BOSS RENDERER ----------
+window.drawScorpionBoss = function drawScorpionBoss(ctx) {
+  const S = window.GameState;
+  const img = S.sprites.bossScorpion;
+  const beamImg = S.sprites.megaBeam;
+  if (!img) return;
+
+  const scale = 0.30;          // mega-boss scale
+  const w = img.width * scale;
+  const h = img.height * scale;
+
+  for (const e of S.enemies) {
+    if (e.type !== "scorpionBoss") continue;
+
+    // Tail laser first so boss is on top
+    if ((e.laserCharging || e.laserActive) && beamImg) {
+      const beamX = e.x;
+      const topY = e.y - h * 0.5;
+      const bottomY = S.H + 40;
+      const segH = beamImg.height || 64;
+      const segments = Math.ceil((bottomY - topY) / segH);
+
+      ctx.save();
+      ctx.translate(beamX, topY);
+      ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
+
+      for (let i = 0; i < segments; i++) {
+        ctx.drawImage(
+          beamImg,
+          -beamImg.width * 0.5,
+          i * segH
+        );
+      }
+
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    // Boss body
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    ctx.drawImage(
+      img,
+      -w * 0.5,
+      -h * 0.5,
+      w,
+      h
+    );
+    ctx.restore();
+
+    // HP bar
+    const barW = 160;
+    const barH = 10;
+    const pct = e.hp / e.maxHp;
+
+    const bx = e.x - barW / 2;
+    const by = e.y - h / 2 - 20;
+
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(bx, by, barW, barH);
+
+    ctx.fillStyle = "#3aff6b";
+    ctx.fillRect(bx, by, barW * pct, barH);
+  }
+};
+
 // ---------- MAIN GAME DRAW ----------
 window.drawGame = function drawGame() {
   const S = window.GameState;
@@ -174,6 +248,9 @@ window.drawGame = function drawGame() {
 
   // Enemies
   window.drawEnemies(ctx);
+
+  // Boss (Scorpion)
+  window.drawScorpionBoss(ctx);
 
   // Bullets
   drawBullets(ctx);
