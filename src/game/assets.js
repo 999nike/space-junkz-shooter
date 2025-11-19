@@ -31,9 +31,16 @@ window.GameState = {
   spawnTimer: 0,
   shootTimer: 0,
 
-  // Sprites
+  // Sprites (individual + atlas bucket)
   shipImage: null,   // player ship
   fireImage: null,   // optional thruster sprite (future)
+  sprites: {
+    playerBullet: null,     // Bullet_player.png
+    enemyBullet: null,      // Laser.png
+    megaBeam: null,         // laser.png (future beam)
+    explosionSheet: null,   // Explo01.png
+    bossScorpion: null      // oldSCORPIO2.png
+  },
 
   // Player
   player: {
