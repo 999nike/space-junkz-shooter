@@ -32,7 +32,7 @@ window.shoot = function shoot() {
   };
 
   if (spread === 1) {
-    // SINGLE SHOT (straight diagonal)
+    // SINGLE SHOT
     S.bullets.push({
       ...base,
       vx: dirX * bulletSpeed,
@@ -57,7 +57,7 @@ window.shoot = function shoot() {
     );
 
   } else {
-    // 3-WAY SPREAD (angled outer shots)
+    // 3-WAY SPREAD
     S.bullets.push(
       // CENTER
       {
