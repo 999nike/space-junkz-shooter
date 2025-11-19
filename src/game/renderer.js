@@ -95,12 +95,23 @@ window.drawBullets = function drawBullets(ctx) {
 // Enemy bullets renderer
 window.drawEnemyBullets = function drawEnemyBullets(ctx) {
   const S = window.GameState;
+  const img = S.sprites.enemyBullet;
+  if (!img) return;
+
+  const w = img.width;
+  const h = img.height;
 
   for (const b of S.enemyBullets) {
-    ctx.fillStyle = b.colour || "#ffae4b";
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.radius || 4, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.drawImage(
+      img,
+      -w * 0.5,   // center horizontally
+      -h * 0.5,   // center vertically
+      w,
+      h
+    );
+    ctx.restore();
   }
 };
 
