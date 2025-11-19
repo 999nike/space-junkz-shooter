@@ -215,10 +215,10 @@ window.updateGame = function updateGame(dt) {
   for (let i = S.enemies.length - 1; i >= 0; i--) {
     const e = S.enemies[i];
 
-    // Base downward movement
-  const angle = (30 * Math.PI) / 180;
-e.x += -Math.sin(angle) * e.speedY * dt;
-e.y +=  Math.cos(angle) * e.speedY * dt;
+    // Base downward movement with 30° diagonal
+    const angle = (30 * Math.PI) / 180;
+    e.x += -Math.sin(angle) * e.speedY * dt;
+    e.y +=  Math.cos(angle) * e.speedY * dt;
 
     // ZigZag
     if (e.type === "zigzag") {
@@ -270,7 +270,7 @@ e.y +=  Math.cos(angle) * e.speedY * dt;
       continue;
     }
 
-    // Collision with enemies (multi-HP)
+    // Collision with enemies
     let hit = false;
     for (let j = S.enemies.length - 1; j >= 0; j--) {
       const e = S.enemies[j];
