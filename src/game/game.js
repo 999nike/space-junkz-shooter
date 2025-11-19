@@ -6,8 +6,10 @@
   window.initGame = function initGame() {
     S.canvas = document.getElementById("game");
     S.ctx = S.canvas.getContext("2d");
-    S.W = S.canvas.width;
-    S.H = S.canvas.height;
+  S.canvas.width = 480;
+S.canvas.height = 900;
+S.W = S.canvas.width;
+S.H = S.canvas.height;
 
     // Load ship sprite
     S.shipImage = new Image();
