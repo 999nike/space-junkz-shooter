@@ -1,4 +1,52 @@
-// ---------- ENGINE / LOOP ----------
+// ---------- ENGINE INIT (FIXED) ----------
+
+window.GameState = {
+  W: 0,
+  H: 0,
+  canvas: null,
+  ctx: null,
+  player: {
+    x: 0,
+    y: 0,
+    angle: 0,
+    speed: 260,
+    weaponLevel: 1,
+    invuln: 0
+  }
+};
+
+// Setup canvas + load all sprites
+window.initEngine = function initEngine() {
+  const S = window.GameState;
+
+  // Canvas
+  S.canvas = document.getElementById("gameCanvas");
+  S.ctx = S.canvas.getContext("2d");
+
+  S.canvas.width = window.innerWidth * 0.90;
+  S.canvas.height = window.innerHeight * 0.90;
+
+  S.W = S.canvas.width;
+  S.H = S.canvas.height;
+
+  // DOM UI
+  S.scoreEl = document.getElementById("score");
+  S.livesEl = document.getElementById("lives");
+  S.msgEl = document.getElementById("msg");
+  S.startBtn = document.getElementById("startBtn");
+
+  // Load sprites (CRITICAL FIX)
+  if (typeof window.loadSprites === "function") {
+    window.loadSprites();
+  }
+
+  // Player start pos
+  S.player.x = S.W / 2;
+  S.player.y = S.H - 80;
+
+  S.lastTime = 0;
+  S.running = false;
+};
 
 // Flash message
 window.flashMsg = function flashMsg(text) {
