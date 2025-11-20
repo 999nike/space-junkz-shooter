@@ -123,7 +123,7 @@ window.resetGameState = function resetGameState() {
   S.spawnTimer = 0;
   S.shootTimer = 0;
   S.score = 0;
-  S.lives = 3;
+  S.lives = 5;
 
   S.player.x = S.W / 2;
   S.player.y = S.H - 80;
