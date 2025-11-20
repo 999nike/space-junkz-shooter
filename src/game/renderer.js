@@ -197,22 +197,39 @@ if (!img) return;
 
     // Tail laser first so boss is on top
     if ((e.laserCharging || e.laserActive) && beamImg) {
-        const beamX = (typeof e.laserX === "number") ? e.laserX : e.x;
-        const topY = e.y - h * 0.5;
-        const bottomY = S.H + 40;
-        const segH = beamImg.height || 64;
-        const segments = Math.ceil((bottomY - topY) / segH);
+      const beamX = (typeof e.laserX === "number") ? e.laserX : e.x;
+      const topY = e.y - h * 0.5;
+      const bottomY = S.H + 40;
 
-        ctx.save();
-        ctx.translate(beamX, topY);
-        ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
+      // scale factor: makes the beam thinner & cleaner
+      const scale = 0.18;
+
+      // After rotation, the "length" of each segment is the original width
+      const segLen = beamImg.width * scale;
+      const segments = Math.ceil((bottomY - topY) / segLen);
+
+      ctx.save();
+      ctx.globalAlpha = e.laserActive ? 0.95 : 0.45;
 
       for (let i = 0; i < segments; i++) {
+        const y = topY + i * segLen;
+
+        ctx.save();
+        // Position segment along the vertical line
+        ctx.translate(beamX, y);
+
+        // Rotate 90° so the horizontal laser.png becomes vertical
+        ctx.rotate(Math.PI / 2);
+
         ctx.drawImage(
           beamImg,
-          -beamImg.width * 0.5,
-          i * segH
+          -beamImg.width * scale * 0.5,
+          -beamImg.height * scale * 0.5,
+          beamImg.width * scale,
+          beamImg.height * scale
         );
+
+        ctx.restore();
       }
 
       ctx.restore();
