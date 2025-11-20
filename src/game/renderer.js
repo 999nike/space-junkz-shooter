@@ -193,6 +193,35 @@ window.drawSidekicks = function drawSidekicks(ctx) {
   }
 };
 
+// ---------- ROCKET RENDERER ----------
+window.drawRockets = function drawRockets(ctx) {
+  const S = window.GameState;
+  const img = S.sprites.rocket;
+  if (!img) return;
+
+  const w = img.width;
+  const h = img.height;
+
+  for (const r of S.rockets || []) {
+    ctx.save();
+    ctx.translate(r.x, r.y);
+
+    // Rotate rocket toward direction it's moving
+    const angle = Math.atan2(r.vy, r.vx);
+    ctx.rotate(angle + Math.PI / 2);
+
+    ctx.drawImage(
+      img,
+      -w * 0.5,
+      -h * 0.5,
+      w,
+      h
+    );
+
+    ctx.restore();
+  }
+};
+
 // ---------- BOSS RENDERER ----------
 window.drawScorpionBoss = function drawScorpionBoss(ctx) {
   const S = window.GameState;
