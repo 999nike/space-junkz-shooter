@@ -207,13 +207,29 @@ if (!img) return;
       ctx.translate(beamX, topY);
       ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
 
-      for (let i = 0; i < segments; i++) {
-        ctx.drawImage(
-          beamImg,
-          -beamImg.width * 0.5,
-          i * segH
-        );
-      }
+// --- FIXED SINGLE VERTICAL BEAM ---
+ctx.save();
+
+// Position at boss tail
+ctx.translate(beamX, topY);
+
+// Rotate horizontal PNG → vertical
+ctx.rotate(Math.PI / 2);
+
+// Optional: shrink glow if too thick
+const scale = 0.55;
+ctx.scale(scale, 1);
+
+// Draw single stretched beam
+ctx.drawImage(
+  beamImg,
+  -beamImg.height * 0.5,  // center the beam
+  0,
+  beamImg.height,
+  bottomY - topY           // stretch down to bottom of screen
+);
+
+ctx.restore();
 
       ctx.restore();
       ctx.globalAlpha = 1;
