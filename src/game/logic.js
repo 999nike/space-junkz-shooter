@@ -66,7 +66,8 @@ window.spawnExplosion = function spawnExplosion(x, y, colour) {
   y,
   row,
   frame: 0,
-  frameCount: 5,    // 5 columns per row
+  frameCount: 4,    // 4 frames per row (Explo01.png is 4x4)
+  frameCount: 4,    // 4 columns per row (correct for your 512x512 sheet) 
   frameSpeed: 0.08, // animation speed
   frameTimer: 0,
   done: false,
