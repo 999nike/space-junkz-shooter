@@ -197,15 +197,15 @@ if (!img) return;
 
     // Tail laser first so boss is on top
     if ((e.laserCharging || e.laserActive) && beamImg) {
-      const beamX = e.x;
-      const topY = e.y - h * 0.5;
-      const bottomY = S.H + 40;
-      const segH = beamImg.height || 64;
-      const segments = Math.ceil((bottomY - topY) / segH);
+        const beamX = (typeof e.laserX === "number") ? e.laserX : e.x;
+        const topY = e.y - h * 0.5;
+        const bottomY = S.H + 40;
+        const segH = beamImg.height || 64;
+        const segments = Math.ceil((bottomY - topY) / segH);
 
-      ctx.save();
-      ctx.translate(beamX, topY);
-      ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
+        ctx.save();
+        ctx.translate(beamX, topY);
+        ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
 
       for (let i = 0; i < segments; i++) {
         ctx.drawImage(
