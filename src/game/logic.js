@@ -62,15 +62,18 @@ window.spawnExplosion = function spawnExplosion(x, y, colour) {
   else if (colour === "#4db9ff") row = 3; // deep blue (if needed)
 
   S.particles.push({
-    x,
-    y,
-    row,
-    frame: 0,
-    frameCount: 5,       // 5 columns per row
-    frameSpeed: 0.08,    // animation speed
-    frameTimer: 0,
-    done: false
-  });
+  x,
+  y,
+  row,
+  frame: 0,
+  frameCount: 5,    // 5 columns per row
+  frameSpeed: 0.08, // animation speed
+  frameTimer: 0,
+  done: false,
+
+  // Big blast scale (row 2 = cyan/green row)
+  scale: (row === 2 ? 2.2 : 1.0)
+});
 };
 
 // ---------- ENEMY TYPES / SPAWN ----------
