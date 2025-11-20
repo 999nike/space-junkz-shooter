@@ -160,14 +160,16 @@ window.drawParticles = function drawParticles(ctx) {
     ctx.save();
     ctx.translate(e.x, e.y);
 
-    ctx.drawImage(
-      sheet,
-      sx, sy, frameW, frameH,   // source slice
-      -frameW * 0.5,            // center explosion
-      -frameH * 0.5,
-      frameW,
-      frameH
-    );
+    const scale = e.scale || 1.0;
+
+ctx.drawImage(
+  sheet,
+  sx, sy, frameW, frameH,
+  -frameW * 0.5 * scale,
+  -frameH * 0.5 * scale,
+  frameW * scale,
+  frameH * scale
+);
 
     ctx.restore();
   }
