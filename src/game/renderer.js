@@ -179,7 +179,7 @@ ctx.drawImage(
 window.drawSidekicks = function drawSidekicks(ctx) {
   const S = window.GameState;
   const img = S.sprites.sideShip;
-  if (!img) return;
+  if (!img || !S.sidekicks) return;
 
   const scale = 0.6;  // nice size for parafighter
   const w = img.width * scale;
@@ -197,25 +197,25 @@ window.drawSidekicks = function drawSidekicks(ctx) {
 window.drawRockets = function drawRockets(ctx) {
   const S = window.GameState;
   const img = S.sprites.rocket;
-  if (!img) return;
+  if (!img || !S.rockets) return;
 
   const w = img.width;
   const h = img.height;
+  const scale = 2.0; // make rockets easy to see
 
-  for (const r of S.rockets || []) {
+  for (const r of S.rockets) {
     ctx.save();
     ctx.translate(r.x, r.y);
 
-    // Rotate rocket toward direction it's moving
     const angle = Math.atan2(r.vy, r.vx);
     ctx.rotate(angle + Math.PI / 2);
 
     ctx.drawImage(
       img,
-      -w * 0.5,
-      -h * 0.5,
-      w,
-      h
+      -w * 0.5 * scale,
+      -h * 0.5 * scale,
+      w * scale,
+      h * scale
     );
 
     ctx.restore();
@@ -226,14 +226,12 @@ window.drawRockets = function drawRockets(ctx) {
 window.drawScorpionBoss = function drawScorpionBoss(ctx) {
   const S = window.GameState;
 
-// Safety: sprites may not be ready on first frames
-if (!S.sprites) return;
+  // Safety: sprites may not be ready on first frames
+  if (!S.sprites) return;
 
-const img = S.sprites.bossScorpion;
-const beamImg = S.sprites.megaBeam;
-
-// Safety: boss sprite not ready or boss not spawned
-if (!img) return;
+  const img = S.sprites.bossScorpion;
+  const beamImg = S.sprites.megaBeam;
+  if (!img) return;
 
   const scale = 0.30;          // mega-boss scale
   const w = img.width * scale;
@@ -243,38 +241,35 @@ if (!img) return;
     if (e.type !== "scorpionBoss") continue;
 
     // Tail laser first so boss is on top
-if ((e.laserCharging || e.laserActive) && beamImg) {
-    const tailX = e.x;
-    const tailY = e.y + h * 0.32;  // tail-tip anchor
+    if ((e.laserCharging || e.laserActive) && beamImg) {
+      const tailX = e.x;
+      const tailY = e.y + h * 0.32;  // tail-tip anchor
 
-    // Beam target = bottom of screen OR player's X
-    const targetX = e.laserX;  // this follows the player from logic
-    const targetY = S.H + 60;
+      const targetX = e.laserX;
+      const targetY = S.H + 60;
 
-    // Angle and distance for rotated beam
-    const dx = targetX - tailX;
-    const dy = targetY - tailY;
-    const angle = Math.atan2(dy, dx);
-    const length = Math.hypot(dx, dy);
+      const dx = targetX - tailX;
+      const dy = targetY - tailY;
+      const angle = Math.atan2(dy, dx);
+      const length = Math.hypot(dx, dy);
 
-    ctx.save();
-    ctx.translate(tailX, tailY);
-    ctx.rotate(angle);
+      ctx.save();
+      ctx.translate(tailX, tailY);
+      ctx.rotate(angle);
 
-    ctx.globalAlpha = e.laserActive ? 0.95 : 0.4;
+      ctx.globalAlpha = e.laserActive ? 0.95 : 0.4;
 
-    // stretch beam sprite along the distance
-    ctx.drawImage(
+      ctx.drawImage(
         beamImg,
         0,
         -beamImg.height * 0.5,
         length,
         beamImg.height
-    );
+      );
 
-    ctx.restore();
-    ctx.globalAlpha = 1;
-}
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
 
     // Boss body
     ctx.save();
@@ -311,11 +306,7 @@ window.drawGame = function drawGame() {
 
   ctx.clearRect(0, 0, S.W, S.H);
 
-  
-  // Sidekick ships
-  window.drawSidekicks(ctx);
-
-  // Diagonal runway background
+  // Background first
   window.drawRunway(ctx);
 
   // Stars
@@ -327,7 +318,10 @@ window.drawGame = function drawGame() {
   // Boss (Scorpion)
   window.drawScorpionBoss(ctx);
 
-    // Rockets
+  // Sidekick ships (on top of enemies)
+  window.drawSidekicks(ctx);
+
+  // Rockets
   window.drawRockets(ctx);
 
   // Bullets
@@ -339,7 +333,7 @@ window.drawGame = function drawGame() {
   // Power-ups
   window.drawPowerUps(ctx);
 
-  // Particles
+  // Particles (explosions)
   window.drawParticles(ctx);
 
   // Player ship + thruster FX
