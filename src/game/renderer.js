@@ -315,9 +315,6 @@ window.drawGame = function drawGame() {
   // Sidekick ships
   window.drawSidekicks(ctx);
 
-  // Rockets
-  window.drawRockets(ctx);
-
   // Diagonal runway background
   window.drawRunway(ctx);
 
@@ -329,6 +326,9 @@ window.drawGame = function drawGame() {
 
   // Boss (Scorpion)
   window.drawScorpionBoss(ctx);
+
+    // Rockets
+  window.drawRockets(ctx);
 
   // Bullets
   drawBullets(ctx);
