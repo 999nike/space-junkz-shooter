@@ -224,7 +224,6 @@ if ((e.laserCharging || e.laserActive) && beamImg) {
     beamLength               // stretch down screen
   );
 
-  ctx.restore();
   ctx.globalAlpha = 1;
 }
 
