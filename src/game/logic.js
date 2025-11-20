@@ -486,14 +486,43 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
   e.laserCharging = false;
   e.laserActive = false;
 
+  // ensure we have a laser X lane
+  if (typeof e.laserX !== "number") {
+    e.laserX = e.x;
+  }
+
+  // how fast the beam tracks the player (slower than ship speed 260)
+  const laserTrackSpeed = 180;
+
+  // charge phase (beam lines up on player, but doesn't hurt yet)
   if (t > 2.0 && t <= 2.8) {
-    // charge phase
     e.laserCharging = true;
+
+    const targetX = player.x;
+    const dx = targetX - e.laserX;
+    const maxStep = laserTrackSpeed * dt;
+
+    if (Math.abs(dx) <= maxStep) {
+      e.laserX = targetX;
+    } else {
+      e.laserX += Math.sign(dx) * maxStep;
+    }
+
   } else if (t > 2.8 && t <= 4.2) {
-    // active beam
+    // active beam: keeps tracking, but still slower than player
     e.laserActive = true;
 
-    const beamX = e.x;
+    const targetX = player.x;
+    const dx = targetX - e.laserX;
+    const maxStep = laserTrackSpeed * dt;
+
+    if (Math.abs(dx) <= maxStep) {
+      e.laserX = targetX;
+    } else {
+      e.laserX += Math.sign(dx) * maxStep;
+    }
+
+    const beamX = e.laserX;
     const halfWidth = 30;
     const topY = e.y - 40;
     const bottomY = S.H + 40;
@@ -510,7 +539,6 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
       spawnExplosion(player.x, player.y + 10, "#ff9977");
     }
   }
-};
   
   // Lose condition
   if (S.lives <= 0) {
