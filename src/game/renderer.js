@@ -147,8 +147,8 @@ window.drawParticles = function drawParticles(ctx) {
   const sheet = S.sprites.explosionSheet;
   if (!sheet) return;
 
-  const rows = 4;
-  const cols = 5;
+ const rows = 4;
+const cols = 4;   // Your texture is a 4x4 grid
 
   const frameW = sheet.width / cols;
   const frameH = sheet.height / rows;
