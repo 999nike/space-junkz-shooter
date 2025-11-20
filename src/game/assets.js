@@ -26,6 +26,8 @@ window.GameState = {
   enemyBullets: [],
   powerUps: [],
   particles: [],
+  sidekicks: [],
+  rockets: [],
 
   // Timers
   spawnTimer: 0,
@@ -97,6 +99,12 @@ window.loadSprites = function loadSprites() {
     return img;
   }
 
+  // Sidekick ship (parafighter drone)
+  sprites.sideShip = makeImage("./src/game/assets/parafighter.png");
+
+  // Rocket bullet (used by sidekicks)
+  sprites.rocket = makeImage("./src/game/assets/rocket.png");
+  
   // Player bullet
   sprites.playerBullet = makeImage("./src/game/assets/Bullet_player.png");
 
