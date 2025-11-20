@@ -440,6 +440,44 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
   e.attackTimer = (e.attackTimer || 0) + dt;
   e.x = S.W * 0.5 + Math.sin(e.attackTimer * 0.5) * 80;
 
+  // ---------- BOSS LASER (TAIL-TRACK BEAM, OPTION B) ----------
+e.laserTimer = (e.laserTimer || 0) + dt;
+
+// fire every 1.2 seconds
+if (e.laserTimer >= 1.2) {
+    e.laserTimer = 0;
+
+    const tailX = e.x;          // center tail
+    const tailY = e.y + 45;     // adjust tail position based on sprite
+    const px = player.x;
+    const py = player.y;
+
+    // aim vector
+    const dx = px - tailX;
+    const dy = py - tailY;
+    const angle = Math.atan2(dy, dx);
+
+    // BEAM SPEED (tracks slower than player so dodge is possible)
+    const TRACK_SPEED = 2.5; 
+
+    // smooth follow
+    e.laserAngle = e.laserAngle || angle;
+    e.laserAngle += (angle - e.laserAngle) * TRACK_SPEED * dt;
+
+    // push a "beam" bullet (long sprite, rotated)
+    S.enemyBullets.push({
+        x: tailX,
+        y: tailY,
+        vx: 0,                // beam is stationary, not flying
+        vy: 0,
+        radius: 18,           // hitbox width
+        colour: "#ff0000",
+        type: "bossLaser",
+        angle: e.laserAngle,  // rotation applied in renderer
+        life: 0.22            // beam visible for 0.22s
+    });
+}
+
   // ---------- CLAW BULLETS (BLUE) ----------
   e.clawTimer = (e.clawTimer || 0) - dt;
   if (e.clawTimer <= 0) {
