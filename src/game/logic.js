@@ -415,14 +415,12 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
   const S = window.GameState;
   const player = S.player;
 
-  // --- BOSS DEATH CHECK (PATCH) ---
+  // --- Boss death check (keep respawns working) ---
   if (e.hp <= 0) {
     const idx = S.enemies.indexOf(e);
     if (idx >= 0) S.enemies.splice(idx, 1);
-
     S.bossSpawned = false;
     S.bossTimer = 0;
-
     window.flashMsg("BOSS DEFEATED!");
     return;
   }
@@ -436,58 +434,56 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
     return;
   }
 
-  // --- Hover / horizontal sway ---
+  // --- Hover / horizontal sway (same as before) ---
   e.attackTimer = (e.attackTimer || 0) + dt;
   e.x = S.W * 0.5 + Math.sin(e.attackTimer * 0.5) * 80;
 
-  // ---------- BOSS LASER (TAIL-TRACK BEAM, OPTION B) ----------
-e.laserTimer = (e.laserTimer || 0) + dt;
+  // ---------- MEGA LASER COLUMN (screen beams, non-tracking) ----------
+  e.laserCooldown = (e.laserCooldown || 0) - dt;
+  e.laserTimer    = e.laserTimer || 0;
+  e.laserCharging = !!e.laserCharging;
+  e.laserActive   = !!e.laserActive;
 
-// fire every 1.2 seconds
-if (e.laserTimer >= 1.2) {
-    e.laserTimer = 0;
+  // Start charging if ready and not already firing
+  if (!e.laserCharging && !e.laserActive && e.laserCooldown <= 0) {
+    e.laserCharging = true;
+    e.laserTimer    = 0.8;      // charge duration
+  }
 
-    const tailX = e.x;          // center tail
-    const tailY = e.y + 45;     // adjust tail position based on sprite
-    const px = player.x;
-    const py = player.y;
+  // Charge → Active
+  if (e.laserCharging) {
+    e.laserTimer -= dt;
+    if (e.laserTimer <= 0) {
+      e.laserCharging = false;
+      e.laserActive   = true;
+      e.laserTimer    = 1.4;    // beam live time
+    }
+  } else if (e.laserActive) {
+    e.laserTimer -= dt;
 
-    // aim vector
-    const dx = px - tailX;
-    const dy = py - tailY;
-    const angle = Math.atan2(dy, dx);
+    // Hurt player while in the beam column under the boss
+    const dx        = player.x - e.x;
+    const hitRadius = 36;       // tweak if needed
+    if (player.invuln <= 0 && Math.abs(dx) < hitRadius) {
+      window.damagePlayer();
+    }
 
-    // BEAM SPEED (tracks slower than player so dodge is possible)
-    const TRACK_SPEED = 2.5; 
+    if (e.laserTimer <= 0) {
+      e.laserActive   = false;
+      e.laserCooldown = 3.0;    // cooldown between beams
+    }
+  }
 
-    // smooth follow
-    e.laserAngle = e.laserAngle || angle;
-    e.laserAngle += (angle - e.laserAngle) * TRACK_SPEED * dt;
-
-    // push a "beam" bullet (long sprite, rotated)
-    S.enemyBullets.push({
-        x: tailX,
-        y: tailY,
-        vx: 0,                // beam is stationary, not flying
-        vy: 0,
-        radius: 18,           // hitbox width
-        colour: "#ff0000",
-        type: "bossLaser",
-        angle: e.laserAngle,  // rotation applied in renderer
-        life: 0.22            // beam visible for 0.22s
-    });
-}
-
-  // ---------- CLAW BULLETS (BLUE) ----------
+  // ---------- CLAW BULLETS (BLUE HOMING) ----------
   e.clawTimer = (e.clawTimer || 0) - dt;
   if (e.clawTimer <= 0) {
     e.clawTimer = 0.7; // burst interval
 
-    const baseY = e.y + 10;
-    const leftX = e.x - 40;
+    const baseY  = e.y + 10;
+    const leftX  = e.x - 40;
     const rightX = e.x + 40;
 
-    const dy = player.y - baseY;
+    const dy  = player.y - baseY;
     const dxL = player.x - leftX;
     const dxR = player.x - rightX;
     const lenL = Math.hypot(dxL, dy) || 1;
@@ -502,7 +498,7 @@ if (e.laserTimer >= 1.2) {
         vy: (dy / lenL) * speed,
         radius: 6,
         colour: "#9bf3ff",
-        type: "bossClaw"   // tells renderer to use blue sprite
+        type: "bossClaw"
       },
       {
         x: rightX,
@@ -515,6 +511,7 @@ if (e.laserTimer >= 1.2) {
       }
     );
   }
+};
 
   // ---------- TAIL LASER ----------
   e.laserTimer = (e.laserTimer || 0) + dt;
