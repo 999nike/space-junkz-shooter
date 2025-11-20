@@ -196,40 +196,37 @@ if (!img) return;
     if (e.type !== "scorpionBoss") continue;
 
     // Tail laser first so boss is on top
-    if ((e.laserCharging || e.laserActive) && beamImg) {
-      const beamX = e.x;
-      const topY = e.y - h * 0.5;
-      const bottomY = S.H + 40;
-      const segH = beamImg.height || 64;
-      const segments = Math.ceil((bottomY - topY) / segH);
+if ((e.laserCharging || e.laserActive) && beamImg) {
+  const beamX = e.x;
+  const topY = e.y - h * 0.5;
+  const bottomY = S.H + 40;
+  const beamLength = bottomY - topY;
 
-      ctx.save();
-      ctx.translate(beamX, topY);
-      ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
+  ctx.save();
+  ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
 
-      for (let i = 0; i < segments; i++) {
-        ctx.drawImage(
-          beamImg,
-          -beamImg.width * 0.5,
-          i * segH
-        );
-      }
+  // move origin to boss tail
+  ctx.translate(beamX, topY);
 
-      ctx.restore();
-      ctx.globalAlpha = 1;
-    }
+  // rotate horizontal laser PNG to vertical
+  ctx.rotate(Math.PI / 2);
 
-    // Boss body
-    ctx.save();
-    ctx.translate(e.x, e.y);
-    ctx.drawImage(
-      img,
-      -w * 0.5,
-      -h * 0.5,
-      w,
-      h
-    );
-    ctx.restore();
+  // thickness of glow
+  const scaleX = 0.45;
+  ctx.scale(scaleX, 1);
+
+  // draw stretched vertical beam
+  ctx.drawImage(
+    beamImg,
+    -beamImg.height * 0.5,   // center
+    0,                       // tail start
+    beamImg.height,          // width (after rotate)
+    beamLength               // stretch down screen
+  );
+
+  ctx.restore();
+  ctx.globalAlpha = 1;
+}
 
     // HP bar
     const barW = 160;
