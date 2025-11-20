@@ -546,3 +546,4 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
     window.flashMsg("GAME OVER — TAP START");
   }
 };
+}
