@@ -175,6 +175,24 @@ ctx.drawImage(
   }
 };
 
+// ---------- SIDEKICK RENDERER ----------
+window.drawSidekicks = function drawSidekicks(ctx) {
+  const S = window.GameState;
+  const img = S.sprites.sideShip;
+  if (!img) return;
+
+  const scale = 0.6;  // nice size for parafighter
+  const w = img.width * scale;
+  const h = img.height * scale;
+
+  for (const s of S.sidekicks) {
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    ctx.restore();
+  }
+};
+
 // ---------- BOSS RENDERER ----------
 window.drawScorpionBoss = function drawScorpionBoss(ctx) {
   const S = window.GameState;
@@ -263,6 +281,13 @@ window.drawGame = function drawGame() {
   const ctx = S.ctx;
 
   ctx.clearRect(0, 0, S.W, S.H);
+
+  
+  // Sidekick ships
+  window.drawSidekicks(ctx);
+
+  // Rockets
+  window.drawRockets(ctx);
 
   // Diagonal runway background
   window.drawRunway(ctx);
