@@ -115,15 +115,25 @@ function makeBullet(angleOffset, colour) {
 window.resetGameState = function resetGameState() {
   const S = window.GameState;
 
-  S.enemies = [];
-  S.bullets = [];
-  S.enemyBullets = [];
-  S.powerUps = [];
-  S.particles = [];
-  S.spawnTimer = 0;
-  S.shootTimer = 0;
-  S.score = 0;
-  S.lives = 5;
+ S.enemies = [];
+S.bullets = [];
+S.enemyBullets = [];
+S.powerUps = [];
+S.particles = [];
+
+S.spawnTimer = 0;
+S.shootTimer = 0;
+
+S.score = 0;
+S.lives = 5;             // PATCH: 5 lives every run
+
+// PATCH: ensure boss always respawns
+S.bossSpawned = false;
+S.bossTimer = 0;
+
+// update UI
+if (S.livesEl) S.livesEl.textContent = S.lives;
+if (S.scoreEl) S.scoreEl.textContent = S.score;
 
   S.player.x = S.W / 2;
   S.player.y = S.H - 80;
