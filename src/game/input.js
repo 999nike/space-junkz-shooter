@@ -9,11 +9,19 @@
 
     // Keyboard (still works, optional)
     window.addEventListener("keydown", (e) => {
-      S.keys[e.key.toLowerCase()] = true;
+      const k = e.key.toLowerCase();
+      S.keys[k] = true;
+
+      // SHIFT HOLD-POSITION MODE
+      if (k === "shift") S.keys["shift"] = true;
     });
 
     window.addEventListener("keyup", (e) => {
-      S.keys[e.key.toLowerCase()] = false;
+      const k = e.key.toLowerCase();
+      S.keys[k] = false;
+
+      // SHIFT RELEASE
+      if (k === "shift") S.keys["shift"] = false;
     });
 
     // Pointer (mouse + touch)
@@ -48,9 +56,12 @@
         p.angle = Math.atan2(dy, dx);
       }
 
-      // Update player position
-      p.x = targetX;
-      p.y = targetY;
+      // HOLD-POSITION MODE (SHIFT)
+      if (!S.keys["shift"]) {
+        // Update player position normally
+        p.x = targetX;
+        p.y = targetY;
+      }
 
       // BANKING – left / right tilt based on movement (keeps nice lean)
       const deltaX = p.x - oldX;
