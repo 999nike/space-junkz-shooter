@@ -415,6 +415,18 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
   const S = window.GameState;
   const player = S.player;
 
+  // --- BOSS DEATH CHECK (PATCH) ---
+  if (e.hp <= 0) {
+    const idx = S.enemies.indexOf(e);
+    if (idx >= 0) S.enemies.splice(idx, 1);
+
+    S.bossSpawned = false;
+    S.bossTimer = 0;
+
+    window.flashMsg("BOSS DEFEATED!");
+    return;
+  }
+
   // --- Entry phase: slide down then hover ---
   if (!e.enterComplete) {
     e.y += 40 * dt;
