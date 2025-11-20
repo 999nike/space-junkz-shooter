@@ -207,45 +207,32 @@ if (!img) return;
       ctx.translate(beamX, topY);
       ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
 
-// --- FIXED SINGLE VERTICAL BEAM ---
+// --- FIXED TRUE VERTICAL TAIL LASER ---
 ctx.save();
 
-// Position at boss tail
+// move to scorpion tail
 ctx.translate(beamX, topY);
 
-// Rotate horizontal PNG → vertical
+// rotate 90° because PNG is horizontal
 ctx.rotate(Math.PI / 2);
 
-// Optional: shrink glow if too thick
-const scale = 0.55;
-ctx.scale(scale, 1);
+// BEAM THICKNESS
+const scaleX = 0.45; // width scale (glow thickness)
+ctx.scale(scaleX, 1);
 
-// Draw single stretched beam
+// STRETCH BEAM FROM BOSS → BOTTOM OF SCREEN
+const beamLength = bottomY - topY;
+
 ctx.drawImage(
   beamImg,
   -beamImg.height * 0.5,  // center the beam
-  0,
-  beamImg.height,
-  bottomY - topY           // stretch down to bottom of screen
+  0,                      // start at boss tail
+  beamImg.height,         // rotated width
+  beamLength              // full vertical stretch
 );
 
 ctx.restore();
-
-      ctx.restore();
-      ctx.globalAlpha = 1;
-    }
-
-    // Boss body
-    ctx.save();
-    ctx.translate(e.x, e.y);
-    ctx.drawImage(
-      img,
-      -w * 0.5,
-      -h * 0.5,
-      w,
-      h
-    );
-    ctx.restore();
+ctx.globalAlpha = 1;
 
     // HP bar
     const barW = 160;
