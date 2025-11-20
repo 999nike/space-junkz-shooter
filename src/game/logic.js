@@ -479,42 +479,62 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
   }
 
   // ---------- TAIL LASER ----------
-  e.laserTimer = (e.laserTimer || 0) + dt;
-  const cycle = 6.0;                  // seconds per pattern cycle
-  const t = e.laserTimer % cycle;
+e.laserTimer = (e.laserTimer || 0) + dt;
+const cycle = 6.0;  // seconds per pattern cycle
+const t = e.laserTimer % cycle;
 
-  e.laserCharging = false;
-  e.laserActive = false;
+// reset states
+e.laserCharging = false;
+e.laserActive = false;
 
-  if (t > 2.0 && t <= 2.8) {
-    // charge phase
-    e.laserCharging = true;
-  } else if (t > 2.8 && t <= 4.2) {
-    // active beam
-    e.laserActive = true;
+// ensure tracking variable exists
+e.laserX = (typeof e.laserX === "number") ? e.laserX : e.x;
 
-    const beamX = e.x;
-    const halfWidth = 30;
-    const topY = e.y - 40;
-    const bottomY = S.H + 40;
+// BOSS HEIGHT (for tail-tip position)
+const bossScale = 0.30; // matches renderer scale
+const bossSprite = S.sprites.bossScorpion;
+const bossH = bossSprite ? bossSprite.height * bossScale : 160;
 
-    if (
-      player.invuln <= 0 &&
-      player.x > beamX - halfWidth &&
-      player.x < beamX + halfWidth &&
-      player.y > topY &&
-      player.y < bottomY
-    ) {
-      damagePlayer();
-      player.invuln = 1.0;
-      spawnExplosion(player.x, player.y + 10, "#ff9977");
-    }
+// ---------- CHARGE PHASE (beam stays still) ----------
+if (t > 2.0 && t <= 2.8) {
+  e.laserCharging = true;
+
+  // lock beam to stinger start position
+  e.laserX = e.x;
+
+// ---------- ACTIVE BEAM PHASE ----------
+} else if (t > 2.8 && t <= 4.2) {
+  e.laserActive = true;
+
+  // Smooth laser pursuit (lerp)
+  const followSpeed = 6.5;
+  e.laserX += (player.x - e.laserX) * followSpeed * dt;
+
+  // Tail-tip vertical position
+  const topY = e.y + bossH * 0.32;
+  const bottomY = S.H + 40;
+
+  const beamX = e.laserX;
+  const halfWidth = 28; // hitbox radius
+
+  // collision check
+  if (
+    player.invuln <= 0 &&
+    player.x > beamX - halfWidth &&
+    player.x < beamX + halfWidth &&
+    player.y > topY &&
+    player.y < bottomY
+  ) {
+    damagePlayer();
+    player.invuln = 1.0;
+    spawnExplosion(player.x, player.y + 10, "#ff9977");
   }
-};
-  
-  // Lose condition
-  if (S.lives <= 0) {
-    S.running = false;
-    window.flashMsg("GAME OVER — TAP START");
-  }
-};
+}
+};   // ✅ THIS closes updateBossScorpion cleanly
+
+
+// ---------- Lose condition (KEEP THIS) ----------
+if (S.lives <= 0) {
+  S.running = false;
+  window.flashMsg("GAME OVER — TAP START");
+}
