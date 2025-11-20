@@ -125,7 +125,7 @@ S.spawnTimer = 0;
 S.shootTimer = 0;
 
 S.score = 0;
-S.lives = 5;             // PATCH: 5 lives every run
+S.lives = 995;             // PATCH: 5 lives every run
 
 // PATCH: ensure boss always respawns
 S.bossSpawned = false;
