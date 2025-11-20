@@ -188,6 +188,8 @@ window.drawSidekicks = function drawSidekicks(ctx) {
   for (const s of S.sidekicks) {
     ctx.save();
     ctx.translate(s.x, s.y);
+    // Rotate 180° so the ship faces upward like the player
+    ctx.rotate(Math.PI);
     ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
     ctx.restore();
   }
@@ -208,7 +210,7 @@ window.drawRockets = function drawRockets(ctx) {
     ctx.translate(r.x, r.y);
 
     const angle = Math.atan2(r.vy, r.vx);
-    ctx.rotate(angle + Math.PI / 2);
+    ctx.rotate(angle + Math.PI / 2 - Math.PI / 4);
 
     ctx.drawImage(
       img,
