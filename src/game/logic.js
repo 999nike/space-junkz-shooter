@@ -538,3 +538,4 @@ if (S.lives <= 0) {
   S.running = false;
   window.flashMsg("GAME OVER — TAP START");
 }
+};
