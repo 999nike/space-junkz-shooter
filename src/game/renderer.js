@@ -179,14 +179,14 @@ ctx.drawImage(
 window.drawScorpionBoss = function drawScorpionBoss(ctx) {
   const S = window.GameState;
 
-// Safety: sprites may not be ready on first frames
-if (!S.sprites) return;
+  // Safety: sprites may not be ready on first frames
+  if (!S.sprites) return;
 
-const img = S.sprites.bossScorpion;
-const beamImg = S.sprites.megaBeam;
+  const img = S.sprites.bossScorpion;
+  const beamImg = S.sprites.megaBeam;
 
-// Safety: boss sprite not ready or boss not spawned
-if (!img) return;
+  // Safety: boss sprite not ready or boss not spawned
+  if (!img) return;
 
   const scale = 0.30;          // mega-boss scale
   const w = img.width * scale;
@@ -195,39 +195,66 @@ if (!img) return;
   for (const e of S.enemies) {
     if (e.type !== "scorpionBoss") continue;
 
- // Tail laser first so boss is on top
-if ((e.laserCharging || e.laserActive) && beamImg) {
-  const beamX = e.x;
-  const topY = e.y - h * 0.5;
-  const bottomY = S.H + 40;
+    // ---------- TAIL LASER (draw before body so it's behind) ----------
+    if ((e.laserCharging || e.laserActive) && beamImg) {
+      const beamX = e.x;
+      const topY = e.y - h * 0.5;   // tail start
+      const bottomY = S.H + 40;     // a bit off-screen
+      const beamLength = bottomY - topY;
 
-  ctx.save();
-  ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
+      ctx.save();
+      ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
 
-  // --- TRUE VERTICAL TAIL LASER ---
-  // move to scorpion tail
-  ctx.translate(beamX, topY);
+      // move origin to tail
+      ctx.translate(beamX, topY);
 
-  // rotate horizontal PNG → vertical beam
-  ctx.rotate(Math.PI / 2);
+      // rotate horizontal PNG → vertical
+      ctx.rotate(Math.PI / 2);
 
-  // beam thickness (glow width)
-  const scaleX = 0.45;
-  ctx.scale(scaleX, 1);
+      // thickness + length scale
+      const scaleX = 0.45;                     // glow thickness
+      const scaleY = beamLength / beamImg.width; // stretch to bottom
+      ctx.scale(scaleX, scaleY);
 
-  // length of beam from boss tail → screen bottom
-  const beamLength = bottomY - topY;
+      // draw centered beam, from tail downward
+      ctx.drawImage(
+        beamImg,
+        -beamImg.height * 0.5,  // center horizontally (after rotate)
+        0,                      // start at tail
+        beamImg.height,         // width (now vertical thickness)
+        beamImg.width           // height (will be scaled to beamLength)
+      );
 
-  ctx.drawImage(
-    beamImg,
-    -beamImg.height * 0.5,   // center beam
-    0,                       // start at tail
-    beamImg.height,          // rotated width
-    beamLength               // stretch down
-  );
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
 
-  ctx.restore();
-  ctx.globalAlpha = 1;
+    // ---------- BOSS BODY ----------
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    ctx.drawImage(
+      img,
+      -w * 0.5,
+      -h * 0.5,
+      w,
+      h
+    );
+    ctx.restore();
+
+    // ---------- HP BAR ----------
+    const barW = 160;
+    const barH = 10;
+    const pct = e.hp / e.maxHp;
+
+    const bx = e.x - barW / 2;
+    const by = e.y - h / 2 - 20;
+
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(bx, by, barW, barH);
+
+    ctx.fillStyle = "#3aff6b";
+    ctx.fillRect(bx, by, barW * pct, barH);
+  }
 };
 
     // HP bar
