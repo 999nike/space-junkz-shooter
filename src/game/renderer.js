@@ -198,7 +198,10 @@ if (!img) return;
     // Tail laser first so boss is on top
     if ((e.laserCharging || e.laserActive) && beamImg) {
       const beamX = (typeof e.laserX === "number") ? e.laserX : e.x;
-      const topY = e.y - h * 0.5;
+
+    // SHIFT origin downward to the actual stinger position
+    // (0.32 * boss height = perfect alignment for your sprite)
+      const topY = e.y + h * 0.32;
       const bottomY = S.H + 40;
 
       // scale factor: makes the beam thinner & cleaner
