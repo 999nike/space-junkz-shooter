@@ -196,48 +196,38 @@ if (!img) return;
     if (e.type !== "scorpionBoss") continue;
 
     // Tail laser first so boss is on top
-    if ((e.laserCharging || e.laserActive) && beamImg) {
-      const beamX = (typeof e.laserX === "number") ? e.laserX : e.x;
+if ((e.laserCharging || e.laserActive) && beamImg) {
+    const tailX = e.x;
+    const tailY = e.y + h * 0.32;  // tail-tip anchor
 
-    // SHIFT origin downward to the actual stinger position
-    // (0.32 * boss height = perfect alignment for your sprite)
-      const topY = e.y + h * 0.32;
-      const bottomY = S.H + 40;
+    // Beam target = bottom of screen OR player's X
+    const targetX = e.laserX;  // this follows the player from logic
+    const targetY = S.H + 60;
 
-      // scale factor: makes the beam thinner & cleaner
-      const scale = 0.18;
+    // Angle and distance for rotated beam
+    const dx = targetX - tailX;
+    const dy = targetY - tailY;
+    const angle = Math.atan2(dy, dx);
+    const length = Math.hypot(dx, dy);
 
-      // After rotation, the "length" of each segment is the original width
-      const segLen = beamImg.width * scale;
-      const segments = Math.ceil((bottomY - topY) / segLen);
+    ctx.save();
+    ctx.translate(tailX, tailY);
+    ctx.rotate(angle);
 
-      ctx.save();
-      ctx.globalAlpha = e.laserActive ? 0.95 : 0.45;
+    ctx.globalAlpha = e.laserActive ? 0.95 : 0.4;
 
-      for (let i = 0; i < segments; i++) {
-        const y = topY + i * segLen;
+    // stretch beam sprite along the distance
+    ctx.drawImage(
+        beamImg,
+        0,
+        -beamImg.height * 0.5,
+        length,
+        beamImg.height
+    );
 
-        ctx.save();
-        // Position segment along the vertical line
-        ctx.translate(beamX, y);
-
-        // Rotate 90° so the horizontal laser.png becomes vertical
-        ctx.rotate(Math.PI / 2);
-
-        ctx.drawImage(
-          beamImg,
-          -beamImg.width * scale * 0.5,
-          -beamImg.height * scale * 0.5,
-          beamImg.width * scale,
-          beamImg.height * scale
-        );
-
-        ctx.restore();
-      }
-
-      ctx.restore();
-      ctx.globalAlpha = 1;
-    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
+}
 
     // Boss body
     ctx.save();
