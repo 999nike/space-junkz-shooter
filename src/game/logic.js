@@ -251,6 +251,44 @@ if (player.invuln > 0) player.invuln -= dt;
   // Stars
   updateStars(dt);
 
+  // -------- SIDEKICKS (FOLLOW + ROCKET FIRE) --------
+for (const s of S.sidekicks) {
+  // Follow player smoothly
+  s.x = S.player.x + s.offsetX;
+  s.y = S.player.y + s.yOff;
+
+  // Fire rockets
+  s.fireTimer -= dt;
+  if (s.fireTimer <= 0) {
+
+    // Level 4 → straight rockets
+    if (S.player.weaponLevel === 4) {
+      S.rockets.push({
+        x: s.x,
+        y: s.y,
+        vx: 0,
+        vy: -200,
+        radius: 8,
+        homing: false
+      });
+    }
+
+    // Level 5 → homing rockets
+    if (S.player.weaponLevel >= 5) {
+      S.rockets.push({
+        x: s.x,
+        y: s.y,
+        vx: 0,
+        vy: -200,
+        radius: 8,
+        homing: true
+      });
+    }
+
+    s.fireTimer = 0.65; // slow balanced rate
+  }
+}
+
   // Spawn enemies
   S.spawnTimer -= dt;
   if (S.spawnTimer <= 0) {
@@ -372,6 +410,59 @@ if (player.invuln > 0) player.invuln -= dt;
     }
   }
 
+  // -------- ROCKETS --------
+for (let i = S.rockets.length - 1; i >= 0; i--) {
+  const r = S.rockets[i];
+
+  // HOMING MODE
+  if (r.homing) {
+    let nearest = null;
+    let dist = 99999;
+
+    for (const e of S.enemies) {
+      if (e.type === "scorpionBoss") continue;
+      const dx = e.x - r.x;
+      const dy = e.y - r.y;
+      const d = dx * dx + dy * dy;
+      if (d < dist) {
+        dist = d;
+        nearest = e;
+      }
+    }
+
+    if (nearest) {
+      const ang = Math.atan2(nearest.y - r.y, nearest.x - r.x);
+      r.vx = Math.cos(ang) * 300;
+      r.vy = Math.sin(ang) * 300;
+    }
+  }
+
+  // Move
+  r.x += r.vx * dt;
+  r.y += r.vy * dt;
+
+  // Off screen
+  if (r.y < -40 || r.x < -40 || r.x > S.W + 40) {
+    S.rockets.splice(i, 1);
+    continue;
+  }
+
+  // Collision
+  for (let j = S.enemies.length - 1; j >= 0; j--) {
+    const e = S.enemies[j];
+    if (circleHit(r, e)) {
+      S.rockets.splice(i, 1);
+      e.hp -= 2; // stronger than bullets
+      spawnExplosion(r.x, r.y, e.colour);
+      if (e.hp <= 0) {
+        S.enemies.splice(j, 1);
+        handleEnemyDeath(e);
+      }
+      break;
+    }
+  }
+}
+  
   // ----- Power-ups -----
   for (let i = S.powerUps.length - 1; i >= 0; i--) {
     const p = S.powerUps[i];
@@ -384,12 +475,32 @@ if (player.invuln > 0) player.invuln -= dt;
 
     if (circleHit(player, p)) {
       S.powerUps.splice(i, 1);
-      if (player.weaponLevel < 3) {
-        player.weaponLevel++;
-        window.flashMsg("WEAPON UPGRADE!");
-      } else {
-        window.flashMsg("MAX POWER");
-      }
+      if (player.weaponLevel < 5) {
+      player.weaponLevel++;
+
+  // Level 4 → first sidekick + rockets
+  if (player.weaponLevel === 4) {
+    S.sidekicks.push({
+      offsetX: -50,
+      yOff: -40,
+      fireTimer: 0
+    });
+    window.flashMsg("ALLY SHIP DEPLOYED!");
+  }
+
+  // Level 5 → second sidekick + homing rockets
+  if (player.weaponLevel === 5) {
+    S.sidekicks.push({
+      offsetX: 50,
+      yOff: -40,
+      fireTimer: 0
+    });
+    window.flashMsg("ALLY SHIP 2 DEPLOYED!");
+  }
+
+} else {
+  window.flashMsg("MAX POWER");
+}
     }
   }
 
