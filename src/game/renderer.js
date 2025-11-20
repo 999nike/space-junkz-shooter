@@ -195,44 +195,40 @@ if (!img) return;
   for (const e of S.enemies) {
     if (e.type !== "scorpionBoss") continue;
 
-    // Tail laser first so boss is on top
-    if ((e.laserCharging || e.laserActive) && beamImg) {
-      const beamX = e.x;
-      const topY = e.y - h * 0.5;
-      const bottomY = S.H + 40;
-      const segH = beamImg.height || 64;
-      const segments = Math.ceil((bottomY - topY) / segH);
+ // Tail laser first so boss is on top
+if ((e.laserCharging || e.laserActive) && beamImg) {
+  const beamX = e.x;
+  const topY = e.y - h * 0.5;
+  const bottomY = S.H + 40;
 
-      ctx.save();
-      ctx.translate(beamX, topY);
-      ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
+  ctx.save();
+  ctx.globalAlpha = e.laserActive ? 0.9 : 0.4;
 
-// --- FIXED TRUE VERTICAL TAIL LASER ---
-ctx.save();
+  // --- TRUE VERTICAL TAIL LASER ---
+  // move to scorpion tail
+  ctx.translate(beamX, topY);
 
-// move to scorpion tail
-ctx.translate(beamX, topY);
+  // rotate horizontal PNG → vertical beam
+  ctx.rotate(Math.PI / 2);
 
-// rotate 90° because PNG is horizontal
-ctx.rotate(Math.PI / 2);
+  // beam thickness (glow width)
+  const scaleX = 0.45;
+  ctx.scale(scaleX, 1);
 
-// BEAM THICKNESS
-const scaleX = 0.45; // width scale (glow thickness)
-ctx.scale(scaleX, 1);
+  // length of beam from boss tail → screen bottom
+  const beamLength = bottomY - topY;
 
-// STRETCH BEAM FROM BOSS → BOTTOM OF SCREEN
-const beamLength = bottomY - topY;
+  ctx.drawImage(
+    beamImg,
+    -beamImg.height * 0.5,   // center beam
+    0,                       // start at tail
+    beamImg.height,          // rotated width
+    beamLength               // stretch down
+  );
 
-ctx.drawImage(
-  beamImg,
-  -beamImg.height * 0.5,  // center the beam
-  0,                      // start at boss tail
-  beamImg.height,         // rotated width
-  beamLength              // full vertical stretch
-);
-
-ctx.restore();
-ctx.globalAlpha = 1;
+  ctx.restore();
+  ctx.globalAlpha = 1;
+};
 
     // HP bar
     const barW = 160;
