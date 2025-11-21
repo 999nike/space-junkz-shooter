@@ -38,6 +38,30 @@ window.updateStars = function updateStars(dt) {
 // ---------- DIAGONAL RUNWAY BACKGROUND ----------
 window.drawRunway = function drawRunway(ctx) {
   const S = window.GameState;
+  const nebula = S.sprites.nebulaBG;
+
+  ctx.save();
+
+  // --- Draw Nebula (full screen) ---
+  if (nebula) {
+    ctx.globalAlpha = 1.0;          // full brightness
+    ctx.drawImage(nebula, 0, 0, S.W, S.H);
+  }
+
+  ctx.restore();
+
+  // --- Optional: KEEP your diagonal speed streaks (looks sick) ---
+  const angle = (30 * Math.PI) / 180;
+
+  for (let i = 0; i < 14; i++) {
+    ctx.globalAlpha = 0.06;
+    ctx.fillStyle = "#5be7ff";
+    const px = (i * (S.W / 14)) + Math.sin(Date.now() * 0.0008 + i) * 6;
+    ctx.fillRect(px, 0, 3, S.H);
+  }
+
+  ctx.globalAlpha = 1;
+};
 
   // 30° angle
   const angle = (30 * Math.PI) / 180;
