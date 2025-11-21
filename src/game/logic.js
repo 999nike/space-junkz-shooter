@@ -490,7 +490,7 @@ for (let i = S.rockets.length - 1; i >= 0; i--) {
   }
 }
   
-  // ----- Power-ups -----
+ // ----- Power-ups -----
   for (let i = S.powerUps.length - 1; i >= 0; i--) {
     const p = S.powerUps[i];
     p.y += p.speedY * dt;
@@ -500,72 +500,77 @@ for (let i = S.rockets.length - 1; i >= 0; i--) {
       continue;
     }
 
-  //////-------POWER-UP-PICKUP-------
-if (circleHit(player, p)) {
-    // remove the orb
-    S.powerUps.splice(i, 1);
+    //////-------POWER-UP-PICKUP-------
+    if (circleHit(player, p)) {
+      // remove the orb
+      S.powerUps.splice(i, 1);
 
-    // -------- COIN PICKUP --------
-    if (p.type === "coin") {
+      // -------- COIN PICKUP --------
+      if (p.type === "coin") {
         S.wizzCoins += p.amount;
         if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
         window.flashMsg("+" + p.amount + " WIZZCOIN");
-        continue; // coin handled, skip weapon logic
-    }
+        continue; // skip weapon logic
+      }
 
-    // -------- WEAPON PICKUP --------
-    if (player.weaponLevel < 5) {
-
+      // -------- WEAPON PICKUP --------
+      if (player.weaponLevel < 5) {
         player.weaponLevel++;
 
         // LEVEL 4 → first ally ship (left)
         if (player.weaponLevel === 4) {
-            S.sidekicks.push({
-                offsetX: -50,
-                yOff: -40,
-                fireTimer: 0
-            });
-            window.flashMsg("ALLY SHIP DEPLOYED!");
+          S.sidekicks.push({
+            offsetX: -50,
+            yOff: -40,
+            fireTimer: 0
+          });
+          window.flashMsg("ALLY SHIP DEPLOYED!");
         }
 
         // LEVEL 5 → second ally ship (right)
         else if (player.weaponLevel === 5) {
-            S.sidekicks.push({
-                offsetX: 50,
-                yOff: -40,
-                fireTimer: 0
-            });
-            window.flashMsg("ALLY SHIP 2 DEPLOYED!");
+          S.sidekicks.push({
+            offsetX: 50,
+            yOff: -40,
+            fireTimer: 0
+          });
+          window.flashMsg("ALLY SHIP 2 DEPLOYED!");
         }
-
-    } else {
+      } else {
         window.flashMsg("MAX POWER");
+      }
     }
-}
+  }  // <-- closes powerUps loop CLEANLY
+
 
   // ----- Explosions (sprite animation) -----
-for (let i = S.particles.length - 1; i >= 0; i--) {
-  const e = S.particles[i];
+  for (let i = S.particles.length - 1; i >= 0; i--) {
+    const e = S.particles[i];
 
-  // advance animation
-  e.frameTimer += dt;
-  if (e.frameTimer >= e.frameSpeed) {
-    e.frameTimer = 0;
-    e.frame++;
+    // advance animation
+    e.frameTimer += dt;
+    if (e.frameTimer >= e.frameSpeed) {
+      e.frameTimer = 0;
+      e.frame++;
 
-    if (e.frame >= e.frameCount) {
-      S.particles.splice(i, 1);
-      continue;
+      if (e.frame >= e.frameCount) {
+        S.particles.splice(i, 1);
+        continue;
+      }
     }
   }
-}
+
+
+} // <--- closes updateGame PROPERLY
+
+
 
 // ---------- BOSS LOGIC ----------
 window.updateBossScorpion = function updateBossScorpion(e, dt) {
   const S = window.GameState;
   const player = S.player;
 
-  // --- BOSS DEATH CHECK (PATCH) ---
+  // --- BOSS DEATH CHECK ---
   if (e.hp <= 0) {
     const idx = S.enemies.indexOf(e);
     if (idx >= 0) S.enemies.splice(idx, 1);
@@ -577,23 +582,21 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
     return;
   }
 
-  // --- Entry phase: slide down then hover ---
+  // --- Entry phase ---
   if (!e.enterComplete) {
     e.y += 40 * dt;
-    if (e.y >= 180) {
-      e.enterComplete = true;
-    }
+    if (e.y >= 180) e.enterComplete = true;
     return;
   }
 
-  // --- Hover / horizontal sway ---
+  // --- Hover ---
   e.attackTimer = (e.attackTimer || 0) + dt;
   e.x = S.W * 0.5 + Math.sin(e.attackTimer * 0.5) * 80;
 
-  // ---------- CLAW BULLETS (BLUE) ----------
+  // ---------- CLAW BULLETS ----------
   e.clawTimer = (e.clawTimer || 0) - dt;
   if (e.clawTimer <= 0) {
-    e.clawTimer = 0.7; // burst interval
+    e.clawTimer = 0.7;
 
     const baseY = e.y + 10;
     const leftX = e.x - 40;
@@ -602,8 +605,10 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
     const dy = player.y - baseY;
     const dxL = player.x - leftX;
     const dxR = player.x - rightX;
+
     const lenL = Math.hypot(dxL, dy) || 1;
     const lenR = Math.hypot(dxR, dy) || 1;
+
     const speed = 260;
 
     S.enemyBullets.push(
@@ -614,7 +619,7 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
         vy: (dy / lenL) * speed,
         radius: 6,
         colour: "#9bf3ff",
-        type: "bossClaw"   // tells renderer to use blue sprite
+        type: "bossClaw"
       },
       {
         x: rightX,
@@ -629,63 +634,53 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
   }
 
   // ---------- TAIL LASER ----------
-e.laserTimer = (e.laserTimer || 0) + dt;
-const cycle = 6.0;  // seconds per pattern cycle
-const t = e.laserTimer % cycle;
+  e.laserTimer = (e.laserTimer || 0) + dt;
+  const cycle = 6.0;
+  const t = e.laserTimer % cycle;
 
-// reset states
-e.laserCharging = false;
-e.laserActive = false;
+  e.laserCharging = false;
+  e.laserActive = false;
 
-// ensure tracking variable exists
-e.laserX = (typeof e.laserX === "number") ? e.laserX : e.x;
+  e.laserX = (typeof e.laserX === "number") ? e.laserX : e.x;
 
-// BOSS HEIGHT (for tail-tip position)
-const bossScale = 0.30; // matches renderer scale
-const bossSprite = S.sprites.bossScorpion;
-const bossH = bossSprite ? bossSprite.height * bossScale : 160;
+  const bossScale = 0.30;
+  const bossSprite = S.sprites.bossScorpion;
+  const bossH = bossSprite ? bossSprite.height * bossScale : 160;
 
-// ---------- CHARGE PHASE (beam stays still) ----------
-if (t > 2.0 && t <= 2.8) {
-  e.laserCharging = true;
+  // CHARGE
+  if (t > 2.0 && t <= 2.8) {
+    e.laserCharging = true;
+    e.laserX = e.x;
 
-  // lock beam to stinger start position
-  e.laserX = e.x;
+  // ACTIVE
+  } else if (t > 2.8 && t <= 4.2) {
+    e.laserActive = true;
+    const followSpeed = 6.5;
+    e.laserX += (player.x - e.laserX) * followSpeed * dt;
 
-// ---------- ACTIVE BEAM PHASE ----------
-} else if (t > 2.8 && t <= 4.2) {
-  e.laserActive = true;
+    const topY = e.y + bossH * 0.32;
+    const bottomY = S.H + 40;
 
-  // Smooth laser pursuit (lerp)
-  const followSpeed = 6.5;
-  e.laserX += (player.x - e.laserX) * followSpeed * dt;
+    const halfWidth = 28;
 
-  // Tail-tip vertical position
-  const topY = e.y + bossH * 0.32;
-  const bottomY = S.H + 40;
-
-  const beamX = e.laserX;
-  const halfWidth = 28; // hitbox radius
-
-  // collision check
-  if (
-    player.invuln <= 0 &&
-    player.x > beamX - halfWidth &&
-    player.x < beamX + halfWidth &&
-    player.y > topY &&
-    player.y < bottomY
-  ) {
-    damagePlayer();
-    player.invuln = 1.0;
-    spawnExplosion(player.x, player.y + 10, "#ff9977");
+    if (
+      player.invuln <= 0 &&
+      player.x > e.laserX - halfWidth &&
+      player.x < e.laserX + halfWidth &&
+      player.y > topY &&
+      player.y < bottomY
+    ) {
+      damagePlayer();
+      player.invuln = 1.0;
+      spawnExplosion(player.x, player.y + 10, "#ff9977");
+    }
   }
-}
-};   // ✅ THIS closes updateBossScorpion cleanly
+}; // <--- END OF BOSS LOGIC
+
 
 
 // ---------- Lose condition (KEEP THIS) ----------
- if (S.lives <= 0) {
-     S.running = false;
-     window.flashMsg("GAME OVER — TAP START");
- }
-}  // <-- closes updateGame PROPERLY
+if (S.lives <= 0) {
+  S.running = false;
+  window.flashMsg("GAME OVER — TAP START");
+}
