@@ -99,6 +99,7 @@ window.loadSprites = function loadSprites() {
     return img;
   }
 
+  
   // Sidekick ship (parafighter drone)
   sprites.sideShip = makeImage("./src/game/assets/parafighter.png");
 
@@ -119,6 +120,13 @@ window.loadSprites = function loadSprites() {
 
   // Boss (scorpion)
   sprites.bossScorpion = makeImage("./src/game/oldSCORPIO2.png");
+
+  
+  // Enemy ship sprites
+  sprites.enemyGrunt   = makeImage("./src/game/assets/oldARIES2.png");
+  sprites.enemyZigzag  = makeImage("./src/game/assets/oldLIBRA12.png");
+  sprites.enemyShooter = makeImage("./src/game/assets/oldTAURUS2.png");
+  sprites.enemyTank    = makeImage("./src/game/assets/cruiser.png");
 
   // Nebula background
   sprites.nebulaBG = makeImage("./src/game/assets/nebula_bg.png");
