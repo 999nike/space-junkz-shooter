@@ -187,19 +187,31 @@ window.handleEnemyDeath = function handleEnemyDeath(e) {
   S.score += e.score;
 S.scoreEl.textContent = S.score;
 
-// ⭐ NEW — Coin rewards per enemy
-const coinGain = 
-  e.type === "grunt"   ? 1 :
-  e.type === "zigzag"  ? 2 :
-  e.type === "shooter" ? 3 :
-  e.type === "tank"    ? 5 :
-  0;
+//////-------BOSS-COIN-DROP-------
+let coinGain = 0;
 
+// Normal enemy fixed WizzCoin rewards
+if (e.type === "grunt")   coinGain = 1;
+if (e.type === "zigzag")  coinGain = 2;
+if (e.type === "shooter") coinGain = 3;
+if (e.type === "tank")    coinGain = 5;
+
+// BOSS drops exactly 1 WizzCoin
+if (e.type === "scorpionBoss") {
+  coinGain = 1;
+}
+
+// 10% chance for a tiny coin pickup (0–1 coin)
+if (Math.random() < 0.10) {
+  spawnPowerUp(e.x, e.y, "coin", Math.random() < 0.5 ? 0 : 1);
+}
+
+// Apply direct coin reward
 if (coinGain > 0) {
   S.wizzCoins += coinGain;
   if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
 
-  window.flashMsg("+" + coinGain + " WIZZCOIN"); 
+  window.flashMsg("+" + coinGain + " WIZZCOIN");
 }
 
 if (Math.random() < e.dropChance) {
@@ -488,10 +500,44 @@ for (let i = S.rockets.length - 1; i >= 0; i--) {
       continue;
     }
 
-    if (circleHit(player, p)) {
-      S.powerUps.splice(i, 1);
-      if (player.weaponLevel < 5) {
-      player.weaponLevel++;
+   //////-------POWER-UP-PICKUP-------
+if (circleHit(player, p)) {
+  S.powerUps.splice(i, 1);
+
+  // -------- COIN PICKUP --------
+  if (p.type === "coin") {
+    S.wizzCoins += p.amount;
+    if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
+    window.flashMsg("+" + p.amount + " WIZZCOIN");
+    continue; // skip weapon logic
+  }
+
+  // -------- WEAPON PICKUP (unchanged) --------
+  if (player.weaponLevel < 5) {
+    player.weaponLevel++;
+
+    if (player.weaponLevel === 4) {
+      S.sidekicks.push({
+        offsetX: -50,
+        yOff: -40,
+        fireTimer: 0
+      });
+      window.flashMsg("ALLY SHIP DEPLOYED!");
+    }
+
+    if (player.weaponLevel === 5) {
+      S.sidekicks.push({
+        offsetX: 50,
+        yOff: -40,
+        fireTimer: 0
+      });
+      window.flashMsg("ALLY SHIP 2 DEPLOYED!");
+    }
+
+  } else {
+    window.flashMsg("MAX POWER");
+  }
+}S
 
   // Level 4 → first sidekick + rockets
   if (player.weaponLevel === 4) {
