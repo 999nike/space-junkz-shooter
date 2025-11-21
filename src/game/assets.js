@@ -119,4 +119,8 @@ window.loadSprites = function loadSprites() {
 
   // Boss (scorpion)
   sprites.bossScorpion = makeImage("./src/game/oldSCORPIO2.png");
+
+  // Nebula background
+  sprites.nebulaBG = makeImage("./src/game/assets/nebula_bg.png");
+  
 };
