@@ -110,3 +110,46 @@ body {
   color: var(--text-dim);
   text-align: center;
 }
+
+#msg {
+  ...
+}
+
+/* PLAYER SELECT SCREEN */
+.player-select {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 350px;
+  padding: 20px;
+  background: rgba(0,0,0,0.75);
+  border: 2px solid #00f7ff;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  font-family: sans-serif;
+  z-index: 9999;
+}
+
+.player-select button {
+  padding: 10px 15px;
+  background: #00f7ff;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.player-btn {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  padding: 10px;
+  background: #222;
+  color: #0ff;
+  border: 1px solid #0ff;
+  cursor: pointer;
+  border-radius: 5px;
+}
