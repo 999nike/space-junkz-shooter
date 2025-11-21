@@ -1,5 +1,4 @@
 // ---------- BOOTSTRAP ----------
-
 (function () {
   const S = window.GameState;
 
@@ -24,17 +23,24 @@
     S.startBtn = document.getElementById("startBtn");
 
     // -------------------------
-    // PLAYER SELECT INIT
+    // PLAYER SELECT INIT (legacy/no-op)
     // -------------------------
     if (window.PlayerSystem) {
       window.PlayerSystem.init();
     }
 
-    // Basic engine init
+    // -------------------------
+    // BASIC ENGINE INIT
+    // -------------------------
     window.initStars();
     window.resetGameState();
     window.setupInput();
     window.flashMsg("Press START to play");
+
+    // -------------------------
+    // PLAYER SELECT (ACTIVE LINE)
+    // -------------------------
+    window.showPlayerSelect();
 
     // -------------------------
     // START BUTTON HANDLER
@@ -65,4 +71,66 @@
   } else {
     window.initGame();
   }
+})();
+
+
+// =========================================================
+// PLAYER SELECT SYSTEM (LocalStorage only)
+// =========================================================
+(function () {
+  const modal = document.getElementById("playerModal");
+  const list = document.getElementById("playerList");
+  const addBtn = document.getElementById("addPlayerBtn");
+
+  if (!modal || !list || !addBtn) {
+    console.warn("Player Select UI not found in HTML.");
+    return;
+  }
+
+  function loadPlayers() {
+    return JSON.parse(localStorage.getItem("sj_players") || "[]");
+  }
+
+  function savePlayers(arr) {
+    localStorage.setItem("sj_players", JSON.stringify(arr));
+  }
+
+  function setActivePlayer(name) {
+    localStorage.setItem("sj_active_player", name);
+    modal.style.display = "none";
+  }
+
+  function renderPlayers() {
+    list.innerHTML = "";
+    const players = loadPlayers();
+
+    players.forEach(name => {
+      const b = document.createElement("button");
+      b.textContent = name;
+      b.onclick = () => setActivePlayer(name);
+      list.appendChild(b);
+    });
+  }
+
+  addBtn.onclick = () => {
+    const name = prompt("Enter new player name:");
+    if (!name || name.trim() === "") return;
+
+    const players = loadPlayers();
+    players.push(name.trim());
+    savePlayers(players);
+    renderPlayers();
+  };
+
+  // ---------- Startup ----------
+  window.showPlayerSelect = function () {
+    const active = localStorage.getItem("sj_active_player");
+
+    if (!active) {
+      modal.style.display = "flex";
+      renderPlayers();
+    } else {
+      modal.style.display = "none";
+    }
+  };
 })();
