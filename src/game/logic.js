@@ -185,11 +185,26 @@ window.spawnScorpionBoss = function spawnScorpionBoss() {
 window.handleEnemyDeath = function handleEnemyDeath(e) {
   const S = window.GameState;
   S.score += e.score;
-  S.scoreEl.textContent = S.score;
+S.scoreEl.textContent = S.score;
 
-  if (Math.random() < e.dropChance) {
-    spawnPowerUp(e.x, e.y);
-  }
+// ⭐ NEW — Coin rewards per enemy
+const coinGain = 
+  e.type === "grunt"   ? 1 :
+  e.type === "zigzag"  ? 2 :
+  e.type === "shooter" ? 3 :
+  e.type === "tank"    ? 5 :
+  0;
+
+if (coinGain > 0) {
+  S.wizzCoins += coinGain;
+  if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
+
+  window.flashMsg("+" + coinGain + " WIZZCOIN"); 
+}
+
+if (Math.random() < e.dropChance) {
+  spawnPowerUp(e.x, e.y);
+}
 };
 
 // ---------- DAMAGE ----------
