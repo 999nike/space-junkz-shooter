@@ -35,50 +35,38 @@ window.updateStars = function updateStars(dt) {
   }
 };
 
-// ---------- DIAGONAL RUNWAY BACKGROUND ----------
+// ---------- DIAGONAL / NEBULA BACKGROUND ----------
 window.drawRunway = function drawRunway(ctx) {
   const S = window.GameState;
   const nebula = S.sprites.nebulaBG;
 
   ctx.save();
 
-  // --- Draw Nebula (full screen) ---
+  // --- Draw nebula image full-screen ---
   if (nebula) {
-    ctx.globalAlpha = 1.0;          // full brightness
+    ctx.globalAlpha = 1.0;
     ctx.drawImage(nebula, 0, 0, S.W, S.H);
   }
 
   ctx.restore();
 
-  // --- Optional: KEEP your diagonal speed streaks (looks sick) ---
+  // --- Speed streaks (keep these, they look sick) ---
   const angle = (30 * Math.PI) / 180;
 
   for (let i = 0; i < 14; i++) {
     ctx.globalAlpha = 0.06;
     ctx.fillStyle = "#5be7ff";
-    const px = (i * (S.W / 14)) + Math.sin(Date.now() * 0.0008 + i) * 6;
+
+    const px =
+      (i * (S.W / 14)) + Math.sin(Date.now() * 0.0008 + i) * 6;
+
     ctx.fillRect(px, 0, 3, S.H);
   }
 
   ctx.globalAlpha = 1;
 };
 
-  // 30° angle
-  const angle = (30 * Math.PI) / 180;
-  const tiltX = Math.sin(angle) * S.W;
-  const tiltY = Math.cos(angle) * S.H;
-
-  ctx.save();
-
-  // Diagonal background gradient
-  const grd = ctx.createLinearGradient(0, S.H, tiltX, 0);
-  grd.addColorStop(0,   "rgba(8, 12, 28, 1)");
-  grd.addColorStop(0.3, "rgba(16, 32, 70, 1)");
-  grd.addColorStop(0.55,"rgba(10, 22, 48, 1)");
-  grd.addColorStop(1,   "rgba(2, 8, 18, 1)");
-
-  ctx.fillStyle = grd;
-  ctx.fillRect(0, 0, S.W, S.H);
+ 
 
   // Subtle streaks (F-Zero effect)
   for (let i = 0; i < 14; i++) {
