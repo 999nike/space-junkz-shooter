@@ -543,32 +543,6 @@ if (circleHit(player, p)) {
     }
 }
 
-  // Level 4 → first sidekick + rockets
-  if (player.weaponLevel === 4) {
-    S.sidekicks.push({
-      offsetX: -50,
-      yOff: -40,
-      fireTimer: 0
-    });
-    window.flashMsg("ALLY SHIP DEPLOYED!");
-  }
-
-  // Level 5 → second sidekick + homing rockets
-  if (player.weaponLevel === 5) {
-    S.sidekicks.push({
-      offsetX: 50,
-      yOff: -40,
-      fireTimer: 0
-    });
-    window.flashMsg("ALLY SHIP 2 DEPLOYED!");
-  }
-
-} else {
-  window.flashMsg("MAX POWER");
-}
-    }
-  }
-
   // ----- Explosions (sprite animation) -----
 for (let i = S.particles.length - 1; i >= 0; i--) {
   const e = S.particles[i];
