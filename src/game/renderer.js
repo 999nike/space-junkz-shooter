@@ -210,7 +210,7 @@ window.drawRockets = function drawRockets(ctx) {
     ctx.translate(r.x, r.y);
 
     const angle = Math.atan2(r.vy, r.vx);
-    ctx.rotate(angle + Math.PI / 2 - Math.PI / 4);
+    ctx.rotate(angle + Math.PI / 2 - Math.PI / 2);
 
     ctx.drawImage(
       img,
