@@ -34,22 +34,72 @@ window.updateEnemies = function updateEnemies(dt) {
 
 window.drawEnemies = function drawEnemies(ctx) {
   const S = window.GameState;
+  if (!S.sprites) return;
 
   ctx.save();
+
   for (const e of S.enemies) {
-    // Enemy triangle rendering (we’ll replace with sprites later)
-    ctx.fillStyle = e.colour;
+    if (e.type === "scorpionBoss") continue;
 
-    ctx.beginPath();
-    ctx.moveTo(e.x, e.y - 12);
-    ctx.lineTo(e.x - 10, e.y + 10);
-    ctx.lineTo(e.x + 10, e.y + 10);
-    ctx.closePath();
-    ctx.fill();
+    let img = null;
+    let scale = 1.0;
 
-    // Health bar
-    ctx.fillStyle = "#7dff99";
-    ctx.fillRect(e.x - 12, e.y - 20, (e.hp / e.maxhp) * 24, 3);
+    // -------- SHIP SPRITE ASSIGNMENT --------
+    switch (e.type) {
+      case "grunt":       // fast weak ship
+        img = S.sprites.enemyGrunt;
+        scale = 0.55;
+        break;
+
+      case "zigzag":      // winged zig-zag ship
+        img = S.sprites.enemyZigzag;
+        scale = 0.60;
+        break;
+
+      case "shooter":     // fires bullets
+        img = S.sprites.enemyShooter;
+        scale = 0.65;
+        break;
+
+      case "tank":        // big cruiser
+        img = S.sprites.enemyTank;
+        scale = 0.95;
+        break;
+    }
+
+    // No sprite? skip (safety)
+    if (!img) continue;
+
+    const w = img.width * scale;
+    const h = img.height * scale;
+
+    ctx.save();
+    ctx.translate(e.x, e.y);
+
+    // Rotate 180° so enemies face downward
+    ctx.rotate(Math.PI);
+
+    // Hit flash = white tint
+    if (e.hitFlash > 0) {
+      ctx.globalAlpha = 0.45 + Math.sin(Date.now()*0.03)*0.25;
+    }
+
+    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+
+    ctx.restore();
+
+    // -------- HEALTH BAR --------
+    if (e.maxhp > 1) {
+      const barW = 28;
+      const pct = e.hp / e.maxhp;
+
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(e.x - barW/2, e.y - h*0.65, barW, 4);
+
+      ctx.fillStyle = "#7dff99";
+      ctx.fillRect(e.x - barW/2, e.y - h*0.65, barW * pct, 4);
+    }
   }
+
   ctx.restore();
-};
+};;
