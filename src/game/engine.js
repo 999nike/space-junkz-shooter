@@ -159,6 +159,29 @@ window.addEventListener("load", () => {
 });
 
 // =========================================================
+//  START BUTTON HANDLER  (ADD THIS BLOCK)
+// =========================================================
+window.GameState.startBtn.addEventListener("click", () => {
+  const S = window.GameState;
+
+  // Reset + start the game
+  window.resetGameState();
+  S.running = true;
+
+  // Message
+  window.flashMsg("GOOD LUCK, COMMANDER");
+
+  // ---------- MUSIC PLAY ----------
+  const bgm = document.getElementById("bgm");
+  if (bgm) {
+    bgm.volume = 0.35;
+    bgm.play().catch(() => {
+      console.warn("Music blocked until user interacts again.");
+    });
+  }
+});
+
+// =========================================================
 //  MAIN LOOP
 // =========================================================
 window.gameLoop = function gameLoop(timestamp) {
