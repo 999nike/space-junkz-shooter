@@ -111,12 +111,23 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
 window.drawPowerUps = function drawPowerUps(ctx) {
   const S = window.GameState;
 
-  for (const p of S.powerUps) {
-    ctx.fillStyle = "#ffe66b";
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius || 10, 0, Math.PI * 2);
-    ctx.fill();
+ //////-------POWER-UP-RENDER-------
+for (const p of S.powerUps) {
+
+  // COIN PICKUP (green)
+  if (p.type === "coin") {
+    ctx.fillStyle = "#7dff99";
   }
+
+  // WEAPON PICKUP (yellow)
+  else {
+    ctx.fillStyle = "#ffe66b";
+  }
+
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.radius || 10, 0, Math.PI * 2);
+  ctx.fill();
+}
 };
 
 // Explosion renderer (sprite sheet)
