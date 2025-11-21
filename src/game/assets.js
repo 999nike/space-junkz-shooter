@@ -13,11 +13,12 @@ window.GameState = {
   msgEl: null,
   startBtn: null,
 
-  // Game state
+ // Game state
   running: false,
   lastTime: 0,
   score: 0,
   lives: 3,
+  wizzCoins: 0,   // ⭐ NEW
 
   // Entities
   stars: [],
