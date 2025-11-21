@@ -40,17 +40,15 @@ window.drawRunway = function drawRunway(ctx) {
   const S = window.GameState;
   const nebula = S.sprites.nebulaBG;
 
+  // Nebula backdrop
   ctx.save();
-
-  // --- Draw nebula image full-screen ---
   if (nebula) {
     ctx.globalAlpha = 1.0;
     ctx.drawImage(nebula, 0, 0, S.W, S.H);
   }
-
   ctx.restore();
 
-  // --- Speed streaks (keep these, they look sick) ---
+  // Speed streaks overlay
   for (let i = 0; i < 14; i++) {
     ctx.globalAlpha = 0.06;
     ctx.fillStyle = "#5be7ff";
@@ -64,19 +62,10 @@ window.drawRunway = function drawRunway(ctx) {
   ctx.globalAlpha = 1;
 };
 
-  // Subtle streaks (F-Zero effect)
-  for (let i = 0; i < 14; i++) {
-    ctx.globalAlpha = 0.04;
-    ctx.fillStyle = "#5be7ff";
-    const px = (i * (S.W / 14)) + Math.sin(Date.now() * 0.0008 + i) * 6;
-    ctx.fillRect(px, 0, 3, S.H);
-  }
-
 // ---------- BULLETS ----------
 window.drawBullets = function drawBullets(ctx) {
   const S = window.GameState;
 
-  // Safety: sprites not ready yet
   if (!S.sprites) return;
 
   const img = S.sprites.playerBullet;
@@ -88,20 +77,10 @@ window.drawBullets = function drawBullets(ctx) {
   for (const b of S.bullets) {
     ctx.save();
     ctx.translate(b.x, b.y);
-
-    ctx.drawImage(
-      img,
-      -w * 0.5,
-      -h * 0.5,
-      w,
-      h
-    );
-
+    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
     ctx.restore();
   }
 };
-
-// ---------- MISSING FUNCTIONS (PATCH) ----------
 
 // Enemy bullets renderer
 window.drawEnemyBullets = function drawEnemyBullets(ctx) {
@@ -123,13 +102,7 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
 
     ctx.save();
     ctx.translate(b.x, b.y);
-    ctx.drawImage(
-      img,
-      -w * 0.5,
-      -h * 0.5,
-      w,
-      h
-    );
+    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
     ctx.restore();
   }
 };
@@ -152,8 +125,8 @@ window.drawParticles = function drawParticles(ctx) {
   const sheet = S.sprites.explosionSheet;
   if (!sheet) return;
 
- const rows = 4;
-const cols = 4;   // Your texture is a 4x4 grid
+  const rows = 4;
+  const cols = 4;   // 4x4 grid
 
   const frameW = sheet.width / cols;
   const frameH = sheet.height / rows;
@@ -167,14 +140,14 @@ const cols = 4;   // Your texture is a 4x4 grid
 
     const scale = e.scale || 1.0;
 
-ctx.drawImage(
-  sheet,
-  sx, sy, frameW, frameH,
-  -frameW * 0.5 * scale,
-  -frameH * 0.5 * scale,
-  frameW * scale,
-  frameH * scale
-);
+    ctx.drawImage(
+      sheet,
+      sx, sy, frameW, frameH,
+      -frameW * 0.5 * scale,
+      -frameH * 0.5 * scale,
+      frameW * scale,
+      frameH * scale
+    );
 
     ctx.restore();
   }
@@ -186,14 +159,14 @@ window.drawSidekicks = function drawSidekicks(ctx) {
   const img = S.sprites.sideShip;
   if (!img || !S.sidekicks) return;
 
-  const scale = 0.6;  // nice size for parafighter
+  const scale = 0.6;
   const w = img.width * scale;
   const h = img.height * scale;
 
   for (const s of S.sidekicks) {
     ctx.save();
     ctx.translate(s.x, s.y);
-    // Rotate 180° so the ship faces upward like the player
+    // Rotate 180° so ship faces upward
     ctx.rotate(Math.PI);
     ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
     ctx.restore();
@@ -208,14 +181,14 @@ window.drawRockets = function drawRockets(ctx) {
 
   const w = img.width;
   const h = img.height;
-  const scale = 2.0; // make rockets easy to see
+  const scale = 2.0; // visible
 
   for (const r of S.rockets) {
     ctx.save();
     ctx.translate(r.x, r.y);
 
     const angle = Math.atan2(r.vy, r.vx);
-    ctx.rotate(angle + Math.PI / 2 - Math.PI / 2);
+    ctx.rotate(angle); // rocket oriented along movement
 
     ctx.drawImage(
       img,
@@ -233,14 +206,13 @@ window.drawRockets = function drawRockets(ctx) {
 window.drawScorpionBoss = function drawScorpionBoss(ctx) {
   const S = window.GameState;
 
-  // Safety: sprites may not be ready on first frames
   if (!S.sprites) return;
 
   const img = S.sprites.bossScorpion;
   const beamImg = S.sprites.megaBeam;
   if (!img) return;
 
-  const scale = 0.30;          // mega-boss scale
+  const scale = 0.30;
   const w = img.width * scale;
   const h = img.height * scale;
 
@@ -322,10 +294,10 @@ window.drawGame = function drawGame() {
   // Enemies
   window.drawEnemies(ctx);
 
-  // Boss (Scorpion)
+  // Boss
   window.drawScorpionBoss(ctx);
 
-  // Sidekick ships (on top of enemies)
+  // Sidekick ships
   window.drawSidekicks(ctx);
 
   // Rockets
@@ -340,9 +312,9 @@ window.drawGame = function drawGame() {
   // Power-ups
   window.drawPowerUps(ctx);
 
-  // Particles (explosions)
+  // Particles
   window.drawParticles(ctx);
 
-  // Player ship + thruster FX
+  // Player
   window.drawPlayer(ctx);
 };
