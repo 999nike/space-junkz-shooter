@@ -684,8 +684,8 @@ if (t > 2.0 && t <= 2.8) {
 
 
 // ---------- Lose condition (KEEP THIS) ----------
-if (S.lives <= 0) {
-  S.running = false;
-  window.flashMsg("GAME OVER — TAP START");
-}
-};
+ if (S.lives <= 0) {
+     S.running = false;
+     window.flashMsg("GAME OVER — TAP START");
+ }
+}  // <-- closes updateGame PROPERLY
