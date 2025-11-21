@@ -1,4 +1,7 @@
-// ---------- ENGINE INIT (FIXED) ----------
+// =========================================================
+//  ENGINE INIT (FULL PATCHED + CLEANED)  
+//  WizzCoin HUD support + redundant cleanup
+// =========================================================
 
 window.GameState = window.GameState || {};
 
@@ -18,11 +21,13 @@ Object.assign(window.GameState, {
   })
 });
 
-// Setup canvas + load all sprites
+// =========================================================
+//  INIT ENGINE
+// =========================================================
 window.initEngine = function initEngine() {
   const S = window.GameState;
 
-  // Canvas (FIXED ID)
+  // Canvas
   S.canvas = document.getElementById("game");
   S.ctx = S.canvas.getContext("2d");
 
@@ -32,18 +37,19 @@ window.initEngine = function initEngine() {
   S.W = S.canvas.width;
   S.H = S.canvas.height;
 
-  // HUD elements
-  S.scoreEl = document.getElementById("score");
-  S.livesEl = document.getElementById("lives");
-  S.msgEl = document.getElementById("msg");
+  // ---------- HUD ELEMENTS ----------
+  S.scoreEl  = document.getElementById("score");
+  S.livesEl  = document.getElementById("lives");
+  S.coinsEl  = document.getElementById("coins");   // ⭐ NEW for WizzCoin
+  S.msgEl    = document.getElementById("msg");
   S.startBtn = document.getElementById("startBtn");
 
-  // Load sprites (CRITICAL)
+  // Load sprites
   if (typeof window.loadSprites === "function") {
     window.loadSprites();
   }
 
-  // Player spawn position
+  // Player spawn
   S.player.x = S.W / 2;
   S.player.y = S.H - 80;
 
@@ -51,57 +57,53 @@ window.initEngine = function initEngine() {
   S.running = false;
 };
 
-// Flash message
+// =========================================================
+//  FLASH MESSAGE
+// =========================================================
 window.flashMsg = function flashMsg(text) {
   const S = window.GameState;
   if (!S.msgEl) return;
+
   S.msgEl.textContent = text;
+
   clearTimeout(S._msgTimeout);
   S._msgTimeout = setTimeout(() => {
     S.msgEl.textContent = "";
   }, 1600);
 };
 
-// ---------- BULLET SYSTEM (Angle-based — fires where the ship faces) ----------
-
+// =========================================================
+//  BULLET SYSTEM (ANGLE-BASED SHOOTING)
+// =========================================================
 window.shoot = function shoot() {
   const S = window.GameState;
   const player = S.player;
   const spread = player.weaponLevel;
   const bulletSpeed = 520;
 
-  // Fallback angle = straight up if we don't have a mouse angle yet
   const baseAngle =
     typeof player.angle === "number" ? player.angle : -Math.PI / 2;
 
-function makeBullet(angleOffset, colour) {
-  const a = baseAngle + angleOffset;
-  return {
-    x: player.x,
-    y: player.y,
-
-    // Collision radius tuned for your glowing orb sprite
-    radius: 6,
-
-    colour,
-
-    // movement
-    vx: Math.cos(a) * bulletSpeed,
-    vy: Math.sin(a) * bulletSpeed
-  };
-}
+  function makeBullet(angleOffset, colour) {
+    const a = baseAngle + angleOffset;
+    return {
+      x: player.x,
+      y: player.y,
+      radius: 6,
+      colour,
+      vx: Math.cos(a) * bulletSpeed,
+      vy: Math.sin(a) * bulletSpeed
+    };
+  }
 
   if (spread === 1) {
-    // SINGLE SHOT
     S.bullets.push(makeBullet(0, "#a8ffff"));
   } else if (spread === 2) {
-    // TWIN SHOT (slight angle split)
     S.bullets.push(
       makeBullet(-0.08, "#a8ffff"),
       makeBullet(0.08, "#a8ffff")
     );
   } else {
-    // 3-WAY SPREAD (center + two coloured side shots)
     S.bullets.push(
       makeBullet(0, "#a8ffff"),
       makeBullet(-0.18, "#ff8ad4"),
@@ -110,41 +112,44 @@ function makeBullet(angleOffset, colour) {
   }
 };
 
-// ---------- GAME RESET ----------
-
+// =========================================================
+//  GAME RESET (NOW INCLUDES WizzCoin RESET)
+// =========================================================
 window.resetGameState = function resetGameState() {
   const S = window.GameState;
 
- S.enemies = [];
-S.bullets = [];
-S.enemyBullets = [];
-S.powerUps = [];
-S.particles = [];
+  S.enemies = [];
+  S.bullets = [];
+  S.enemyBullets = [];
+  S.powerUps = [];
+  S.particles = [];
+  S.spawnTimer = 0;
+  S.shootTimer = 0;
 
-S.spawnTimer = 0;
-S.shootTimer = 0;
+  S.score = 0;
+  S.lives = 995;  
 
-S.score = 0;
-S.lives = 995;             // PATCH: 5 lives every run
+  // ---------- WIZZCOIN RESET ----------
+  S.wizzCoins = 0;
+  if (S.coinsEl) S.coinsEl.textContent = 0;
 
-// PATCH: ensure boss always respawns
-S.bossSpawned = false;
-S.bossTimer = 0;
+  // Boss reset
+  S.bossSpawned = false;
+  S.bossTimer = 0;
 
-// update UI
-if (S.livesEl) S.livesEl.textContent = S.lives;
-if (S.scoreEl) S.scoreEl.textContent = S.score;
+  // Update HUD
+  if (S.livesEl) S.livesEl.textContent = S.lives;
+  if (S.scoreEl) S.scoreEl.textContent = S.score;
 
   S.player.x = S.W / 2;
   S.player.y = S.H - 80;
   S.player.weaponLevel = 1;
   S.player.invuln = 0;
-
-  S.scoreEl.textContent = S.score;
-  S.livesEl.textContent = S.lives;
 };
 
-// ---------- ENGINE STARTUP ----------
+// =========================================================
+//  ENGINE STARTUP
+// =========================================================
 window.addEventListener("load", () => {
   window.initEngine();
   window.initStars();
@@ -153,11 +158,13 @@ window.addEventListener("load", () => {
   window.flashMsg("Press START to play");
 });
 
-// ---------- MAIN LOOP ----------
-
+// =========================================================
+//  MAIN LOOP
+// =========================================================
 window.gameLoop = function gameLoop(timestamp) {
   const S = window.GameState;
   const dt = (timestamp - S.lastTime) / 1000 || 0;
+
   S.lastTime = timestamp;
 
   if (S.running) {
