@@ -500,44 +500,48 @@ for (let i = S.rockets.length - 1; i >= 0; i--) {
       continue;
     }
 
-   //////-------POWER-UP-PICKUP-------
+  //////-------POWER-UP-PICKUP-------
 if (circleHit(player, p)) {
-  S.powerUps.splice(i, 1);
+    // remove the orb
+    S.powerUps.splice(i, 1);
 
-  // -------- COIN PICKUP --------
-  if (p.type === "coin") {
-    S.wizzCoins += p.amount;
-    if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
-    window.flashMsg("+" + p.amount + " WIZZCOIN");
-    continue; // skip weapon logic
-  }
-
-  // -------- WEAPON PICKUP (unchanged) --------
-  if (player.weaponLevel < 5) {
-    player.weaponLevel++;
-
-    if (player.weaponLevel === 4) {
-      S.sidekicks.push({
-        offsetX: -50,
-        yOff: -40,
-        fireTimer: 0
-      });
-      window.flashMsg("ALLY SHIP DEPLOYED!");
+    // -------- COIN PICKUP --------
+    if (p.type === "coin") {
+        S.wizzCoins += p.amount;
+        if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
+        window.flashMsg("+" + p.amount + " WIZZCOIN");
+        continue; // coin handled, skip weapon logic
     }
 
-    if (player.weaponLevel === 5) {
-      S.sidekicks.push({
-        offsetX: 50,
-        yOff: -40,
-        fireTimer: 0
-      });
-      window.flashMsg("ALLY SHIP 2 DEPLOYED!");
-    }
+    // -------- WEAPON PICKUP --------
+    if (player.weaponLevel < 5) {
 
-  } else {
-    window.flashMsg("MAX POWER");
-  }
-}S
+        player.weaponLevel++;
+
+        // LEVEL 4 → first ally ship (left)
+        if (player.weaponLevel === 4) {
+            S.sidekicks.push({
+                offsetX: -50,
+                yOff: -40,
+                fireTimer: 0
+            });
+            window.flashMsg("ALLY SHIP DEPLOYED!");
+        }
+
+        // LEVEL 5 → second ally ship (right)
+        else if (player.weaponLevel === 5) {
+            S.sidekicks.push({
+                offsetX: 50,
+                yOff: -40,
+                fireTimer: 0
+            });
+            window.flashMsg("ALLY SHIP 2 DEPLOYED!");
+        }
+
+    } else {
+        window.flashMsg("MAX POWER");
+    }
+}
 
   // Level 4 → first sidekick + rockets
   if (player.weaponLevel === 4) {
