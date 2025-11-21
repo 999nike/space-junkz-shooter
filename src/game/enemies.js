@@ -67,7 +67,7 @@ window.drawEnemies = function drawEnemies(ctx) {
         break;
     }
 
-    // No sprite? skip (safety)
+    // Skip if sprite missing
     if (!img) continue;
 
     const w = img.width * scale;
@@ -76,15 +76,21 @@ window.drawEnemies = function drawEnemies(ctx) {
     ctx.save();
     ctx.translate(e.x, e.y);
 
-    // Rotate 180° so enemies face downward
+    // Enemies face downward
     ctx.rotate(Math.PI);
 
-    // Hit flash = white tint
+    // Hit flash tint
     if (e.hitFlash > 0) {
-      ctx.globalAlpha = 0.45 + Math.sin(Date.now()*0.03)*0.25;
+      ctx.globalAlpha = 0.45 + Math.sin(Date.now() * 0.03) * 0.25;
     }
 
-    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    ctx.drawImage(
+      img,
+      -w * 0.5,
+      -h * 0.5,
+      w,
+      h
+    );
 
     ctx.restore();
 
@@ -94,12 +100,22 @@ window.drawEnemies = function drawEnemies(ctx) {
       const pct = e.hp / e.maxhp;
 
       ctx.fillStyle = "#000000";
-      ctx.fillRect(e.x - barW/2, e.y - h*0.65, barW, 4);
+      ctx.fillRect(
+        e.x - barW / 2,
+        e.y + h * 0.55,
+        barW,
+        4
+      );
 
       ctx.fillStyle = "#7dff99";
-      ctx.fillRect(e.x - barW/2, e.y - h*0.65, barW * pct, 4);
+      ctx.fillRect(
+        e.x - barW / 2,
+        e.y + h * 0.55,
+        barW * pct,
+        4
+      );
     }
   }
 
   ctx.restore();
-};;
+};
