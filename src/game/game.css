@@ -153,3 +153,40 @@ body {
   cursor: pointer;
   border-radius: 5px;
 }
+
+.player-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.player-box {
+  background: rgba(0,0,0,0.75);
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #00eaff;
+  width: 300px;
+  text-align: center;
+}
+#playerList button {
+  width: 100%;
+  margin: 6px 0;
+  padding: 10px;
+  background: #111;
+  border: 1px solid #00eaff;
+  color: white;
+  cursor: pointer;
+}
+#addPlayerBtn {
+  margin-top: 14px;
+  padding: 10px;
+  width: 100%;
+  background: #00eaff;
+  color: black;
+  border-radius: 6px;
+  cursor: pointer;
+}
