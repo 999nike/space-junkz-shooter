@@ -51,8 +51,6 @@ window.drawRunway = function drawRunway(ctx) {
   ctx.restore();
 
   // --- Speed streaks (keep these, they look sick) ---
-  const angle = (30 * Math.PI) / 180;
-
   for (let i = 0; i < 14; i++) {
     ctx.globalAlpha = 0.06;
     ctx.fillStyle = "#5be7ff";
@@ -66,8 +64,6 @@ window.drawRunway = function drawRunway(ctx) {
   ctx.globalAlpha = 1;
 };
 
- 
-
   // Subtle streaks (F-Zero effect)
   for (let i = 0; i < 14; i++) {
     ctx.globalAlpha = 0.04;
@@ -75,9 +71,6 @@ window.drawRunway = function drawRunway(ctx) {
     const px = (i * (S.W / 14)) + Math.sin(Date.now() * 0.0008 + i) * 6;
     ctx.fillRect(px, 0, 3, S.H);
   }
-
-  ctx.restore();
-};
 
 // ---------- BULLETS ----------
 window.drawBullets = function drawBullets(ctx) {
