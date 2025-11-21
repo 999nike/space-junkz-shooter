@@ -43,29 +43,29 @@ window.drawEnemies = function drawEnemies(ctx) {
 
     let img = null;
     let scale = 1.0;
+    
+// -------- SHIP SPRITE ASSIGNMENT --------
+switch (e.type) {
+  case "grunt":       // fast weak ship
+    img = S.sprites.enemyGrunt;
+    scale = 0.30;   // was 0.38
+    break;
 
-    // -------- SHIP SPRITE ASSIGNMENT --------
-    switch (e.type) {
-      case "grunt":       // fast weak ship
-        img = S.sprites.enemyGrunt;
-        scale = 0.55;
-        break;
+  case "zigzag":      // winged zig-zag ship
+    img = S.sprites.enemyZigzag;
+    scale = 0.36;   // was 0.45
+    break;
 
-      case "zigzag":      // winged zig-zag ship
-        img = S.sprites.enemyZigzag;
-        scale = 0.60;
-        break;
+  case "shooter":     // fires bullets
+    img = S.sprites.enemyShooter;
+    scale = 0.38;   // was 0.48
+    break;
 
-      case "shooter":     // fires bullets
-        img = S.sprites.enemyShooter;
-        scale = 0.65;
-        break;
-
-      case "tank":        // big cruiser
-        img = S.sprites.enemyTank;
-        scale = 0.95;
-        break;
-    }
+  case "tank":        // big cruiser (DO NOT CHANGE)
+    img = S.sprites.enemyTank;
+    scale = 0.62;    // exact size you like
+    break;
+}
 
     // Skip if sprite missing
     if (!img) continue;
