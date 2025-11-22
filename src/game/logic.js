@@ -210,6 +210,11 @@ if (coinGain > 0) {
     if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
     window.flashMsg("+" + coinGain + " WIZZCOIN");
 }
+
+  // Chance to drop a power-up
+if (Math.random() < e.dropChance) {
+    spawnPowerUp(e.x, e.y);
+} 
 };
 
 // ---------- DAMAGE ----------
