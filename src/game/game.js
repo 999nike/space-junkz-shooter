@@ -65,6 +65,27 @@
 })();
 
 /* ==========================================================
+   ONLINE SYNC STUBS (LOCAL-ONLY MODE)
+   ========================================================== */
+
+// These prevent crashes until the real backend/API is wired up.
+// They just log to console so you can see calls happening.
+
+window.syncNewPlayer = window.syncNewPlayer || function (name) {
+  console.log("[syncNewPlayer] stub called for:", name);
+};
+
+window.syncStats = window.syncStats || function (name, coins, score) {
+  console.log("[syncStats] stub called for:", name, "coins:", coins, "score:", score);
+};
+
+/* ==========================================================
+   PLAYER SELECT SYSTEM (FINAL – SINGLE PANEL VERSION)
+   ========================================================== */
+
+(function () {
+
+/* ==========================================================
    PLAYER SELECT SYSTEM (FINAL – SINGLE PANEL VERSION)
    ========================================================== */
 
