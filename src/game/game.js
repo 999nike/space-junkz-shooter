@@ -65,18 +65,37 @@
 })();
 
 /* ==========================================================
-   ONLINE SYNC STUBS (LOCAL-ONLY MODE)
+   ONLINE SYNC — REAL BACKEND (Neon Postgres)
    ========================================================== */
 
-// These prevent crashes until the real backend/API is wired up.
-// They just log to console so you can see calls happening.
+// ---- Create Player ----
+window.syncNewPlayer = async function (name) {
+  try {
+    const res = await fetch("/api/create-player", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name })
+    });
 
-window.syncNewPlayer = window.syncNewPlayer || function (name) {
-  console.log("[syncNewPlayer] stub called for:", name);
+    const data = await res.json();
+
+    // For your account only – debug feedback
+    if (name === "999nike") {
+      console.log("[create-player]", data);
+    }
+
+    if (!data.ok) {
+      console.warn("create-player failed:", data.error);
+    }
+
+  } catch (err) {
+    console.warn("syncNewPlayer error (offline?):", err);
+  }
 };
 
+// ---- Update Stats (still stub for now; real patch next) ----
 window.syncStats = window.syncStats || function (name, coins, score) {
-    // stub silent
+  // silent stub until update-stats endpoint is added
 };
 
 
