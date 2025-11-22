@@ -560,7 +560,24 @@ for (let i = S.rockets.length - 1; i >= 0; i--) {
     }
   }
 
+// =========================================================
+// DAMAGE PLAYER (MISSING FUNCTION ADDED)
+// =========================================================
+window.damagePlayer = function damagePlayer() {
+  const S = window.GameState;
 
+  // Reduce life
+  S.lives--;
+
+  // Update HUD
+  if (S.livesEl) {
+    S.livesEl.textContent = S.lives;
+  }
+
+  // Optional flash effect
+  S.player.invuln = 0.5; // half-second invulnerability
+};
+  
 } // <--- closes updateGame PROPERLY
 
 
