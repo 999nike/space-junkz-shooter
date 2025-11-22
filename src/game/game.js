@@ -181,50 +181,19 @@
   };
 })();
 
-  function loadPlayers() {
-    return JSON.parse(localStorage.getItem("sj_players") || "[]");
+  /* ==========================================================
+   SAFE PLAYER SELECT ENTRY POINT (FINAL)
+   Ensures only ONE system runs and no duplicates fire.
+   ========================================================== */
+
+window.showPlayerSelect = window.showPlayerSelect || function () {
+  const selectBox = document.getElementById("playerSelect");
+  if (!selectBox) return;
+  
+  const active = localStorage.getItem("sj_active_player");
+  if (!active) {
+    selectBox.style.display = "block";
+  } else {
+    selectBox.style.display = "none";
   }
-
-  function savePlayers(arr) {
-    localStorage.setItem("sj_players", JSON.stringify(arr));
-  }
-
-  function setActivePlayer(name) {
-    localStorage.setItem("sj_active_player", name);
-    modal.style.display = "none";
-  }
-
-  function renderPlayers() {
-    list.innerHTML = "";
-    const players = loadPlayers();
-
-    players.forEach(name => {
-      const b = document.createElement("button");
-      b.textContent = name;
-      b.onclick = () => setActivePlayer(name);
-      list.appendChild(b);
-    });
-  }
-
-  addBtn.onclick = () => {
-    const name = prompt("Enter new player name:");
-    if (!name || name.trim() === "") return;
-
-    const players = loadPlayers();
-    players.push(name.trim());
-    savePlayers(players);
-    renderPlayers();
-  };
-
-  // ---------- Startup ----------
-  window.showPlayerSelect = function () {
-    const active = localStorage.getItem("sj_active_player");
-
-    if (!active) {
-      modal.style.display = "flex";
-      renderPlayers();
-    } else {
-      modal.style.display = "none";
-    }
-  };
-})();
+};
