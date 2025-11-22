@@ -74,18 +74,112 @@
 })();
 
 
-// =========================================================
-// PLAYER SELECT SYSTEM (LocalStorage only)
-// =========================================================
+/* ==========================================================
+   PLAYER SELECT SYSTEM (FINAL – SINGLE PANEL VERSION)
+   ========================================================== */
+
 (function () {
-  const modal = document.getElementById("playerModal");
+  const selectBox = document.getElementById("playerSelect");
   const list = document.getElementById("playerList");
   const addBtn = document.getElementById("addPlayerBtn");
+  const nameBox = document.getElementById("nameInputBox");
+  const nameInput = document.getElementById("newPlayerName");
+  const saveBtn = document.getElementById("savePlayerBtn");
 
-  if (!modal || !list || !addBtn) {
-    console.warn("Player Select UI not found in HTML.");
+  if (!selectBox || !list || !addBtn || !nameBox || !nameInput || !saveBtn) {
+    console.warn("❌ Player UI missing — check game.html");
     return;
   }
+
+  /* ------------------------------
+      LOCAL PLAYERS (temporary)
+     ------------------------------ */
+
+  function loadPlayers() {
+    return JSON.parse(localStorage.getItem("sj_players") || "[]");
+  }
+
+  function savePlayers(arr) {
+    localStorage.setItem("sj_players", JSON.stringify(arr));
+  }
+
+  function setActivePlayer(name) {
+    localStorage.setItem("sj_active_player", name);
+    selectBox.style.display = "none";
+  }
+
+  /* ------------------------------
+      RENDER PLAYER LIST
+     ------------------------------ */
+
+  function renderPlayers() {
+    list.innerHTML = "";
+    const players = loadPlayers();
+
+    if (players.length === 0) {
+      const empty = document.createElement("div");
+      empty.textContent = "No players yet.";
+      empty.style.opacity = "0.6";
+      list.appendChild(empty);
+      return;
+    }
+
+    players.forEach((p) => {
+      const btn = document.createElement("button");
+      btn.className = "player-btn";
+      btn.textContent = p;
+      btn.onclick = () => setActivePlayer(p);
+      list.appendChild(btn);
+    });
+  }
+
+  /* ------------------------------
+      ADD NEW PLAYER BUTTON
+     ------------------------------ */
+
+  addBtn.onclick = () => {
+    nameBox.style.display = "block";
+    nameInput.value = "";
+    nameInput.focus();
+  };
+
+  /* ------------------------------
+      SAVE PLAYER BUTTON
+     ------------------------------ */
+
+  saveBtn.onclick = () => {
+    const name = nameInput.value.trim();
+    if (!name) return;
+
+    const players = loadPlayers();
+
+    if (players.includes(name)) {
+      alert("Name already exists!");
+      return;
+    }
+
+    players.push(name);
+    savePlayers(players);
+
+    nameBox.style.display = "none";
+    renderPlayers();
+  };
+
+  /* ------------------------------
+      AUTO-SHOW IF NO PLAYER SELECTED
+     ------------------------------ */
+
+  window.showPlayerSelect = function () {
+    const active = localStorage.getItem("sj_active_player");
+
+    if (!active) {
+      selectBox.style.display = "block";
+      renderPlayers();
+    } else {
+      selectBox.style.display = "none";
+    }
+  };
+})();
 
   function loadPlayers() {
     return JSON.parse(localStorage.getItem("sj_players") || "[]");
