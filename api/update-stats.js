@@ -1,6 +1,5 @@
 // ---- /api/update-stats.js --------------------------------
-// Updates the stats for a player ID in Postgres.
-// Called by syncStats(name, coins, score) in the game.
+// Updates stats for a player_id in Postgres (coins, score, xp).
 
 import { sql } from './db.js';
 
@@ -11,7 +10,6 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Parse JSON safely
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body || '{}');
     if (!body) body = {};
@@ -23,7 +21,6 @@ export default async function handler(req, res) {
       return;
     }
 
-    // UPSERT: Update stats for this player
     const result = await sql/*sql*/`
       INSERT INTO stats (player_id, coins, score, xp)
       VALUES (
