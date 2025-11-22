@@ -67,6 +67,51 @@ if (muteBtn) {
   });
 }
 
+   // ----- LEADERBOARD BUTTON -----
+const leaderBtn = document.getElementById("leaderBtn");
+const leaderPanel = document.getElementById("leaderboardPanel");
+const leaderList = document.getElementById("leaderboardList");
+const closeLeaderBtn = document.getElementById("closeLeaderBtn");
+
+async function loadLeaderboard() {
+  const res = await fetch("/api/getLeaderboard");
+  const data = await res.json();
+
+  leaderList.innerHTML = "";
+
+  if (!data.ok || !data.leaderboard) {
+    leaderList.innerHTML = "<p>Error loading leaderboard.</p>";
+    return;
+  }
+
+  data.leaderboard.forEach((row, i) => {
+    const div = document.createElement("div");
+    div.style.margin = "8px 0";
+    div.style.padding = "8px";
+    div.style.borderBottom = "1px solid #00f7ff55";
+
+    div.innerHTML = `
+      <strong>${i + 1}. ${row.name}</strong><br>
+      Score: ${row.score} | Coins: ${row.coins}
+    `;
+
+    leaderList.appendChild(div);
+  });
+}
+
+if (leaderBtn) {
+  leaderBtn.addEventListener("click", () => {
+    loadLeaderboard(); // refresh every time
+    leaderPanel.style.display = "block";
+  });
+}
+
+if (closeLeaderBtn) {
+  closeLeaderBtn.addEventListener("click", () => {
+    leaderPanel.style.display = "none";
+  });
+}
+    
     // Start game loop
     S.lastTime = performance.now();
     requestAnimationFrame(window.gameLoop);
