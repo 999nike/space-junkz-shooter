@@ -194,8 +194,13 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
 
   const oldHandleEnemyDeath = window.handleEnemyDeath;
   window.handleEnemyDeath = function (e) {
-    oldHandleEnemyDeath(e);
 
+    // Safely call original if it exists
+    if (typeof oldHandleEnemyDeath === "function") {
+      oldHandleEnemyDeath(e);
+    }
+
+    // Auto-sync stats if a player is active
     const active = localStorage.getItem("sj_active_player");
     if (active) {
       syncStats(active, S.wizzCoins, S.score);
@@ -210,18 +215,20 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
 (function () {
   const S = window.GameState;
 
-const originalDamagePlayer = window.damagePlayer;
-window.damagePlayer = function () {
+  const originalDamagePlayer = window.damagePlayer;
+  window.damagePlayer = function () {
 
-  // Safely call original if it exists
-  if (typeof originalDamagePlayer === "function") {
-    originalDamagePlayer();
-  }
-
-  if (S.lives <= 0) {
-    const active = localStorage.getItem("sj_active_player");
-    if (active) {
-      syncStats(active, S.wizzCoins, S.score);
+    // Safely call original if it exists
+    if (typeof originalDamagePlayer === "function") {
+      originalDamagePlayer();
     }
-  }
-};
+
+    // Sync only when lives hit zero
+    if (S.lives <= 0) {
+      const active = localStorage.getItem("sj_active_player");
+      if (active) {
+        syncStats(active, S.wizzCoins, S.score);
+      }
+    }
+  };
+})();
