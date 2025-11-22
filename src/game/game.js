@@ -210,15 +210,18 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
 (function () {
   const S = window.GameState;
 
-  const originalDamagePlayer = window.damagePlayer;
-  window.damagePlayer = function () {
-    originalDamagePlayer();
+const originalDamagePlayer = window.damagePlayer;
+window.damagePlayer = function () {
 
-    if (S.lives <= 0) {
-      const active = localStorage.getItem("sj_active_player");
-      if (active) {
-        syncStats(active, S.wizzCoins, S.score);
-      }
+  // Safely call original if it exists
+  if (typeof originalDamagePlayer === "function") {
+    originalDamagePlayer();
+  }
+
+  if (S.lives <= 0) {
+    const active = localStorage.getItem("sj_active_player");
+    if (active) {
+      syncStats(active, S.wizzCoins, S.score);
     }
-  };
-})();
+  }
+};
