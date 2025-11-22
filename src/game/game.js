@@ -35,22 +35,37 @@
 
     // PLAYER SELECT UI
     window.showPlayerSelect();
+// START BUTTON
+S.startBtn.addEventListener("click", () => {
+  window.resetGameState();
+  S.running = true;
 
-    // START BUTTON
-    S.startBtn.addEventListener("click", () => {
-      window.resetGameState();
-      S.running = true;
+  window.flashMsg("GOOD LUCK, COMMANDER");
 
-      window.flashMsg("GOOD LUCK, COMMANDER");
-
-      const bgm = document.getElementById("bgm");
-      if (bgm) {
-        bgm.volume = 0.35;
-        bgm.play().catch(() => {
-          console.warn("Music blocked until user interacts again.");
-        });
-      }
+  const bgm = document.getElementById("bgm");
+  if (bgm) {
+    bgm.volume = 0.35;
+    bgm.play().catch(() => {
+      console.warn("Music blocked until user interacts again.");
     });
+  }
+});
+
+// ----- MUTE BUTTON -----
+const muteBtn = document.getElementById("muteBtn");
+if (muteBtn) {
+  muteBtn.addEventListener("click", () => {
+    const bgm = document.getElementById("bgm");
+    if (!bgm) return;
+
+    // toggle mute state
+    bgm.muted = !bgm.muted;
+
+    // update button label
+    muteBtn.textContent = bgm.muted ? "🔊 UNMUTE" : "🔇 MUTE";
+  });
+  }
+  });
 
     // Start game loop
     S.lastTime = performance.now();
