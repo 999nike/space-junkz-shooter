@@ -22,36 +22,27 @@
     S.msgEl = document.getElementById("msg");
     S.startBtn = document.getElementById("startBtn");
 
-    // -------------------------
-    // PLAYER SELECT INIT (legacy/no-op)
-    // -------------------------
+    // PLAYER SELECT INIT
     if (window.PlayerSystem) {
       window.PlayerSystem.init();
     }
 
-    // -------------------------
     // BASIC ENGINE INIT
-    // -------------------------
     window.initStars();
     window.resetGameState();
     window.setupInput();
     window.flashMsg("Press START to play");
 
-    // -------------------------
-    // PLAYER SELECT (ACTIVE LINE)
-    // -------------------------
+    // PLAYER SELECT UI
     window.showPlayerSelect();
 
-    // -------------------------
-    // START BUTTON HANDLER
-    // -------------------------
+    // START BUTTON
     S.startBtn.addEventListener("click", () => {
       window.resetGameState();
       S.running = true;
 
       window.flashMsg("GOOD LUCK, COMMANDER");
 
-      // ---- MUSIC ----
       const bgm = document.getElementById("bgm");
       if (bgm) {
         bgm.volume = 0.35;
@@ -73,7 +64,6 @@
   }
 })();
 
-
 /* ==========================================================
    PLAYER SELECT SYSTEM (FINAL – SINGLE PANEL VERSION)
    ========================================================== */
@@ -91,10 +81,6 @@
     return;
   }
 
-  /* ------------------------------
-      LOCAL PLAYERS (temporary)
-     ------------------------------ */
-
   function loadPlayers() {
     return JSON.parse(localStorage.getItem("sj_players") || "[]");
   }
@@ -103,14 +89,15 @@
     localStorage.setItem("sj_players", JSON.stringify(arr));
   }
 
+  // ⭐ PATCH SECTION 4 (Synced)
   function setActivePlayer(name) {
     localStorage.setItem("sj_active_player", name);
     selectBox.style.display = "none";
-  }
 
-  /* ------------------------------
-      RENDER PLAYER LIST
-     ------------------------------ */
+    // ⭐ Sync immediately on selection
+    const S = window.GameState;
+    syncStats(name, S.wizzCoins || 0, S.score || 0);
+  }
 
   function renderPlayers() {
     list.innerHTML = "";
@@ -133,20 +120,13 @@
     });
   }
 
-  /* ------------------------------
-      ADD NEW PLAYER BUTTON
-     ------------------------------ */
-
   addBtn.onclick = () => {
     nameBox.style.display = "block";
     nameInput.value = "";
     nameInput.focus();
   };
 
-  /* ------------------------------
-      SAVE PLAYER BUTTON
-     ------------------------------ */
-
+  // ⭐ PATCH SECTION 1 — Sync on save
   saveBtn.onclick = () => {
     const name = nameInput.value.trim();
     if (!name) return;
@@ -161,13 +141,12 @@
     players.push(name);
     savePlayers(players);
 
+    // ⭐ NEW: Sync new player to online DB
+    syncNewPlayer(name);
+
     nameBox.style.display = "none";
     renderPlayers();
   };
-
-  /* ------------------------------
-      AUTO-SHOW IF NO PLAYER SELECTED
-     ------------------------------ */
 
   window.showPlayerSelect = function () {
     const active = localStorage.getItem("sj_active_player");
@@ -181,15 +160,14 @@
   };
 })();
 
-  /* ==========================================================
-   SAFE PLAYER SELECT ENTRY POINT (FINAL)
-   Ensures only ONE system runs and no duplicates fire.
+/* ==========================================================
+   SAFE PLAYER SELECT ENTRY POINT
    ========================================================== */
 
 window.showPlayerSelect = window.showPlayerSelect || function () {
   const selectBox = document.getElementById("playerSelect");
   if (!selectBox) return;
-  
+
   const active = localStorage.getItem("sj_active_player");
   if (!active) {
     selectBox.style.display = "block";
@@ -197,3 +175,41 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
     selectBox.style.display = "none";
   }
 };
+
+/* ==========================================================
+   AUTO-SYNC GAME EVENTS (kills, coins, XP)
+   ========================================================== */
+
+(function () {
+  const S = window.GameState;
+
+  const oldHandleEnemyDeath = window.handleEnemyDeath;
+  window.handleEnemyDeath = function (e) {
+    oldHandleEnemyDeath(e);
+
+    const active = localStorage.getItem("sj_active_player");
+    if (active) {
+      syncStats(active, S.wizzCoins, S.score);
+    }
+  };
+})();
+
+/* ==========================================================
+   SYNC ON GAME OVER
+   ========================================================== */
+
+(function () {
+  const S = window.GameState;
+
+  const originalDamagePlayer = window.damagePlayer;
+  window.damagePlayer = function () {
+    originalDamagePlayer();
+
+    if (S.lives <= 0) {
+      const active = localStorage.getItem("sj_active_player");
+      if (active) {
+        syncStats(active, S.wizzCoins, S.score);
+      }
+    }
+  };
+})();
