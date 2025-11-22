@@ -122,6 +122,9 @@ window.loadSprites = function loadSprites() {
   // Boss (scorpion)
   sprites.bossScorpion = makeImage("./src/game/oldSCORPIO2.png");
 
+  // Boss 2 (Gemini Warship)
+  sprites.bossGemini = makeImage("./src/game/oldGEMINI2.png");
+
   
   // Enemy ship sprites
   sprites.enemyGrunt   = makeImage("./src/game/assets/oldARIES2.png");
