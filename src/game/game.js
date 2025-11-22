@@ -79,11 +79,6 @@ window.syncStats = window.syncStats || function (name, coins, score) {
   console.log("[syncStats] stub called for:", name, "coins:", coins, "score:", score);
 };
 
-/* ==========================================================
-   PLAYER SELECT SYSTEM (FINAL – SINGLE PANEL VERSION)
-   ========================================================== */
-
-(function () {
 
 /* ==========================================================
    PLAYER SELECT SYSTEM (FINAL – SINGLE PANEL VERSION)
