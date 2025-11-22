@@ -84,6 +84,11 @@ window.syncNewPlayer = async function (name) {
       console.log("[create-player]", data);
     }
 
+    // ⭐ Store player_id locally for stats syncing
+if (data.playerId) {
+  localStorage.setItem("sj_player_id", data.playerId);
+}
+
     if (!data.ok) {
       console.warn("create-player failed:", data.error);
     }
