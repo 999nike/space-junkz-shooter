@@ -193,36 +193,43 @@ window.syncStats = async function (name, coins, score, xp = 0) {
     nameInput.focus();
   };
 
-  // ⭐ PATCH SECTION 1 — Sync on save
-  saveBtn.onclick = () => {
-    const name = nameInput.value.trim();
-    if (!name) return;
+ // ⭐ PATCHED — REAL DB SYNC WITH playerId
+saveBtn.onclick = async () => {
+  const name = nameInput.value.trim();
+  if (!name) return;
 
-    const players = loadPlayers();
+  const players = loadPlayers();
 
-    if (players.includes(name)) {
-      alert("Name already exists!");
-      return;
-    }
+  if (players.includes(name)) {
+    alert("Name already exists!");
+    return;
+  }
 
-    players.push(name);
-    savePlayers(players);
+  players.push(name);
+  savePlayers(players);
 
-    // ⭐ NEW: Sync new player to online DB
-    syncNewPlayer(name);
+  // ⭐ NEW: Sync new player to online DB and capture playerId
+  const result = await syncNewPlayer(name);
 
- // Close input box
-nameBox.style.display = "none";
+  if (result && result.playerId) {
+    localStorage.setItem("sj_player_id", result.playerId);
+    console.log("📌 Stored playerId:", result.playerId);
+  } else {
+    console.warn("⚠ No playerId returned from backend");
+  }
 
-// Refresh list (so Jeff now appears above)
-renderPlayers();
+  // Close input box
+  nameBox.style.display = "none";
 
-// Status message (quick feedback)
-window.flashMsg("Player added — logged in");
+  // Refresh list (so Jeff now appears above)
+  renderPlayers();
 
-// Auto-select the new player
-setActivePlayer(name);
-  };
+  // Status message (quick feedback)
+  window.flashMsg("Player added — logged in");
+
+  // Auto-select the new player
+  setActivePlayer(name);
+};
 
   window.showPlayerSelect = function () {
     const active = localStorage.getItem("sj_active_player");
