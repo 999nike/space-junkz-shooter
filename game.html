@@ -37,9 +37,31 @@
   
   <canvas id="game" width="720" height="1280"></canvas>
 
- <button id="startBtn">START GAME</button>
+<button id="startBtn">START GAME</button>
 <button id="muteBtn" style="margin-top:10px;">🔇 MUTE</button>
-<div id="msg"></div>S
+<button id="leaderBtn" style="margin-top:10px;">🏆 Leaderboard</button>
+<div id="msg"></div>
+
+<!-- LEADERBOARD PANEL -->
+<div id="leaderboardPanel" style="
+  display:none;
+  position:absolute;
+  top:15%;
+  left:50%;
+  transform:translateX(-50%);
+  width:330px;
+  padding:20px;
+  background:rgba(0,0,0,0.85);
+  border:2px solid #00f7ff;
+  border-radius:12px;
+  color:white;
+  text-align:center;
+  z-index:99999;">
+  
+  <h2>Leaderboard</h2>
+  <div id="leaderboardList" style="max-height:300px; overflow-y:auto;"></div>
+  <button id="closeLeaderBtn" style="margin-top:15px;">Close</button>
+</div>
 
   <!-- GAME MUSIC -->
   <audio id="bgm" src="./src/game/assets/hyper-garden-jungle-breakbeat-drum-and-bass-loop-edit-356528.mp3" loop></audio>
