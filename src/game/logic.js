@@ -187,35 +187,28 @@ window.handleEnemyDeath = function handleEnemyDeath(e) {
   S.score += e.score;
 S.scoreEl.textContent = S.score;
 
-//////-------BOSS-COIN-DROP-------
+// ========================================================
+// NEW COIN SYSTEM — ULTRA LOW DROP RATE
+// ========================================================
+
+// Default: no coins from normal kills
 let coinGain = 0;
 
-// Normal enemy fixed WizzCoin rewards
-if (e.type === "grunt")   coinGain = 1;
-if (e.type === "zigzag")  coinGain = 2;
-if (e.type === "shooter") coinGain = 3;
-if (e.type === "tank")    coinGain = 5;
-
-// BOSS drops exactly 1 WizzCoin
-if (e.type === "scorpionBoss") {
-  coinGain = 1;
+// 0.1% chance to drop 1 coin from any normal enemy
+if (Math.random() < 0.001) {
+    coinGain = 1;
 }
 
-// 10% chance for a tiny coin pickup (0–1 coin)
-if (Math.random() < 0.10) {
-  spawnPowerUp(e.x, e.y, "coin", Math.random() < 0.5 ? 0 : 1);
+// Boss = guaranteed 1 coin
+if (e.type === "scorpionBoss") {
+    coinGain = 1;
 }
 
 // Apply direct coin reward
 if (coinGain > 0) {
-  S.wizzCoins += coinGain;
-  if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
-
-  window.flashMsg("+" + coinGain + " WIZZCOIN");
-}
-
-if (Math.random() < e.dropChance) {
-  spawnPowerUp(e.x, e.y);
+    S.wizzCoins += coinGain;
+    if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
+    window.flashMsg("+" + coinGain + " WIZZCOIN");
 }
 };
 
