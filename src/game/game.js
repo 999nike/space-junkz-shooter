@@ -94,8 +94,35 @@ window.syncNewPlayer = async function (name) {
 };
 
 // ---- Update Stats (still stub for now; real patch next) ----
-window.syncStats = window.syncStats || function (name, coins, score) {
-  // silent stub until update-stats endpoint is added
+// ---- Update Stats (real backend) ----
+window.syncStats = async function (name, coins, score, xp = 0) {
+  try {
+    const player_id = localStorage.getItem("sj_player_id");
+    if (!player_id) return; // no DB record yet
+
+    const payload = {
+      player_id,
+      coins,
+      score,
+      xp
+    };
+
+    const res = await fetch("/api/update-stats", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    // Debug ONLY for you
+    if (name === "999nike") {
+      console.log("[update-stats]", data);
+    }
+
+  } catch (err) {
+    // Always silent — never disrupt gameplay
+  }
 };
 
 
