@@ -144,8 +144,17 @@
     // ⭐ NEW: Sync new player to online DB
     syncNewPlayer(name);
 
-    nameBox.style.display = "none";
-    renderPlayers();
+ // Close input box
+nameBox.style.display = "none";
+
+// Refresh list (so Jeff now appears above)
+renderPlayers();
+
+// Status message (quick feedback)
+window.flashMsg("Player added — logged in");
+
+// Auto-select the new player
+setActivePlayer(name);
   };
 
   window.showPlayerSelect = function () {
