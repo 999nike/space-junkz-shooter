@@ -76,7 +76,7 @@ window.syncNewPlayer = window.syncNewPlayer || function (name) {
 };
 
 window.syncStats = window.syncStats || function (name, coins, score) {
-  console.log("[syncStats] stub called for:", name, "coins:", coins, "score:", score);
+    // stub silent
 };
 
 
