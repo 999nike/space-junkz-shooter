@@ -264,10 +264,15 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
 
 /* ==========================================================
    AUTO-SYNC GAME EVENTS (kills, coins, XP)
+   - Throttled: at most once every 60 seconds per player
    ========================================================== */
 
 (function () {
   const S = window.GameState;
+
+  // last time (ms) we pushed stats to the backend
+  let lastSyncMs = 0;
+  const SYNC_INTERVAL_MS = 60_000; // 60 seconds
 
   const oldHandleEnemyDeath = window.handleEnemyDeath;
   window.handleEnemyDeath = function (e) {
@@ -277,9 +282,14 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
       oldHandleEnemyDeath(e);
     }
 
-    // Auto-sync stats if a player is active
     const active = localStorage.getItem("sj_active_player");
-    if (active) {
+    if (!active) return;
+
+    const now = Date.now();
+
+    // ⭐ Only sync if at least 60 seconds have passed
+    if (now - lastSyncMs >= SYNC_INTERVAL_MS) {
+      lastSyncMs = now;
       syncStats(active, S.wizzCoins, S.score);
     }
   };
