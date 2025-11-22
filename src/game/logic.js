@@ -184,7 +184,10 @@ window.spawnScorpionBoss = function spawnScorpionBoss() {
 // ---------- ENEMY DEATH ----------
 window.handleEnemyDeath = function handleEnemyDeath(e) {
   const S = window.GameState;
-  S.score += e.score;
+  
+// SAFE SCORE GAIN
+const gainedScore = Number(e.score) || 0;
+S.score += gainedScore;
 S.scoreEl.textContent = S.score;
 
 // ========================================================
