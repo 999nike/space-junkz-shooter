@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Optional: clamp name length
+    // Clamp name length
     const name = rawName.slice(0, 32);
 
     // Upsert player by name
@@ -52,17 +52,19 @@ export default async function handler(req, res) {
       ON CONFLICT (player_id) DO NOTHING;
     `;
 
-    // For debugging, you can log 999nike only:
+    // Debug only for you
     if (name === '999nike') {
       console.log('[create-player] 999nike playerId =', player.id);
     }
 
+    // Response
     res.status(200).json({
       ok: true,
       playerId: player.id,
       name: player.name,
       createdAt: player.created_at
     });
+
   } catch (err) {
     console.error('Error in /api/create-player:', err);
     res.status(500).json({ error: 'Internal server error' });
