@@ -597,9 +597,18 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
     S.bossTimer = 0;
 
     window.flashMsg("BOSS DEFEATED!");
+
+    // ------ PATCH 3: Chain Scorpion → Gemini Boss (N5) ------
+    if (!S.geminiBossSpawned) {
+      S.geminiBossSpawned = true;
+      setTimeout(() => {
+        window.spawnGeminiBoss();
+        window.flashMsg("⚠ WARNING: GEMINI WARSHIP APPROACHING ⚠");
+      }, 2000);
+    }
+
     return;
   }
-
   // --- Entry phase ---
   if (!e.enterComplete) {
     e.y += 40 * dt;
@@ -695,7 +704,101 @@ window.updateBossScorpion = function updateBossScorpion(e, dt) {
   }
 }; // <--- END OF BOSS LOGIC
 
+// ------ PATCH 4: Gemini Boss AI (N5) ------
+// Boss 2 behaviour: Gemini Warship
+window.updateBossGemini = function updateBossGemini(e, dt) {
+  const S = window.GameState;
 
+  // Entry from top
+  if (!e.enterComplete) {
+    e.y += 80 * dt;
+    if (e.y >= 180) e.enterComplete = true;
+    return;
+  }
+
+  // Horizontal oscillation (hover movement)
+  e.x += Math.sin(performance.now() * 0.001) * 120 * dt;
+
+  // Attack timers
+  e.attackTimer = (e.attackTimer || 0) + dt;
+  e.spawnTimer = (e.spawnTimer || 0) + dt;
+
+  // ----- Phase 1: Dual cannon shots -----
+  if (e.phase === 1 && e.attackTimer > 1.2) {
+    const spread = [-0.25, 0.25];
+    for (const dx of spread) {
+      S.enemyBullets.push({
+        x: e.x + dx * 40,
+        y: e.y + 40,
+        dx: dx,
+        dy: 1,
+        speed: 220
+      });
+    }
+    e.attackTimer = 0;
+  }
+
+  // ----- Phase switch -----
+  if (e.phase === 1 && e.hp < e.maxHp * 0.5) {
+    e.phase = 2;
+    window.flashMsg("Gemini Warship: ENRAGED MODE");
+  }
+
+  // ----- Phase 2: Heavy spread fire -----
+  if (e.phase === 2 && e.attackTimer > 0.5) {
+    const spread2 = [-0.4, -0.15, 0, 0.15, 0.4];
+    for (const dx of spread2) {
+      S.enemyBullets.push({
+        x: e.x,
+        y: e.y + 40,
+        dx: dx,
+        dy: 1,
+        speed: 280
+      });
+    }
+    e.attackTimer = 0;
+  }
+
+  // ----- Escort ship spawn -----
+  if (e.spawnTimer > 3) {
+    if (window.spawnEnemyType) {
+      window.spawnEnemyType("enemyZigzag", e.x, e.y + 50);
+    }
+    e.spawnTimer = 0;
+  }
+
+  // ----- Boss Death -----
+  if (e.hp <= 0) {
+    const idx = S.enemies.indexOf(e);
+    if (idx >= 0) S.enemies.splice(idx, 1);
+
+    S.running = false;
+    window.flashMsg("LEVEL COMPLETE!");
+    setTimeout(() => window.resetGameState(), 3000);
+  }
+};
+
+// ------ PATCH 2: spawnGeminiBoss (N5) ------
+// Boss 2: Gemini Warship
+window.spawnGeminiBoss = function spawnGeminiBoss() {
+  const S = window.GameState;
+
+  const boss = {
+    type: "geminiBoss",
+    x: S.W * 0.5,
+    y: -300,
+    radius: 110,
+    hp: 700,
+    maxHp: 700,
+    enterComplete: false,
+    attackTimer: 0,
+    phase: 1,
+    fireCooldown: 0,
+    spawnTimer: 0
+  };
+
+  S.enemies.push(boss);
+};
 
 // ---------- Lose condition (KEEP THIS) ----------
 if (S.lives <= 0) {
