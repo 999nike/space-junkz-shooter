@@ -35,6 +35,7 @@
 
     // PLAYER SELECT UI
     window.showPlayerSelect();
+    
 // START BUTTON
 S.startBtn.addEventListener("click", () => {
   window.resetGameState();
@@ -64,8 +65,7 @@ if (muteBtn) {
     // update button label
     muteBtn.textContent = bgm.muted ? "🔊 UNMUTE" : "🔇 MUTE";
   });
-  }
-  });
+}
 
     // Start game loop
     S.lastTime = performance.now();
