@@ -48,8 +48,6 @@ window.drawRunway = function drawRunway(ctx) {
   ctx.restore();
 };
 
-  ctx.restore();
-
   // optional subtle haze
   ctx.save();
   const grd = ctx.createLinearGradient(0, 0, 0, S.H);
