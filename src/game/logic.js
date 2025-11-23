@@ -300,43 +300,157 @@ window.spawnScorpionBoss = function spawnScorpionBoss() {
   S.enemies.push(boss);
 };
 
+// ---------- GEMINI BOSS SPAWN ----------
+window.spawnGeminiBoss = function spawnGeminiBoss() {
+  const S = window.GameState;
+
+  const boss = {
+    type: "geminiBoss",
+    x: S.W * 0.5,
+    y: -260,          // comes in from above
+    radius: 110,
+    hp: 700,
+    maxHp: 700,
+
+    enterComplete: false,
+    phase: 1,
+    attackTimer: 0,
+    orbitAngle: 0
+  };
+
+  S.enemies.push(boss);
+};
+
+// ---------- GEMINI BOSS UPDATE ----------
+window.updateBossGemini = function updateBossGemini(e, dt) {
+  const S = window.GameState;
+  const player = S.player;
+
+  // Entry slide down
+  if (!e.enterComplete) {
+    e.y += 80 * dt;
+    if (e.y >= S.H * 0.25) {
+      e.y = S.H * 0.25;
+      e.enterComplete = true;
+      e.attackTimer = 0;
+    }
+    return;
+  }
+
+  // PHASE 1 – orbit around player
+  if (e.phase === 1) {
+    e.orbitAngle += 0.6 * dt; // speed of orbit
+    const radius = 260;
+
+    const targetX = player.x + Math.cos(e.orbitAngle) * radius;
+    const targetY = player.y - 120 + Math.sin(e.orbitAngle) * 40;
+
+    e.x += (targetX - e.x) * 3.0 * dt;
+    e.y += (targetY - e.y) * 3.0 * dt;
+
+    e.attackTimer += dt;
+    if (e.attackTimer >= 1.3) {
+      e.attackTimer = 0;
+
+      // radial 5-shot spread aimed roughly downward
+      const spread = [-0.35,-0.18,0,0.18,0.35];
+      for (const sx of spread) {
+        S.enemyBullets.push({
+          x: e.x,
+          y: e.y + 40,
+          vx: sx * 260,
+          vy: 260,
+          radius: 6
+        });
+      }
+    }
+
+    // Rage trigger
+    if (e.hp <= e.maxHp * 0.45) {
+      e.phase = 2;
+      window.flashMsg("GEMINI – ENRAGED MODE");
+      e.attackTimer = 0;
+    }
+  }
+
+  // PHASE 2 – aggressive tracking + beams
+  else if (e.phase === 2) {
+    // Chase player horizontally
+    const targetX = player.x;
+    e.x += (targetX - e.x) * 4.0 * dt;
+
+    // bob vertically
+    e.y = S.H * 0.22 + Math.sin(performance.now() * 0.003) * 24;
+
+    e.attackTimer += dt;
+
+    // fast triple spread
+    if (e.attackTimer >= 0.7) {
+      e.attackTimer = 0;
+
+      const angles = [-0.25, 0, 0.25];
+      for (const a of angles) {
+        S.enemyBullets.push({
+          x: e.x,
+          y: e.y + 40,
+          vx: a * 320,
+          vy: 320,
+          radius: 7
+        });
+      }
+    }
+  }
+};
+
 // ---------- ENEMY DEATH ----------
 window.handleEnemyDeath = function handleEnemyDeath(e) {
   const S = window.GameState;
   
-// SAFE SCORE GAIN
-const gainedScore = Number(e.score) || 0;
-S.score += gainedScore;
-S.scoreEl.textContent = S.score;
+  // SAFE SCORE GAIN
+  const gainedScore = Number(e.score) || 0;
+  S.score += gainedScore;
+  S.scoreEl.textContent = S.score;
 
-// ========================================================
-// NEW COIN SYSTEM — ULTRA LOW DROP RATE
-// ========================================================
+  // ========================================================
+  // NEW COIN SYSTEM — ULTRA LOW DROP RATE
+  // ========================================================
 
-// Default: no coins from normal kills
-let coinGain = 0;
+  // Default: no coins from normal kills
+  let coinGain = 0;
 
-// 0.1% chance to drop 1 coin from any normal enemy
-if (Math.random() < 0.001) {
+  // 0.1% chance to drop 1 coin from any normal enemy
+  if (Math.random() < 0.001) {
     coinGain = 1;
-}
+  }
 
-// Boss = guaranteed 1 coin
-if (e.type === "scorpionBoss") {
+  // Boss = guaranteed 1 coin
+  if (e.type === "scorpionBoss") {
     coinGain = 1;
-}
+  }
 
-// Apply direct coin reward
-if (coinGain > 0) {
+  // Apply direct coin reward
+  if (coinGain > 0) {
     S.wizzCoins += coinGain;
     if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
     window.flashMsg("+" + coinGain + " WIZZCOIN");
-}
+  }
+
+  // ----- SCORPION -> GEMINI CHAIN -----
+  if (e.type === "scorpionBoss" && !S.geminiBossSpawned) {
+    S.geminiBossSpawned = true;
+
+    window.flashMsg("BOSS DEFEATED!");
+
+    setTimeout(() => {
+      window.flashMsg("⚠ WARNING: GEMINI WARSHIP APPROACHING ⚠");
+      window.spawnGeminiBoss();
+    }, 1500);
+  }
 
   // Chance to drop a power-up
-if (Math.random() < e.dropChance) {
+  if (Math.random() < e.dropChance) {
     spawnPowerUp(e.x, e.y);
-} 
+  } 
 };
 
 // ---------- DAMAGE ----------
@@ -450,13 +564,17 @@ for (const s of S.sidekicks) {
     S.shootTimer = 0.22;
   }
 
- // ----- Update enemies -----
+// ----- Update enemies -----
   for (let i = S.enemies.length - 1; i >= 0; i--) {
     const e = S.enemies[i];
 
-    // Boss handled in its own function (Option C)
+    // Bosses handled in their own functions
     if (e.type === "scorpionBoss") {
       window.updateBossScorpion(e, dt);
+      continue;
+    }
+    if (e.type === "geminiBoss") {
+      window.updateBossGemini(e, dt);
       continue;
     }
 
