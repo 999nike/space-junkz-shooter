@@ -57,10 +57,12 @@ body {
 /* gameblock */
 
 #game {
-  width: 90vw;      /* perfect landscape width */
-  height: 82vh;     /* ← this is the “1 inch smaller” sweet spot */
   display: block;
   margin: 0 auto;
+
+  /* REMOVED width & height to stop scaling artifacts */
+  /* width: 90vw; */
+  /* height: 82vh; */
 
   border-radius: 18px;
   border: 2px solid #2f3e7b;
@@ -68,6 +70,10 @@ body {
   box-shadow:
     0 0 0 1px rgba(60, 100, 255, 0.2),
     0 26px 60px rgba(0, 0, 0, 0.95);
+
+  /* MAKE CANVAS CRISP / NO VERTICAL LINES */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 /* Start button */
