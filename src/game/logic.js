@@ -949,12 +949,9 @@ window.updateGame = function updateGame(dt) {
         continue;
       }
 
-      // WEAPON PICKUP
+     // WEAPON PICKUP
       if (player.weaponLevel < 5) {
         player.weaponLevel++;
-      }
-    }
-  }
 
         // LEVEL 4 → first ally ship (left)
         if (player.weaponLevel === 4) {
