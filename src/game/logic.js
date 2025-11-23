@@ -157,6 +157,131 @@ window.spawnEnemy = function spawnEnemy() {
   S.enemies.push(e);
 };
 
+S.enemies.push(e);
+};
+
+// ---------- DIRECT ENEMY SPAWNER (for bosses / scripts) ----------
+window.spawnEnemyType = function spawnEnemyType(type, x, y) {
+  const S = window.GameState;
+  let e = null;
+
+  // Helper to keep enemies safely on-screen
+  function clampX(px, size) {
+    return clamp(px ?? rand(size, S.W - size), size, S.W - size);
+  }
+
+  switch (type) {
+    // ---------------- GRUNT ----------------
+    case "grunt":
+    case "enemyGrunt": {
+      const size = rand(10, 16);
+      const ex = clampX(x, size);
+      const ey = y ?? -size;
+
+      e = {
+        type: "grunt",
+        x: ex,
+        y: ey,
+        radius: size,
+        speedY: rand(120, 200),
+        hp: 1,
+        maxHp: 1,
+        hitFlash: 0,
+        colour: "#6bffb2",
+        score: 100,
+        dropChance: 0.05
+      };
+      break;
+    }
+
+    // ---------------- ZIGZAG (ESCORT) ----------------
+    // Used by Gemini: spawnEnemyType("enemyZigzag", e.x, e.y + 50)
+    case "zigzag":
+    case "enemyZigzag": {
+      const size = rand(14, 20);
+      const baseX = clampX(x, size);
+      const ey = y ?? -size;
+
+      e = {
+        type: "zigzag",
+        x: baseX,
+        y: ey,
+        baseX,
+        radius: size,
+        speedY: rand(80, 140),
+        hp: 2,
+        maxHp: 2,
+        colour: "#ff9bf5",
+        score: 200,
+        dropChance: 0.08,
+        phase: Math.random() * Math.PI * 2,
+        waveAmp: rand(18, 32),
+        waveSpeed: rand(3, 5),
+        hitFlash: 0
+      };
+      break;
+    }
+
+    // ---------------- SHOOTER ----------------
+    case "shooter":
+    case "enemyShooter": {
+      const size = rand(16, 24);
+      const ex = clampX(x, size);
+      const ey = y ?? -size;
+
+      e = {
+        type: "shooter",
+        x: ex,
+        y: ey,
+        radius: size,
+        speedY: rand(70, 110),
+        hp: 2,
+        maxHp: 2,
+        hitFlash: 0,
+        colour: "#ffd36b",
+        score: 250,
+        dropChance: 0.08,
+        shootTimer: rand(1.0, 2.2)
+      };
+      break;
+    }
+
+    // ---------------- TANK ----------------
+    case "tank":
+    case "enemyTank": {
+      const size = rand(22, 30);
+      const ex = clampX(x, size);
+      const ey = y ?? -size;
+
+      e = {
+        type: "tank",
+        x: ex,
+        y: ey,
+        radius: size,
+        speedY: rand(40, 70),
+        hp: 3,
+        maxHp: 3,
+        hitFlash: 0,
+        colour: "#ff6b7b",
+        score: 350,
+        dropChance: 0.15
+      };
+      break;
+    }
+
+    // Unknown type → do nothing (no crash)
+    default:
+      return;
+  }
+
+  if (e) {
+    S.enemies.push(e);
+  }
+};
+
+// ---------- BOSS SPAWN ----------
+window.spawnScorpionBoss = function spawnScorpionBoss() {
+
 // ---------- BOSS SPAWN ----------
 window.spawnScorpionBoss = function spawnScorpionBoss() {
   const S = window.GameState;
