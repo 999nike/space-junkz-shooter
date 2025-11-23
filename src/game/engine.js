@@ -113,42 +113,50 @@ window.shoot = function shoot() {
 };
 
 // =========================================================
-//  GAME RESET (NOW INCLUDES WizzCoin RESET)
+//  GAME RESET (NOW INCLUDES WizzCoin + SHIELD CORE)
 // =========================================================
 window.resetGameState = function resetGameState() {
   const S = window.GameState;
 
- S.enemies = [];
-S.bullets = [];
-S.enemyBullets = [];
-S.powerUps = [];
-S.particles = [];
-S.spawnTimer = 0;
-S.shootTimer = 0;
+  S.enemies       = [];
+  S.bullets       = [];
+  S.enemyBullets  = [];
+  S.powerUps      = [];
+  S.particles     = [];
+  S.spawnTimer    = 0;
+  S.shootTimer    = 0;
 
-// CLEAR ALLY SHIPS + ROCKETS ON RESTART
-S.sidekicks = [];
-S.rockets   = [];
+  // CLEAR ALLY SHIPS + ROCKETS ON RESTART
+  S.sidekicks = [];
+  S.rockets   = [];
 
   S.score = 0;
-  S.lives = 995;  
 
-// ---------- WIZZCOIN RESET ----------
+  // ---- HEALTH / SHIELD CORE ----
+  // Keep your current god-mode default, but define maxLives for later bars.
+  S.lives    = typeof S.lives === "number" ? S.lives : 995;
+  S.maxLives = S.maxLives || S.lives;
+
+  // Fresh shield each run (drops will fill this later)
+  S.shield     = 0;
+  S.maxShield  = S.maxShield || 100;
+
+  // ---------- WIZZCOIN RESET ----------
   S.wizzCoins = 0;
   if (S.coinsEl) S.coinsEl.textContent = 0;
 
   // Boss reset
-  S.bossSpawned = false;       // old timer flag (scorpion)
-  S.bossTimer = 0;
+  S.bossSpawned       = false; // old timer flag (scorpion)
+  S.bossTimer         = 0;
   S.geminiBossSpawned = false; // NEW: has Gemini spawned yet?
 
   // Update HUD
   if (S.livesEl) S.livesEl.textContent = S.lives;
 
-  S.player.x = S.W / 2;
-  S.player.y = S.H - 80;
+  S.player.x          = S.W / 2;
+  S.player.y          = S.H - 80;
   S.player.weaponLevel = 1;
-  S.player.invuln = 0;
+  S.player.invuln      = 0;
 };
 
 // =========================================================
