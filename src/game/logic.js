@@ -441,11 +441,10 @@ window.handleEnemyDeath = function handleEnemyDeath(e) {
 
     window.flashMsg("BOSS DEFEATED!");
 
-    setTimeout(() => {
-      window.flashMsg("⚠ WARNING: GEMINI WARSHIP APPROACHING ⚠");
-      window.spawnGeminiBoss();
-    }, 1500);
-  }
+ setTimeout(() => {
+  setTimeout(() => window.flashMsg("⚠ WARNING: GEMINI WARSHIP APPROACHING ⚠"), 200);
+  window.spawnGeminiBoss();
+}, 1500);
 
   // Chance to drop a power-up
   if (Math.random() < e.dropChance) {
