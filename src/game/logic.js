@@ -293,7 +293,7 @@ window.spawnScorpionBoss = function spawnScorpionBoss() {
     type: "scorpionBoss",
     x: S.W * 0.5,
     y: -220,          // enters from above screen
-    radius: 80,       // big collision body
+    radius: 80,       // big collision bodyT
     hp: 500,
     maxHp: 500,
     dropChance: 0.6,
