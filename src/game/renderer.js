@@ -371,27 +371,28 @@ window.initStars = function initStars() {
       x: Math.random() * S.W,
       y: Math.random() * S.H,
       s: Math.random() * 2 + 1,
-      v: 0.2 + Math.random() * 0.4 // speed
+      v: 0.2 + Math.random() * 0.4
     });
   }
 };
 
 window.drawStars = function drawStars(ctx) {
   const S = window.GameState;
-
   ctx.fillStyle = "#ffffff";
-  for (const s of _stars) {
-    // flicker
-    ctx.globalAlpha = 0.5 + Math.random() * 0.5;
 
+  for (const s of _stars) {
+    ctx.globalAlpha = 0.5 + Math.random() * 0.5;
     ctx.fillRect(s.x, s.y, s.s, s.s);
 
-    // movement
     s.y += s.v;
     if (s.y > S.H) {
       s.y = 0;
       s.x = Math.random() * S.W;
     }
+  }
+
+  ctx.globalAlpha = 1;
+};
 
 // ---------- MAIN GAME DRAW ----------
 window.drawGame = function drawGame() {
