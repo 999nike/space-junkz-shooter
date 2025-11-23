@@ -631,10 +631,16 @@ window.damagePlayer = function damagePlayer() {
 
 window.updateGame = function updateGame(dt) {
   const S = window.GameState;
+
+  // WORLD MAP MODE: hand off to WorldMap when active
+  if (window.WorldMap && window.WorldMap.active) {
+    window.WorldMap.update(dt);
+    return;
+  }
+
   if (!S.running) return;
 
   const player = S.player;
-
   // ----- Boss spawn timer -----
   if (!S.bossSpawned) {
     S.bossTimer = (S.bossTimer || 0) + dt;

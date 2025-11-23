@@ -11,6 +11,11 @@
     S.canvas.height = window.innerHeight * 0.90;
     S.W = S.canvas.width;
     S.H = S.canvas.height;
+    
+    // ------ WORLD MAP INIT (PILLARS SECTOR) ------
+    if (window.WorldMap && window.WorldMap.init) {
+      window.WorldMap.init();
+    }
 
     // Load ship sprite
     S.shipImage = new Image();
