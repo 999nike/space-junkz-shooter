@@ -129,17 +129,17 @@ window.resetGameState = function resetGameState() {
   S.score = 0;
   S.lives = 995;  
 
-  // ---------- WIZZCOIN RESET ----------
+// ---------- WIZZCOIN RESET ----------
   S.wizzCoins = 0;
   if (S.coinsEl) S.coinsEl.textContent = 0;
 
   // Boss reset
-  S.bossSpawned = false;
+  S.bossSpawned = false;       // old timer flag (scorpion)
   S.bossTimer = 0;
+  S.geminiBossSpawned = false; // NEW: has Gemini spawned yet?
 
   // Update HUD
   if (S.livesEl) S.livesEl.textContent = S.lives;
-  if (S.scoreEl) S.scoreEl.textContent = S.score;
 
   S.player.x = S.W / 2;
   S.player.y = S.H - 80;
