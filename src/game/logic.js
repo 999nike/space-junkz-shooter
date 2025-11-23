@@ -528,7 +528,7 @@ window.updateBossGemini = function updateBossGemini(e, dt) {
 };
 
 // =========================================================
-//  ENEMY DEATH + WIZZCOIN
+//  ENEMY DEATH + WIZZCOIN patch11
 // =========================================================
 
 window.handleEnemyDeath = function handleEnemyDeath(e) {
