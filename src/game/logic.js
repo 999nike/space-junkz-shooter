@@ -157,9 +157,6 @@ window.spawnEnemy = function spawnEnemy() {
   S.enemies.push(e);
 };
 
-S.enemies.push(e);
-};
-
 // ---------- DIRECT ENEMY SPAWNER (for bosses / scripts) ----------
 window.spawnEnemyType = function spawnEnemyType(type, x, y) {
   const S = window.GameState;
