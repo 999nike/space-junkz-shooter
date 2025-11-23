@@ -117,10 +117,10 @@ window.shoot = function shoot() {
 // =========================================================
 window.resetGameState = function resetGameState() {
   const S = window.GameState;
-
   if (window.initStars) window.initStars();
-  S.enemies       = [];
-  S.bullets       = [];
+
+  S.enemies = [];
+  S.bullets = [];
   S.enemyBullets  = [];
   S.powerUps      = [];
   S.particles     = [];
