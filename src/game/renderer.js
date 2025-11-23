@@ -48,17 +48,6 @@ window.drawRunway = function drawRunway(ctx) {
   }
   ctx.restore();
 
-  // Speed streaks overlay
-  for (let i = 0; i < 14; i++) {
-    ctx.globalAlpha = 0.06;
-    ctx.fillStyle = "#5be7ff";
-
-    const px =
-      (i * (S.W / 14)) + Math.sin(Date.now() * 0.0008 + i) * 6;
-
-    ctx.fillRect(px, 0, 3, S.H);
-  }
-
   ctx.globalAlpha = 1;
 };
 
