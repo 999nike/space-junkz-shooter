@@ -35,20 +35,48 @@ window.updateStars = function updateStars(dt) {
   }
 };
 
-// ---------- DIAGONAL / NEBULA BACKGROUND ----------
+// ---------- RUNWAY (TRUE 3D PERSPECTIVE) ----------
 window.drawRunway = function drawRunway(ctx) {
   const S = window.GameState;
-  const nebula = S.sprites.nebulaBG;
+  const bg = S.sprites.nebulaBG;
+  if (!bg) return;
 
-  // Nebula backdrop
   ctx.save();
-  if (nebula) {
-    ctx.globalAlpha = 1.0;
-    ctx.drawImage(nebula, 0, 0, S.W, S.H);
-  }
+
+  // 30° camera tilt
+  const angle = -30 * Math.PI / 180;
+
+  // center pivot
+  ctx.translate(S.W * 0.5, S.H * 0.6);
+
+  // tilt
+  ctx.rotate(angle);
+
+  // perspective scale (top smaller, bottom larger)
+  const scaleTop = 0.55;
+  const scaleBottom = 1.4;
+
+  // vertical gradient stretch
+  const runwayH = S.H * 1.4;
+
+  // draw the nebula as a trapezoid runway
+  ctx.drawImage(
+    bg,
+    0, 0, bg.width, bg.height,
+    -S.W * scaleTop * 0.5, -runwayH * 0.5,
+     S.W * scaleBottom,    runwayH
+  );
+
   ctx.restore();
 
-  ctx.globalAlpha = 1;
+  // optional subtle haze
+  ctx.save();
+  const grd = ctx.createLinearGradient(0, 0, 0, S.H);
+  grd.addColorStop(0, "rgba(0,0,0,0.10)");
+  grd.addColorStop(1, "rgba(0,0,0,0.45)");
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, S.W, S.H);
+  ctx.restore();
 };
 
 // ---------- BULLETS ----------
