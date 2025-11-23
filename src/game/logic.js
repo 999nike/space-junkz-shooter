@@ -278,9 +278,6 @@ window.spawnEnemyType = function spawnEnemyType(type, x, y) {
 
 // ---------- BOSS SPAWN ----------
 window.spawnScorpionBoss = function spawnScorpionBoss() {
-
-// ---------- BOSS SPAWN ----------
-window.spawnScorpionBoss = function spawnScorpionBoss() {
   const S = window.GameState;
 
   const boss = {
