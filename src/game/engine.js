@@ -118,13 +118,17 @@ window.shoot = function shoot() {
 window.resetGameState = function resetGameState() {
   const S = window.GameState;
 
-  S.enemies = [];
-  S.bullets = [];
-  S.enemyBullets = [];
-  S.powerUps = [];
-  S.particles = [];
-  S.spawnTimer = 0;
-  S.shootTimer = 0;
+ S.enemies = [];
+S.bullets = [];
+S.enemyBullets = [];
+S.powerUps = [];
+S.particles = [];
+S.spawnTimer = 0;
+S.shootTimer = 0;
+
+// CLEAR ALLY SHIPS + ROCKETS ON RESTART
+S.sidekicks = [];
+S.rockets   = [];
 
   S.score = 0;
   S.lives = 995;  
