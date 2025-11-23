@@ -289,6 +289,45 @@ window.drawScorpionBoss = function drawScorpionBoss(ctx) {
   }
 };
 
+// ------ PATCH 5: Gemini Boss Renderer (N5) ------
+window.drawGeminiBoss = function drawGeminiBoss(ctx) {
+  const S = window.GameState;
+  if (!S.sprites) return;
+
+  const img = S.sprites.bossGemini;
+  if (!img) return;
+
+  const scale = 0.70; 
+  const w = img.width * scale;
+  const h = img.height * scale;
+
+  for (const e of S.enemies) {
+    if (e.type !== "geminiBoss") continue;
+
+    // Draw main ship
+    ctx.drawImage(img, e.x - w * 0.5, e.y - h * 0.5, w, h);
+
+    // HP bar
+    if (e.maxHp) {
+      const barWidth = 200;
+      const barHeight = 6;
+      const hpRatio = Math.max(0, Math.min(1, e.hp / e.maxHp));
+
+      const barX = e.x - barWidth / 2;
+      const barY = e.y - h * 0.5 - 20;
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+      ctx.fillRect(barX, barY, barWidth, barHeight);
+
+      ctx.fillStyle = "rgba(0, 255, 255, 0.7)";
+      ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
+
+      ctx.strokeStyle = "#00ffff";
+      ctx.strokeRect(barX, barY, barWidth, barHeight);
+    }
+  }
+};
+
 // ---------- MAIN GAME DRAW ----------
 window.drawGame = function drawGame() {
   const S = window.GameState;
@@ -307,6 +346,7 @@ window.drawGame = function drawGame() {
 
   // Boss
   window.drawScorpionBoss(ctx);
+  window.drawGeminiBoss(ctx);   // PATCH 5B
 
   // Sidekick ships
   window.drawSidekicks(ctx);
