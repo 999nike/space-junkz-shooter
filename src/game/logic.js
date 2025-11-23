@@ -615,13 +615,22 @@ if (e.dropChance && Math.random() < e.dropChance) {
 };
 
 // =========================================================
-//  DAMAGE PLAYER
+//  DAMAGE PLAYER (SHIELD → HULL)
 // =========================================================
 
 window.damagePlayer = function damagePlayer() {
   const S = window.GameState;
 
-  S.lives--;
+  // Shield takes the hit first
+  if (S.shield && S.shield > 0) {
+    S.shield = Math.max(0, S.shield - 1);
+    S.player.invuln = 0.5; // brief invuln
+    window.flashMsg("SHIELD HIT!");
+    return;
+  }
+
+  // Then hull (lives)
+  S.lives = (S.lives || 0) - 1;
   if (S.livesEl) {
     S.livesEl.textContent = S.lives;
   }
@@ -899,7 +908,7 @@ window.updateGame = function updateGame(dt) {
     }
   }
 
-  // ----- Power-ups -----
+ // ----- Power-ups -----
   for (let i = S.powerUps.length - 1; i >= 0; i--) {
     const p = S.powerUps[i];
     p.y += p.speedY * dt;
@@ -921,9 +930,31 @@ window.updateGame = function updateGame(dt) {
         continue;
       }
 
+      // SHIELD PICKUP  (fills S.shield up to S.maxShield)
+      if (p.type === "shield") {
+        const maxShield = S.maxShield || 100;
+        const gain      = p.amount || 20;
+        S.shield = Math.min(maxShield, (S.shield || 0) + gain);
+        window.flashMsg("+" + gain + " SHIELD");
+        continue;
+      }
+
+      // HEALTH PICKUP  (heals lives up to maxLives)
+      if (p.type === "health") {
+        const maxLives = S.maxLives || S.lives || 100;
+        const gain     = p.amount || 20;
+        S.lives = Math.min(maxLives, (S.lives || 0) + gain);
+        if (S.livesEl) S.livesEl.textContent = S.lives;
+        window.flashMsg("+" + gain + " HULL");
+        continue;
+      }
+
       // WEAPON PICKUP
       if (player.weaponLevel < 5) {
         player.weaponLevel++;
+      }
+    }
+  }
 
         // LEVEL 4 → first ally ship (left)
         if (player.weaponLevel === 4) {
