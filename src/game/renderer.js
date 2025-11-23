@@ -317,6 +317,47 @@ window.drawGeminiBoss = function drawGeminiBoss(ctx) {
   }
 };
 
+// --------------------------------------------------------
+//  PLAYER HEALTH + SHIELD BARS (LERP ANIMATED)
+// --------------------------------------------------------
+window.drawPlayerBars = function drawPlayerBars(ctx, S) {
+  const p = S.player;
+  if (!p) return;
+
+  // Limits
+  const maxHP = S.maxLives  || 100;
+  const maxSH = S.maxShield || 100;
+  const hp    = Math.max(0, S.lives);
+  const sh    = Math.max(0, S.shield || 0);
+
+  // Short bar width
+  const BAR_W = 40;
+  const BAR_H = 4;
+  const GAP   = 6;
+
+  // Position
+  const X = p.x - BAR_W / 2;
+  let   Y = p.y + 32;
+
+  // ---- HEALTH BAR (GREEN) ----
+  S._hpLerp = S._hpLerp ?? hp;
+  S._hpLerp += (hp - S._hpLerp) * 0.18;
+
+  ctx.fillStyle = "#00ff44"; // neon green
+  ctx.fillRect(X, Y, (S._hpLerp / maxHP) * BAR_W, BAR_H);
+
+  // ---- SHIELD BAR (BLUE) ----
+  if (S.shieldUnlocked) {
+    Y += BAR_H + 2;  // small gap
+
+    S._shLerp = S._shLerp ?? sh;
+    S._shLerp += (sh - S._shLerp) * 0.18;
+
+    ctx.fillStyle = "#00c8ff"; // neon blue
+    ctx.fillRect(X, Y, (S._shLerp / maxSH) * BAR_W, BAR_H);
+  }
+};
+
 // ---------- MAIN GAME DRAW ----------
 window.drawGame = function drawGame() {
   const S = window.GameState;
@@ -357,8 +398,14 @@ window.drawGame = function drawGame() {
   window.drawPowerUps(ctx);
 
   // Particles
-  window.drawParticles(ctx);
+window.drawParticles(ctx);
 
-  // Player
-  window.drawPlayer(ctx);
+// Player
+window.drawPlayer(ctx);
+
+// ------- PLAYER HEALTH + SHIELD BARS (N5) -------
+if (window.drawPlayerBars && S) {
+  window.drawPlayerBars(ctx, S);
+}
 };
+
