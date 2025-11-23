@@ -17,7 +17,7 @@ window.WorldMap = {
   const S = window.GameState;
 
   // ------ CONFIG ------
-  const BG_IMAGE_SRC = "./src/game/assets/world_pillars.jpg"; 
+  const BG_IMAGE_SRC = "./src/game/assets/25th_m16.jpg";
   // ^ drop your NASA Pillars image in that path & name
 
   const NODE_RADIUS = 16;
