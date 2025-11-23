@@ -133,10 +133,13 @@ window.resetGameState = function resetGameState() {
 
   S.score = 0;
 
-  // ---- HEALTH / SHIELD CORE ----
-  // Keep your current god-mode default, but define maxLives for later bars.
-  S.lives    = typeof S.lives === "number" ? S.lives : 995;
-  S.maxLives = S.maxLives || S.lives;
+  // ---- HEALTH / SHIELD CORE (TEST MODE: 200 HP) ----
+  S.maxLives = 200;
+  S.lives    = 200;
+
+  // Shield stays 0 until unlocked in Level 3+
+  S.shield      = 0;
+  S.maxShield   = 100;
 
   // Fresh shield each run (drops will fill this later)
   S.shield     = 0;
