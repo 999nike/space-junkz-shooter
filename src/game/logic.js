@@ -601,12 +601,17 @@ if (e.dropChance && Math.random() < e.dropChance) {
     }
   }
 
-  // Gemini defeated → level complete
-  if (e.type === "geminiBoss") {
-    S.running = false;
-    window.flashMsg("LEVEL COMPLETE!");
-    setTimeout(() => window.resetGameState(), 3000);
-  }
+ // Gemini defeated → jump to world map (temp hook)
+    if (e.type === "geminiBoss") {
+        S.running = false;
+        window.flashMsg("LEVEL COMPLETE!");
+
+        if (window.WorldMap && window.WorldMap.enter) {
+            setTimeout(() => {
+                window.WorldMap.enter();
+            }, 1200);
+        }
+    }
 };
 
 // =========================================================
