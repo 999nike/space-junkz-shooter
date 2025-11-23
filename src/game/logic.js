@@ -542,6 +542,27 @@ window.handleEnemyDeath = function handleEnemyDeath(e) {
   // --- WIZZCOIN DROPS ---
   let coinGain = 0;
 
+  // ---------- POWER-UP DROP (N5 RESTORE) ----------
+if (e.dropChance && Math.random() < e.dropChance) {
+
+  // 80% = weapon power-up
+  if (Math.random() < 0.8) {
+    window.spawnPowerUp(e.x, e.y);
+  }
+
+  // 20% = coin orb
+  else {
+    S.powerUps.push({
+      x: e.x,
+      y: e.y,
+      radius: 10,
+      speedY: 50,
+      type: "coin",
+      amount: 1
+    });
+  }
+}
+
   // 0.1% chance from normal enemies
   if (Math.random() < 0.001) {
     coinGain = 1;
