@@ -1,232 +1,203 @@
-// ----------- INPUT -----------
+// ===============================
+//  INPUT.JS – FINAL CLEAN VERSION
+//  • Mobile-safe
+//  • No duplicate listeners
+//  • Canvas never blocks buttons
+//  • Joystick + fire button stable
+// ===============================
 
 (function () {
   const S = window.GameState;
   S.keys = {};
 
-  window.setupInput = function setupInput() {
+  // ----------------------------------
+  // KEYBOARD INPUT
+  // ----------------------------------
+  window.addEventListener("keydown", (e) => {
+    const k = e.key.toLowerCase();
+    S.keys[k] = true;
+
+    if (k === "shift") S.keys["shift"] = true;
+  });
+
+  window.addEventListener("keyup", (e) => {
+    const k = e.key.toLowerCase();
+    S.keys[k] = false;
+
+    if (k === "shift") S.keys["shift"] = false;
+  });
+
+  // ----------------------------------
+  //  POINTER MOVEMENT → ANGLE + POSITION
+  // ----------------------------------
+  function pointerMove(e) {
     const canvas = S.canvas;
-
-    // Keyboard (still works, optional)
-    window.addEventListener("keydown", (e) => {
-      const k = e.key.toLowerCase();
-      S.keys[k] = true;
-
-      // SHIFT HOLD-POSITION MODE
-      if (k === "shift") S.keys["shift"] = true;
-    });
-
-    window.addEventListener("keyup", (e) => {
-      const k = e.key.toLowerCase();
-      S.keys[k] = false;
-
-      // SHIFT RELEASE
-      if (k === "shift") S.keys["shift"] = false;
-    });
-
-    // Pointer (mouse + touch)
-    function pointerMove(e) {
-      const rect = canvas.getBoundingClientRect();
-
-      // Raw screen coords inside the canvas element
-      const px =
-        (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const py =
-        (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-
-      // Convert from CSS pixels → game-space using scaling factors
-      const gx = (px / rect.width) * S.W;
-      const gy = (py / rect.height) * S.H;
-
-      const p = S.player;
-      const oldX = p.x;
-
-      // Store mouse in game-space for other systems (angle, etc.)
-      S.mouseX = gx;
-      S.mouseY = gy;
-
-      // Target position: allow full-screen movement with a small border
-      const targetX = clamp(gx, 24, S.W - 24);
-      const targetY = clamp(gy, 24, S.H - 24);
-
-      // Update facing angle toward pointer
-      const dx = gx - p.x;
-      const dy = gy - p.y;
-      if (dx !== 0 || dy !== 0) {
-        p.angle = Math.atan2(dy, dx);
-      }
-
-      // HOLD-POSITION MODE (SHIFT)
-      if (!S.keys["shift"]) {
-        // Update player position normally
-        p.x = targetX;
-        p.y = targetY;
-      }
-
-      // BANKING – left / right tilt based on movement (keeps nice lean)
-      const deltaX = p.x - oldX;
-
-      if (deltaX < -2) {
-        p.bank = Math.max(p.bank - 0.10, -1); // bank left
-      } else if (deltaX > 2) {
-        p.bank = Math.min(p.bank + 0.10, 1);  // bank right
-      } else {
-        p.bank *= 0.92; // return to center smoothly
-      }
-    }
-
-    // MOUSE
-    canvas.addEventListener("mousemove", pointerMove);
-
-    // TOUCH
-    canvas.addEventListener(
-  "touchmove",
-  (e) => {
-    // ⭐ Don’t globally block touch behaviour; just track movement
-    pointerMove(e);
-  },
-  { passive: true }
-);
-
-    // -----------------------------------
-    // FIRE BUTTON (Tap & Hold – all platforms)
-    // -----------------------------------
-    const fireEl = document.getElementById("btnFire");
-
-    function startFire(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      S.firing = true;
-    }
-
-    function stopFire(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      S.firing = false;
-    }
-
-    if (fireEl) {
-      // Desktop mouse
-      fireEl.addEventListener("mousedown", startFire);
-      fireEl.addEventListener("mouseup", stopFire);
-      fireEl.addEventListener("mouseleave", stopFire);
-
-      /* ---- MOBILE TOUCHMOVE (FINAL FIX) ---- */
-// Only block touchmove INSIDE the canvas rectangle
-canvas.addEventListener(
-  "touchmove",
-  (e) => {
-    const touch = e.touches[0];
     const rect = canvas.getBoundingClientRect();
 
-    // Check if touch is INSIDE canvas boundaries
-    const insideCanvas =
-      touch.clientX >= rect.left &&
-      touch.clientX <= rect.right &&
-      touch.clientY >= rect.top &&
-      touch.clientY <= rect.bottom;
+    const px =
+      (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const py =
+      (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
 
-    if (insideCanvas) {
-      // This is actual gameplay movement
-      e.preventDefault();
-      pointerMove(e);
+    // Convert to game-space
+    const gx = (px / rect.width) * S.W;
+    const gy = (py / rect.height) * S.H;
+
+    const p = S.player;
+    const oldX = p.x;
+
+    S.mouseX = gx;
+    S.mouseY = gy;
+
+    const targetX = clamp(gx, 24, S.W - 24);
+    const targetY = clamp(gy, 24, S.H - 24);
+
+    // Update ship angle
+    const dx = gx - p.x;
+    const dy = gy - p.y;
+    if (dx || dy) {
+      p.angle = Math.atan2(dy, dx);
     }
-    // If OUTSIDE canvas → DO NOT block touches.
-  },
-  { passive: false }
-);
-      fireEl.addEventListener("touchend", stopFire);
-      fireEl.addEventListener("touchcancel", stopFire);
+
+    // HOLD position?
+    if (!S.keys["shift"]) {
+      p.x = targetX;
+      p.y = targetY;
     }
 
-    // Safety: release fire if finger/mouse leaves button area
-    window.addEventListener("mouseup", stopFire);
-    window.addEventListener("touchend", stopFire);
+    // Lean/bank effect
+    const deltaX = p.x - oldX;
+    if (deltaX < -2) p.bank = Math.max(p.bank - 0.10, -1);
+    else if (deltaX > 2) p.bank = Math.min(p.bank + 0.10, 1);
+    else p.bank *= 0.92;
+  }
 
-// ---------------------------------------------------------
-// ANALOG JOYSTICK (Mobile movement only)
-// ---------------------------------------------------------
-const joyOuter = document.getElementById("joyOuter");
-const joyInner = document.getElementById("joyInner");
+  // ----------------------------------
+  //  CANVAS LISTENERS
+  // ----------------------------------
+  const canvas = S.canvas;
 
-let joyActive = false;
-let joyStartX = 0;
-let joyStartY = 0;
+  // MOUSE
+  canvas.addEventListener("mousemove", pointerMove);
 
-function joyStart(e) {
-  joyActive = true;
-  const t = e.touches[0];
-  joyStartX = t.clientX;
-  joyStartY = t.clientY;
-}
+  // CLEAN TOUCHMOVE — ONE HANDLER ONLY
+  canvas.addEventListener(
+    "touchmove",
+    (e) => {
+      const t = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
 
-function joyMove(e) {
-  if (!joyActive) return;
+      const inside =
+        t.clientX >= rect.left &&
+        t.clientX <= rect.right &&
+        t.clientY >= rect.top &&
+        t.clientY <= rect.bottom;
 
-  const t = e.touches[0];
-  const dx = t.clientX - joyStartX;
-  const dy = t.clientY - joyStartY;
+      if (inside) {
+        e.preventDefault(); // allow joystick + UI to function
+        pointerMove(e);
+      }
+    },
+    { passive: false }
+  );
 
-  const maxDist = 50;
-  const dist = Math.min(Math.sqrt(dx*dx + dy*dy), maxDist);
-  const angle = Math.atan2(dy, dx);
+  // ----------------------------------
+  //  FIRE BUTTON (hold-to-fire)
+  // ----------------------------------
+  const fireEl = document.getElementById("btnFire");
 
-  const x = Math.cos(angle) * dist;
-  const y = Math.sin(angle) * dist;
-
-  joyInner.style.transform = `translate(${x}px, ${y}px)`;
-
-  // Normalised vector (-1 to 1)
-  S.moveX = x / maxDist;
-  S.moveY = y / maxDist;
-}
-
-function joyEnd() {
-  joyActive = false;
-  S.moveX = 0;
-  S.moveY = 0;
-  joyInner.style.transform = "translate(0px,0px)";
-}
-
-/* ---- JOYSTICK TOUCH EVENTS (PATCHED) ---- */
-joyOuter.addEventListener("touchstart", (e) => {
-  e.preventDefault();     // allow fire button to receive touches
-  joyStart(e);
-}, { passive: false });
-
-joyOuter.addEventListener("touchmove", (e) => {
-  e.preventDefault();
-  joyMove(e);
-}, { passive: false });
-
-joyOuter.addEventListener("touchend", joyEnd);
-joyOuter.addEventListener("touchcancel", joyEnd);
-
-// ---------------------------------------------------------
-// DESKTOP FIRE INPUT (non-destructive)
-// ---------------------------------------------------------
-
-// left mouse HOLD = fire
-canvas.addEventListener("mousedown", (e) => {
-  // do NOT move ship — pointerMove handles that separately
-  S.firing = true;
-});
-
-// stop on release (from anywhere)
-window.addEventListener("mouseup", () => {
-  S.firing = false;
-});
-
-// spacebar HOLD = fire
-window.addEventListener("keydown", (e) => {
-  if (e.code === "Space") {
+  function startFire(e) {
+    if (e && e.preventDefault) e.preventDefault();
     S.firing = true;
   }
-});
 
-window.addEventListener("keyup", (e) => {
-  if (e.code === "Space") {
+  function stopFire() {
     S.firing = false;
   }
-});
 
-  };
+  if (fireEl) {
+    // desktop
+    fireEl.addEventListener("mousedown", startFire);
+    fireEl.addEventListener("mouseup", stopFire);
+    fireEl.addEventListener("mouseleave", stopFire);
+
+    // mobile
+    fireEl.addEventListener("touchstart", startFire, { passive: false });
+    fireEl.addEventListener("touchend", stopFire);
+    fireEl.addEventListener("touchcancel", stopFire);
+  }
+
+  window.addEventListener("mouseup", stopFire);
+  window.addEventListener("touchend", stopFire);
+
+  // ----------------------------------
+  //  ANALOG JOYSTICK (mobile left)
+  // ----------------------------------
+  const joyOuter = document.getElementById("joyOuter");
+  const joyInner = document.getElementById("joyInner");
+
+  let joyActive = false;
+  let joyStartX = 0;
+  let joyStartY = 0;
+
+  function joyStart(e) {
+    const t = e.touches[0];
+    joyActive = true;
+    joyStartX = t.clientX;
+    joyStartY = t.clientY;
+  }
+
+  function joyMove(e) {
+    if (!joyActive) return;
+
+    const t = e.touches[0];
+    const dx = t.clientX - joyStartX;
+    const dy = t.clientY - joyStartY;
+
+    const maxDist = 50;
+    const dist = Math.min(Math.hypot(dx, dy), maxDist);
+    const angle = Math.atan2(dy, dx);
+
+    const x = Math.cos(angle) * dist;
+    const y = Math.sin(angle) * dist;
+
+    joyInner.style.transform = `translate(${x}px, ${y}px)`;
+
+    S.moveX = x / maxDist;
+    S.moveY = y / maxDist;
+  }
+
+  function joyEnd() {
+    joyActive = false;
+    S.moveX = 0;
+    S.moveY = 0;
+    joyInner.style.transform = "translate(0px,0px)";
+  }
+
+  if (joyOuter) {
+    joyOuter.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      joyStart(e);
+    }, { passive: false });
+
+    joyOuter.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      joyMove(e);
+    }, { passive: false });
+
+    joyOuter.addEventListener("touchend", joyEnd);
+    joyOuter.addEventListener("touchcancel", joyEnd);
+  }
+
+  // ----------------------------------
+  // DESKTOP FIRE (spacebar)
+  // ----------------------------------
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space") S.firing = true;
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.code === "Space") S.firing = false;
+  });
+
 })();
