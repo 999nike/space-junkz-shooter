@@ -105,6 +105,21 @@ body {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.85);
 }
 
+/* ---- MUTE BUTTON (PATCHED) ---- */
+#muteBtn {
+  margin-top: 12px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #4ab0ff;
+  background: rgba(10, 20, 40, 0.85);
+  color: #c6eaff;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: inline-block;   /* <--- prevents stretching */
+  z-index: 8000;           /* <--- above joystick */
+}
+
 /* Flash message */
 
 #msg {
@@ -273,9 +288,8 @@ body {
   display: none;
 }
 
-@media (max-width: 900px) {
-  #joyOuter { display: block; }
-}
+/* ---- FORCE JOYSTICK TO SHOW (DEBUG MODE) ---- */
+#joyOuter { display: block !important; }
 
 #joyInner {
   position: absolute;
