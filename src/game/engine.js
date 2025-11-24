@@ -127,6 +127,9 @@ window.resetGameState = function resetGameState() {
   S.spawnTimer    = 0;
   S.shootTimer    = 0;
 
+  // ---- INPUT / FIRE STATE ----
+  S.firing = false;
+
   // CLEAR ALLY SHIPS + ROCKETS ON RESTART
   S.sidekicks = [];
   S.rockets   = [];

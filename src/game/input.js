@@ -87,5 +87,40 @@
       },
       { passive: false }
     );
+
+    // -----------------------------------
+    // FIRE BUTTON (Tap & Hold – all platforms)
+    // -----------------------------------
+    const fireEl = document.getElementById("btnFire");
+
+    function startFire(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      S.firing = true;
+    }
+
+    function stopFire(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      S.firing = false;
+    }
+
+    if (fireEl) {
+      // Desktop mouse
+      fireEl.addEventListener("mousedown", startFire);
+      fireEl.addEventListener("mouseup", stopFire);
+      fireEl.addEventListener("mouseleave", stopFire);
+
+      // Touch
+      fireEl.addEventListener(
+        "touchstart",
+        startFire,
+        { passive: false }
+      );
+      fireEl.addEventListener("touchend", stopFire);
+      fireEl.addEventListener("touchcancel", stopFire);
+    }
+
+    // Safety: release fire if finger/mouse leaves button area
+    window.addEventListener("mouseup", stopFire);
+    window.addEventListener("touchend", stopFire);
   };
 })();
