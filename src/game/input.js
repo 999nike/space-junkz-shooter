@@ -109,12 +109,30 @@
       fireEl.addEventListener("mouseup", stopFire);
       fireEl.addEventListener("mouseleave", stopFire);
 
-      // Touch
-      fireEl.addEventListener(
-        "touchstart",
-        startFire,
-        { passive: false }
-      );
+      /* ---- MOBILE TOUCHMOVE (FINAL FIX) ---- */
+// Only block touchmove INSIDE the canvas rectangle
+canvas.addEventListener(
+  "touchmove",
+  (e) => {
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+
+    // Check if touch is INSIDE canvas boundaries
+    const insideCanvas =
+      touch.clientX >= rect.left &&
+      touch.clientX <= rect.right &&
+      touch.clientY >= rect.top &&
+      touch.clientY <= rect.bottom;
+
+    if (insideCanvas) {
+      // This is actual gameplay movement
+      e.preventDefault();
+      pointerMove(e);
+    }
+    // If OUTSIDE canvas → DO NOT block touches.
+  },
+  { passive: false }
+);
       fireEl.addEventListener("touchend", stopFire);
       fireEl.addEventListener("touchcancel", stopFire);
     }
