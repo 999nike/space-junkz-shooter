@@ -281,6 +281,27 @@ body {
   transition: transform 0.05s linear;
 }
 
+/* ----------- FINAL MOBILE CONTROL ALIGNMENT (WIZZ PATCH) ----------- */
+/*  JOYSTICK: 30px from left, FIRE: 30px from right, same vertical line */
+
+#joyOuter {
+  position: fixed !important;
+  bottom: 30px !important;
+  left: 30px !important;
+  width: 90px;
+  height: 90px;
+  z-index: 999999 !important;
+}
+
+#btnFire {
+  position: fixed !important;
+  bottom: 30px !important;
+  right: 30px !important;
+  width: 90px;
+  height: 90px;
+  z-index: 999999 !important;
+}
+
 /* mobile only joystick visible */
 @media (max-width: 900px) {
   #joyOuter { display: block; }
