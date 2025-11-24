@@ -122,5 +122,34 @@
     // Safety: release fire if finger/mouse leaves button area
     window.addEventListener("mouseup", stopFire);
     window.addEventListener("touchend", stopFire);
+
+// ---------------------------------------------------------
+// DESKTOP FIRE INPUT (non-destructive)
+// ---------------------------------------------------------
+
+// left mouse HOLD = fire
+canvas.addEventListener("mousedown", (e) => {
+  // do NOT move ship — pointerMove handles that separately
+  S.firing = true;
+});
+
+// stop on release (from anywhere)
+window.addEventListener("mouseup", () => {
+  S.firing = false;
+});
+
+// spacebar HOLD = fire
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    S.firing = true;
+  }
+});
+
+window.addEventListener("keyup", (e) => {
+  if (e.code === "Space") {
+    S.firing = false;
+  }
+});
+
   };
 })();
