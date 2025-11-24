@@ -247,15 +247,18 @@ body {
   }
 }
 
-/* ---- JOYSTICK BLOCK (PATCHED) ---- */
+/* ---- JOYSTICK BLOCK (PATCHED – FINAL POSITION) ---- */
 #joyOuter {
   position: fixed;
-  bottom: 6%;      /* match fire button Y */
-  left: 6%;        /* mirror fire button X */
-  width: 80px;     /* SAME size as fire button */
-  height: 80px;    /* SAME size as fire button */
+
+  bottom: 20px;     /* ALWAYS visible – mirrors FIRE visually */
+  left: 20px;       /* EXACT LEFT side mirror of FIRE */
+
+  width: 80px;      /* SAME SIZE AS FIRE */
+  height: 80px;     /* SAME SIZE AS FIRE */
+
   border-radius: 50%;
-  z-index: 5000;   /* below UI buttons, above canvas */
+  z-index: 99999;   /* FORCE above canvas + UI */
 
   /* WIZZ LAB glow */
   background: rgba(0, 255, 100, 0.08);
@@ -267,7 +270,11 @@ body {
 
   backdrop-filter: blur(3px);
   touch-action: none;
-  display: none; /* mobile only */
+  display: none;
+}
+
+@media (max-width: 900px) {
+  #joyOuter { display: block; }
 }
 
 #joyInner {
