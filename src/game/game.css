@@ -247,18 +247,15 @@ body {
   }
 }
 
-/* =======================================================
-   ANALOG JOYSTICK (MOBILE ONLY) — FIXED BOTTOM-LEFT
-   ======================================================= */
-
+/* ---- JOYSTICK BLOCK (PATCHED) ---- */
 #joyOuter {
   position: fixed;
-  bottom: 8%;
-  left: 8%;
-  width: 120px;
-  height: 120px;
+  bottom: 6%;      /* match fire button Y */
+  left: 6%;        /* mirror fire button X */
+  width: 80px;     /* SAME size as fire button */
+  height: 80px;    /* SAME size as fire button */
   border-radius: 50%;
-  z-index: 9999;
+  z-index: 5000;   /* below UI buttons, above canvas */
 
   /* WIZZ LAB glow */
   background: rgba(0, 255, 100, 0.08);
@@ -270,8 +267,7 @@ body {
 
   backdrop-filter: blur(3px);
   touch-action: none;
-
-  display: none; /* hidden on desktop */
+  display: none; /* mobile only */
 }
 
 #joyInner {
