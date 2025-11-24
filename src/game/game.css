@@ -255,6 +255,10 @@ body {
     inset 0 0 10px rgba(0, 255, 100, 0.25);
   backdrop-filter: blur(3px);
   touch-action: none;
+/* FINAL JOYSTICK OVERRIDE */
+#joyOuter {
+  bottom: 20% !important;   /* moves UP */
+  left: 26% !important;      /* keeps the sideways position */
 }
 
 #joyInner {

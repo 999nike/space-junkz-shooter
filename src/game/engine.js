@@ -168,10 +168,12 @@ window.resetGameState = function resetGameState() {
 //  ENGINE STARTUP + START BUTTON ATTACH (FINAL CLEAN VERSION)
 // =========================================================
 window.addEventListener("load", () => {
-  window.initEngine();
-  window.initStars();
-  window.resetGameState();
-  window.setupInput();
+  requestAnimationFrame(() => {
+    window.initEngine();
+    window.initStars();
+    window.resetGameState();
+    window.setupInput();
+  });
 
   // ---------- START BUTTON ----------
   window.GameState.startBtn.addEventListener("click", () => {
