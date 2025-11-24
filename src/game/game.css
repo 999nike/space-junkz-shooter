@@ -283,7 +283,17 @@ body {
 
 /* mobile only joystick visible */
 @media (max-width: 900px) {
-  #joyOuter { display: block; }
+
+  #joyOuter {
+    bottom: 18% !important;
+    left: 16% !important;
+  }
+
+  #btnFire {
+    bottom: 18% !important;
+    right: 16% !important;
+  }
+
 }
 
 /* ---------------- UI PRIORITY ---------------- */
