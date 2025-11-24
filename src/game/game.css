@@ -206,9 +206,9 @@ body {
 /* ---------------- FIRE BUTTON ---------------- */
 
 #btnFire {
-  position: fixed;
-  bottom: 6%;
-  right: 6%;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -227,8 +227,7 @@ body {
   text-transform: uppercase;
   user-select: none;
   touch-action: none;
-  z-index: 9500;
-  opacity: 0.9;
+  z-index: 9999;
 }
 
 #btnFire:active {
@@ -241,13 +240,12 @@ body {
 /* ---------------- JOYSTICK ---------------- */
 
 #joyOuter {
-  position: fixed;
-  bottom: 6%;
-  left: 6%;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  z-index: 9500;
   background: rgba(0, 255, 100, 0.08);
   border: 2px solid rgba(0, 255, 100, 0.4);
   box-shadow:
@@ -256,7 +254,7 @@ body {
     inset 0 0 10px rgba(0, 255, 100, 0.25);
   backdrop-filter: blur(3px);
   touch-action: none;
-  display: none; /* mobile-only by default */
+  z-index: 9999;
 }
 
 #joyInner {
