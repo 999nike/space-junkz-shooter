@@ -682,6 +682,12 @@ window.updateGame = function updateGame(dt) {
     player.y += dy * player.speed * dt;
   }
 
+  // Mobile analog movement
+  if (S.moveX || S.moveY) {
+    player.x += (S.moveX || 0) * player.speed * dt;
+    player.y += (S.moveY || 0) * player.speed * dt;
+  }
+
   // Full-screen movement with a small safe border
   player.x = clamp(player.x, 24, S.W - 24);
   player.y = clamp(player.y, 24, S.H - 24);
