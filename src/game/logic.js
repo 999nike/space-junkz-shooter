@@ -735,11 +735,11 @@ window.updateGame = function updateGame(dt) {
     S.spawnTimer = rand(0.4, 1.0);
   }
 
-  // ----- Auto-fire -----
+  // ----- HOLD-TO-FIRE (shared for desktop + mobile) -----
   S.shootTimer -= dt;
-  if (S.shootTimer <= 0) {
+  if (S.firing && S.shootTimer <= 0) {
     window.shoot();
-    S.shootTimer = 0.22;
+    S.shootTimer = 0.22; // fire rate
   }
 
   // ----- Update enemies -----
