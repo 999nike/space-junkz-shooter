@@ -29,7 +29,7 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* HUD */
+/* ---------------- HUD ---------------- */
 
 #hud {
   margin-top: 16px;
@@ -54,29 +54,24 @@ body {
   margin-right: 4px;
 }
 
-/* gameblock */
+/* ---------------- CANVAS ---------------- */
 
 #game {
   display: block;
   margin: 0 auto;
-
-  /* REMOVED width & height to stop scaling artifacts */
-  /* width: 90vw; */
-  /* height: 82vh; */
-
   border-radius: 18px;
   border: 2px solid #2f3e7b;
   background: radial-gradient(circle at 50% 40%, #0c1e4b 0%, #020313 65%);
   box-shadow:
     0 0 0 1px rgba(60, 100, 255, 0.2),
     0 26px 60px rgba(0, 0, 0, 0.95);
-
-  /* MAKE CANVAS CRISP / NO VERTICAL LINES */
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  position: relative;
+  z-index: 1;
 }
 
-/* Start button */
+/* ---------------- MAIN BUTTONS ---------------- */
 
 #startBtn {
   margin-top: 18px;
@@ -105,7 +100,6 @@ body {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.85);
 }
 
-/* ---- MUTE BUTTON (PATCHED) ---- */
 #muteBtn {
   margin-top: 12px;
   padding: 6px 14px;
@@ -116,12 +110,10 @@ body {
   font-size: 12px;
   letter-spacing: 0.05em;
   cursor: pointer;
-  display: inline-block;   /* <--- prevents stretching */
-  z-index: 8000;           /* <--- above joystick */
+  display: inline-block;
 }
 
 /* Flash message */
-
 #msg {
   min-height: 20px;
   margin-top: 6px;
@@ -132,11 +124,8 @@ body {
   text-align: center;
 }
 
-#msg {
-  ...
-}
+/* ---------------- PLAYER SELECT MODAL ---------------- */
 
-/* PLAYER SELECT SCREEN */
 .player-select {
   position: absolute;
   top: 20%;
@@ -150,7 +139,7 @@ body {
   text-align: center;
   color: white;
   font-family: sans-serif;
-  z-index: 9999;
+  z-index: 9000;
 }
 
 .player-select button {
@@ -193,6 +182,7 @@ body {
   width: 300px;
   text-align: center;
 }
+
 #playerList button {
   width: 100%;
   margin: 6px 0;
@@ -202,6 +192,7 @@ body {
   color: white;
   cursor: pointer;
 }
+
 #addPlayerBtn {
   margin-top: 14px;
   padding: 10px;
@@ -212,9 +203,8 @@ body {
   cursor: pointer;
 }
 
-/* -------------------------------------------------
-   FIRE BUTTON (MOBILE + DESKTOP – TAP & HOLD)
-   ------------------------------------------------- */
+/* ---------------- FIRE BUTTON ---------------- */
+
 #btnFire {
   position: fixed;
   bottom: 6%;
@@ -237,13 +227,10 @@ body {
   text-transform: uppercase;
   user-select: none;
   touch-action: none;
-
-  /* Below main UI buttons, above canvas */
-  z-index: 5000;
+  z-index: 9500;
   opacity: 0.9;
 }
 
-/* Slight press feedback */
 #btnFire:active {
   transform: scale(0.95);
   box-shadow:
@@ -251,45 +238,26 @@ body {
     0 0 28px rgba(255, 80, 80, 0.5);
 }
 
-/* Optional: smaller on tiny screens */
-@media (max-width: 600px) {
-  #btnFire {
-    width: 68px;
-    height: 68px;
-    bottom: 5%;
-    right: 5%;
-    font-size: 12px;
-  }
-}
+/* ---------------- JOYSTICK ---------------- */
 
-/* ---- JOYSTICK BLOCK (PATCHED – FINAL POSITION) ---- */
 #joyOuter {
   position: fixed;
-
-  bottom: 20px;     /* ALWAYS visible – mirrors FIRE visually */
-  left: 20px;       /* EXACT LEFT side mirror of FIRE */
-
-  width: 80px;      /* SAME SIZE AS FIRE */
-  height: 80px;     /* SAME SIZE AS FIRE */
-
+  bottom: 6%;
+  left: 6%;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  z-index: 99999;   /* FORCE above canvas + UI */
-
-  /* WIZZ LAB glow */
+  z-index: 9500;
   background: rgba(0, 255, 100, 0.08);
   border: 2px solid rgba(0, 255, 100, 0.4);
   box-shadow:
     0 0 20px rgba(0, 255, 100, 0.4),
     0 0 45px rgba(0, 255, 100, 0.3),
     inset 0 0 10px rgba(0, 255, 100, 0.25);
-
   backdrop-filter: blur(3px);
   touch-action: none;
-  display: none;
+  display: none; /* mobile-only by default */
 }
-
-/* ---- FORCE JOYSTICK TO SHOW (DEBUG MODE) ---- */
-#joyOuter { display: block !important; }
 
 #joyInner {
   position: absolute;
@@ -299,26 +267,33 @@ body {
   top: calc(50% - 27.5px);
   border-radius: 50%;
   pointer-events: none;
-
   background: radial-gradient(circle,
     rgba(0, 200, 255, 0.9),
     rgba(0, 120, 255, 0.6),
     rgba(0, 50, 200, 0.4)
   );
-
   box-shadow:
     0 0 20px rgba(0, 180, 255, 0.8),
     0 0 35px rgba(0, 120, 255, 0.5),
     inset 0 0 12px rgba(255, 255, 255, 0.3);
-
   transition: transform 0.05s linear;
 }
 
-/* MOBILE ONLY */
+/* mobile only joystick visible */
 @media (max-width: 900px) {
   #joyOuter { display: block; }
 }
 
+/* ---------------- UI PRIORITY ---------------- */
+
+#startBtn,
+#muteBtn,
+#leaderBtn,
+#btnFire,
+#joyOuter {
+  position: relative;
+  z-index: 9600;
+}
 /* ----- UI PRIORITY: buttons must be above everything ----- */
 #startBtn,
 #muteBtn,
