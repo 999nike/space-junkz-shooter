@@ -207,8 +207,8 @@ body {
 
 #btnFire {
   position: fixed;
-  bottom: 10%;
-  right: 26%;
+  bottom: 9%;
+  right: 29%;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -241,8 +241,8 @@ body {
 /* ---------------- JOYSTICK ---------------- */
 #joyOuter {
   position: fixed;
-  bottom: 14%;
-  left: 26%;
+  bottom: 17%;
+  left: 29%;
   width: 80px;
   height: 80px;
   border-radius: 50%;
