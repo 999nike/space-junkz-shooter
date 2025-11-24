@@ -305,3 +305,25 @@ body {
   pointer-events: auto !important;
   z-index: 999999 !important;
 }
+
+@media (max-width: 900px) {
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden; /* stops scroll bounce */
+  }
+
+  #game {
+    width: 100vw !important;
+    height: 100vh !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  #hud {
+    display: none; /* optional – remove HUD for pure fullscreen */
+  }
+
+}
