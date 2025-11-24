@@ -241,8 +241,8 @@ body {
 /* ---------------- JOYSTICK ---------------- */
 #joyOuter {
   position: fixed;
-  bottom: 17%;
-  left: 29%;
+  bottom: 20%;
+  left: 35%;
   width: 80px;
   height: 80px;
   border-radius: 50%;
