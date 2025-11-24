@@ -222,7 +222,9 @@ body {
   text-transform: uppercase;
   user-select: none;
   touch-action: none;
-  z-index: 9999;
+
+  /* Below main UI buttons, above canvas */
+  z-index: 5000;
   opacity: 0.9;
 }
 
