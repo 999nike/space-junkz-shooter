@@ -124,6 +124,56 @@
     window.addEventListener("touchend", stopFire);
 
 // ---------------------------------------------------------
+// ANALOG JOYSTICK (Mobile movement only)
+// ---------------------------------------------------------
+const joyOuter = document.getElementById("joyOuter");
+const joyInner = document.getElementById("joyInner");
+
+let joyActive = false;
+let joyStartX = 0;
+let joyStartY = 0;
+
+function joyStart(e) {
+  joyActive = true;
+  const t = e.touches[0];
+  joyStartX = t.clientX;
+  joyStartY = t.clientY;
+}
+
+function joyMove(e) {
+  if (!joyActive) return;
+
+  const t = e.touches[0];
+  const dx = t.clientX - joyStartX;
+  const dy = t.clientY - joyStartY;
+
+  const maxDist = 50;
+  const dist = Math.min(Math.sqrt(dx*dx + dy*dy), maxDist);
+  const angle = Math.atan2(dy, dx);
+
+  const x = Math.cos(angle) * dist;
+  const y = Math.sin(angle) * dist;
+
+  joyInner.style.transform = `translate(${x}px, ${y}px)`;
+
+  // Normalised vector (-1 to 1)
+  S.moveX = x / maxDist;
+  S.moveY = y / maxDist;
+}
+
+function joyEnd() {
+  joyActive = false;
+  S.moveX = 0;
+  S.moveY = 0;
+  joyInner.style.transform = "translate(0px,0px)";
+}
+
+joyOuter.addEventListener("touchstart", joyStart, { passive: true });
+joyOuter.addEventListener("touchmove", joyMove, { passive: false });
+joyOuter.addEventListener("touchend", joyEnd);
+joyOuter.addEventListener("touchcancel", joyEnd);
+
+// ---------------------------------------------------------
 // DESKTOP FIRE INPUT (non-destructive)
 // ---------------------------------------------------------
 

@@ -244,3 +244,60 @@ body {
     font-size: 12px;
   }
 }
+
+/* =======================================================
+   ANALOG JOYSTICK (MOBILE) — W.I.Z.Z. LAB STYLE
+   ======================================================= */
+
+#joyOuter {
+  position: fixed;
+  bottom: 8%;
+  left: 8%;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(0, 255, 100, 0.08);
+  border: 2px solid rgba(0, 255, 100, 0.4);
+
+  /* Outer glow like your W.I.Z.Z. Lab logo */
+  box-shadow:
+    0 0 25px rgba(0, 255, 100, 0.45),
+    0 0 55px rgba(0, 255, 100, 0.35),
+    inset 0 0 15px rgba(0, 255, 100, 0.25);
+
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  touch-action: none;
+  display: none; /* Hidden on desktop */
+}
+
+#joyInner {
+  position: absolute;
+  width: 65px;
+  height: 65px;
+  left: calc(50% - 32.5px);
+  top: calc(50% - 32.5px);
+  border-radius: 50%;
+
+  /* Energy core like your logo center */
+  background: radial-gradient(circle,
+    rgba(0, 200, 255, 0.9) 0%,
+    rgba(0, 120, 255, 0.6) 60%,
+    rgba(0, 50, 200, 0.4) 100%
+  );
+
+  box-shadow:
+    0 0 20px rgba(0, 180, 255, 0.8),
+    0 0 35px rgba(0, 120, 255, 0.5),
+    inset 0 0 12px rgba(255, 255, 255, 0.3);
+
+  pointer-events: none;
+  transition: transform 0.05s linear;
+}
+
+/* Enable joystick only on mobile */
+@media (max-width: 900px) {
+  #joyOuter {
+    display: block;
+  }
+}
