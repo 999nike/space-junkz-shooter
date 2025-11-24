@@ -207,8 +207,8 @@ body {
 
 #btnFire {
   position: fixed;
-  bottom: 6%;
-  right: 6%;
+  bottom: 10%;
+  right: 14%;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -239,11 +239,10 @@ body {
 }
 
 /* ---------------- JOYSTICK ---------------- */
-
 #joyOuter {
   position: fixed;
-  bottom: 6%;
-  left: 6%;
+  bottom: 10%;
+  left: 14%;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -256,7 +255,6 @@ body {
     inset 0 0 10px rgba(0, 255, 100, 0.25);
   backdrop-filter: blur(3px);
   touch-action: none;
-  display: none; /* mobile-only by default */
 }
 
 #joyInner {
