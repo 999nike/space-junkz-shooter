@@ -1,6 +1,6 @@
 // =========================================================
 //  ENGINE INIT (FULL PATCHED + CLEANED)  
-//  WizzCoin HUD support + redundant cleanup
+//  WizzCoin HUD support + Leaderboard Safe Start
 // =========================================================
 
 window.GameState = window.GameState || {};
@@ -38,7 +38,7 @@ window.initEngine = function initEngine() {
   // ---------- HUD ELEMENTS ----------
   S.scoreEl  = document.getElementById("score");
   S.livesEl  = document.getElementById("lives");
-  S.coinsEl  = document.getElementById("coins");   // ⭐ NEW for WizzCoin
+  S.coinsEl  = document.getElementById("coins");   // ⭐ WizzCoin HUD
   S.msgEl    = document.getElementById("msg");
   S.startBtn = document.getElementById("startBtn");
 
@@ -111,14 +111,15 @@ window.shoot = function shoot() {
 };
 
 // =========================================================
-//  GAME RESET (NOW INCLUDES WizzCoin + SHIELD CORE)
+//  GAME RESET (WizzCoin + Shield Core)
 // =========================================================
 window.resetGameState = function resetGameState() {
   const S = window.GameState;
+
   if (window.initStars) window.initStars();
 
-  S.enemies = [];
-  S.bullets = [];
+  S.enemies       = [];
+  S.bullets       = [];
   S.enemyBullets  = [];
   S.powerUps      = [];
   S.particles     = [];
@@ -128,44 +129,41 @@ window.resetGameState = function resetGameState() {
   // ---- INPUT / FIRE STATE ----
   S.firing = false;
 
-  // CLEAR ALLY SHIPS + ROCKETS ON RESTART
+  // ---- ALLIES / ROCKETS ----
   S.sidekicks = [];
   S.rockets   = [];
 
+  // ---- SCORE ----
   S.score = 0;
 
-  // ---- HEALTH / SHIELD CORE (TEST MODE: 200 HP) ----
+  // ---- HEALTH / SHIELD ----
   S.maxLives = 200;
   S.lives    = 200;
 
-  // Shield stays 0 until unlocked in Level 3+
   S.shield      = 0;
   S.maxShield   = 100;
 
-  // Fresh shield each run (drops will fill this later)
-  S.shield     = 0;
-  S.maxShield  = S.maxShield || 100;
-
-  // ---------- WIZZCOIN RESET ----------
+  // ---- WIZZCOIN ----
   S.wizzCoins = 0;
   if (S.coinsEl) S.coinsEl.textContent = 0;
 
-  // Boss reset
-  S.bossSpawned       = false; // old timer flag (scorpion)
+  // ---- BOSS FLAGS ----
+  S.bossSpawned       = false;
   S.bossTimer         = 0;
-  S.geminiBossSpawned = false; // NEW: has Gemini spawned yet?
+  S.geminiBossSpawned = false;
 
-  // Update HUD
+  // ---- HUD ----
   if (S.livesEl) S.livesEl.textContent = S.lives;
 
-  S.player.x          = S.W / 2;
-  S.player.y          = S.H - 80;
+  // ---- PLAYER ----
+  S.player.x           = S.W / 2;
+  S.player.y           = S.H - 80;
   S.player.weaponLevel = 1;
   S.player.invuln      = 0;
 };
 
 // =========================================================
-//  ENGINE STARTUP + START BUTTON ATTACH (FINAL CLEAN VERSION)
+//  ENGINE STARTUP + START BUTTON (LEADERBOARD FIX)
 // =========================================================
 window.addEventListener("load", () => {
   requestAnimationFrame(() => {
@@ -179,7 +177,15 @@ window.addEventListener("load", () => {
   window.GameState.startBtn.addEventListener("click", () => {
     const S = window.GameState;
 
-    // Reset + start game
+    // -------- LEADERBOARD FIX --------
+    // Upload previous run BEFORE wiping values
+    if ((S.score > 0) || (S.wizzCoins > 0)) {
+      if (typeof window.submitStats === "function") {
+        window.submitStats(true, S.wizzCoins, S.score);
+      }
+    }
+
+    // -------- NOW RESET AND START NEW RUN --------
     window.resetGameState();
     S.running = true;
 
