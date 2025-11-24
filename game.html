@@ -89,8 +89,21 @@
   <script src="./src/game/world.js"></script>
   <script src="./src/game/game.js"></script>
   
-  <!-- Eruda (mobile console) -->
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>eruda.init();</script>
+<script src="./src/game/game.js"></script>
+  
+  <!-- Eruda (mobile console – DEV ONLY) -->
+  <script>
+    // Only load Eruda when running locally, not on Vercel
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+      var s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/eruda";
+      s.onload = function () {
+        if (window.eruda) {
+          eruda.init();
+        }
+      };
+      document.body.appendChild(s);
+    }
+  </script>
 </body>
 </html>

@@ -80,13 +80,13 @@
 
     // TOUCH
     canvas.addEventListener(
-      "touchmove",
-      (e) => {
-        e.preventDefault();
-        pointerMove(e);
-      },
-      { passive: false }
-    );
+  "touchmove",
+  (e) => {
+    // ⭐ Don’t globally block touch behaviour; just track movement
+    pointerMove(e);
+  },
+  { passive: true }
+);
 
     // -----------------------------------
     // FIRE BUTTON (Tap & Hold – all platforms)

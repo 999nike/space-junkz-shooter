@@ -4,7 +4,7 @@
   --hud-bg: rgba(6, 12, 30, 0.9);
   --accent1: #5be7ff;
   --accent2: #ff8ad4;
-  --accent3: #fffd8b;
+  --accent3: hsl(59, 100%, 77%);
   --text: #e8f6ff;
   --text-dim: #8ea8c9;
   --btn-grad1: #5be7ff;
@@ -317,4 +317,14 @@ body {
 /* MOBILE ONLY */
 @media (max-width: 900px) {
   #joyOuter { display: block; }
+}
+
+/* ----- UI PRIORITY: buttons must be above everything ----- */
+#startBtn,
+#muteBtn,
+#leaderBtn,
+#btnFire,
+#joyOuter {
+  pointer-events: auto !important;
+  z-index: 999999 !important;
 }
