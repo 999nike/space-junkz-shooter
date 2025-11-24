@@ -168,8 +168,17 @@ function joyEnd() {
   joyInner.style.transform = "translate(0px,0px)";
 }
 
-joyOuter.addEventListener("touchstart", joyStart, { passive: true });
-joyOuter.addEventListener("touchmove", joyMove, { passive: false });
+/* ---- JOYSTICK TOUCH EVENTS (PATCHED) ---- */
+joyOuter.addEventListener("touchstart", (e) => {
+  e.preventDefault();     // allow fire button to receive touches
+  joyStart(e);
+}, { passive: false });
+
+joyOuter.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  joyMove(e);
+}, { passive: false });
+
 joyOuter.addEventListener("touchend", joyEnd);
 joyOuter.addEventListener("touchcancel", joyEnd);
 
