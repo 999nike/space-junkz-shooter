@@ -246,44 +246,45 @@ body {
 }
 
 /* =======================================================
-   ANALOG JOYSTICK (MOBILE) — W.I.Z.Z. LAB STYLE
+   ANALOG JOYSTICK (MOBILE ONLY) — FIXED BOTTOM-LEFT
    ======================================================= */
 
 #joyOuter {
   position: fixed;
   bottom: 8%;
   left: 8%;
-  width: 130px;
-  height: 130px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
+  z-index: 9999;
+
+  /* WIZZ LAB glow */
   background: rgba(0, 255, 100, 0.08);
   border: 2px solid rgba(0, 255, 100, 0.4);
-
-  /* Outer glow like your W.I.Z.Z. Lab logo */
   box-shadow:
-    0 0 25px rgba(0, 255, 100, 0.45),
-    0 0 55px rgba(0, 255, 100, 0.35),
-    inset 0 0 15px rgba(0, 255, 100, 0.25);
+    0 0 20px rgba(0, 255, 100, 0.4),
+    0 0 45px rgba(0, 255, 100, 0.3),
+    inset 0 0 10px rgba(0, 255, 100, 0.25);
 
   backdrop-filter: blur(3px);
-  z-index: 9999;
   touch-action: none;
-  display: none; /* Hidden on desktop */
+
+  display: none; /* hidden on desktop */
 }
 
 #joyInner {
   position: absolute;
-  width: 65px;
-  height: 65px;
-  left: calc(50% - 32.5px);
-  top: calc(50% - 32.5px);
+  width: 55px;
+  height: 55px;
+  left: calc(50% - 27.5px);
+  top: calc(50% - 27.5px);
   border-radius: 50%;
+  pointer-events: none;
 
-  /* Energy core like your logo center */
   background: radial-gradient(circle,
-    rgba(0, 200, 255, 0.9) 0%,
-    rgba(0, 120, 255, 0.6) 60%,
-    rgba(0, 50, 200, 0.4) 100%
+    rgba(0, 200, 255, 0.9),
+    rgba(0, 120, 255, 0.6),
+    rgba(0, 50, 200, 0.4)
   );
 
   box-shadow:
@@ -291,13 +292,10 @@ body {
     0 0 35px rgba(0, 120, 255, 0.5),
     inset 0 0 12px rgba(255, 255, 255, 0.3);
 
-  pointer-events: none;
   transition: transform 0.05s linear;
 }
 
-/* Enable joystick only on mobile */
+/* MOBILE ONLY */
 @media (max-width: 900px) {
-  #joyOuter {
-    display: block;
-  }
+  #joyOuter { display: block; }
 }
