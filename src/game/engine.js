@@ -68,6 +68,20 @@ window.flashMsg = function flashMsg(text) {
 };
 
 // =========================================================
+//  FLASH MESSAGE
+// =========================================================
+window.flashMsg = function flashMsg(text) {
+  const S = window.GameState;
+  if (!S.msgEl) return;
+  S.msgEl.textContent = text;
+
+  clearTimeout(S._msgTimeout);
+  S._msgTimeout = setTimeout(() => {
+    S.msgEl.textContent = "";
+  }, 1600);
+};
+
+// =========================================================
 //  SHOOT SYSTEM
 // =========================================================
 window.shoot = function shoot() {
