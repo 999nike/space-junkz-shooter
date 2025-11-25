@@ -160,6 +160,13 @@ window.addEventListener("load", () => {
     window.setupInput();
   });
 
+  // ----- SNAPSHOT TRACKERS -----
+S._sessionStartScore = S.score ?? 0;
+S._sessionStartCoins = S.wizzCoins ?? 0;
+
+S._snapshotLastScore = S.score ?? 0;
+S._snapshotLastCoins = S.wizzCoins ?? 0;
+
  window.GameState.startBtn.addEventListener("click", () => {
     const S = window.GameState;
     const active = localStorage.getItem("sj_active_player");

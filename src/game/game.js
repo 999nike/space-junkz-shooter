@@ -348,7 +348,7 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
 
   // last time (ms) we pushed stats to the backend
   let lastSyncMs = 0;
-  const SYNC_INTERVAL_MS = 60_000; // 60 seconds
+  const SYNC_INTERVAL_MS = 30_000; // 30 sec snapshots
 
   const oldHandleEnemyDeath = window.handleEnemyDeath;
   window.handleEnemyDeath = function (e) {
@@ -365,9 +365,19 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
 
     // ⭐ Only sync if at least 60 seconds have passed
     if (now - lastSyncMs >= SYNC_INTERVAL_MS) {
-      lastSyncMs = now;
-      syncStats(active, S.wizzCoins, S.score);
-    }
+  lastSyncMs = now;
+
+  // ---- ACCUMULATION MODE: send only gains since last snapshot ----
+  const gainScore = S.score - (S._snapshotLastScore ?? S.score);
+  const gainCoins = S.wizzCoins - (S._snapshotLastCoins ?? S.wizzCoins);
+
+  // Update snapshot markers
+  S._snapshotLastScore = S.score;
+  S._snapshotLastCoins = S.wizzCoins;
+
+  // Sync only the gain
+  syncStats(active, gainCoins, gainScore);
+}
   };
 })();
 
@@ -390,7 +400,15 @@ window.showPlayerSelect = window.showPlayerSelect || function () {
     if (S.lives <= 0) {
       const active = localStorage.getItem("sj_active_player");
       if (active) {
-        syncStats(active, S.wizzCoins, S.score);
+        // ---- ACCUMULATION MODE: send only gains since last snapshot ----
+const gainScore = S.score - (S._snapshotLastScore ?? S.score);
+const gainCoins = S.wizzCoins - (S._snapshotLastCoins ?? S.wizzCoins);
+
+// update snapshot markers
+S._snapshotLastScore = S.score;
+S._snapshotLastCoins = S.wizzCoins;
+
+syncStats(active, gainCoins, gainScore);
       }
     }
   };
