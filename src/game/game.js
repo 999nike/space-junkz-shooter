@@ -1,3 +1,23 @@
+// ================================
+// N5 PATCH – LOAD PLAYER STATS
+// ================================
+window.loadPlayerStats = async function loadPlayerStats(player_id) {
+  try {
+    const res = await fetch(`/api/get-stats?player_id=` + player_id);
+    const data = await res.json();
+
+    if (data && data.stats) {
+      const S = window.GameState;
+      S.score = Number(data.stats.score) || 0;
+      S.wizzCoins = Number(data.stats.coins) || 0;
+
+      console.log("N5 RESTORED:", S.score, S.wizzCoins);
+    }
+  } catch (err) {
+    console.error("loadPlayerStats error:", err);
+  }
+};
+
 // ---------- BOOTSTRAP ----------
 (function () {
   const S = window.GameState;
@@ -210,6 +230,11 @@ window.syncStats = async function (name, coins, score, xp = 0) {
 
   // ⭐ PATCH SECTION 4 (Synced)
   function setActivePlayer(name) {
+    // N5 restore stats
+const pid = localStorage.getItem("sj_player_id");
+if (pid && window.loadPlayerStats) {
+    window.loadPlayerStats(pid);
+}
     localStorage.setItem("sj_active_player", name);
     selectBox.style.display = "none";
 

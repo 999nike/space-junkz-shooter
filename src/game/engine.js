@@ -36,7 +36,7 @@ window.initEngine = function initEngine() {
   S.canvas.height = window.innerHeight;
   S.W = S.canvas.width;
   S.H = S.canvas.height;
-  
+
   // ---------- HUD ELEMENTS ----------
   S.scoreEl  = document.getElementById("score");
   S.livesEl  = document.getElementById("lives");
@@ -135,8 +135,6 @@ window.resetGameState = function resetGameState() {
   S.sidekicks = [];
   S.rockets   = [];
 
-  // ---- SCORE ----
-  S.score = 0;
 
   // ---- HEALTH / SHIELD CORE (TEST MODE: 100 HP) ----
   S.maxLives = 100;
@@ -145,8 +143,6 @@ window.resetGameState = function resetGameState() {
   S.shield      = 0;
   S.maxShield   = 100;
 
-  // ---- WIZZCOIN ----
-  S.wizzCoins = 0;
   if (S.coinsEl) S.coinsEl.textContent = 0;
 
   // ---- BOSS FLAGS ----
