@@ -160,23 +160,33 @@ window.addEventListener("load", () => {
     window.setupInput();
   });
 
-  window.GameState.startBtn.addEventListener("click", () => {
+  window.GameState.startBtn.addEventListener("click", async () => {
     const S = window.GameState;
-
     const active = localStorage.getItem("sj_active_player");
 
+    // -------- SAFE RUN-END SYNC --------
     if (
       active &&
       (S.score > 0 || S.wizzCoins > 0) &&
       typeof window.syncStats === "function"
     ) {
-      window.syncStats(active, S.wizzCoins, S.score);
+      await window.syncStats(active, S.wizzCoins, S.score);
     }
 
+    // -------- RESET FOR NEW RUN --------
     window.resetGameState();
+
+    // -------- RESTORE DB STATS SO START DOESN'T WIPE --------
+    const pid = localStorage.getItem("sj_player_id");
+    if (pid && window.loadPlayerStats) {
+        await window.loadPlayerStats(pid);
+    }
+
+    // -------- START RUN --------
     S.running = true;
     window.flashMsg("GOOD LUCK, COMMANDER");
 
+    // -------- MUSIC --------
     const bgm = document.getElementById("bgm");
     if (bgm) {
       bgm.volume = 0.35;
@@ -184,10 +194,9 @@ window.addEventListener("load", () => {
         console.warn("Music blocked until user interacts again.");
       });
     }
-  });
-
-  window.flashMsg("Press START to play");
 });
+
+window.flashMsg("Press START to play");
 
 // =========================================================
 //  MAIN LOOP
