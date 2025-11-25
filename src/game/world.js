@@ -152,10 +152,10 @@ window.WorldMap = {
         return;
       }
 
-      // TODO (next step):
-      // when ship reaches node & node.id === "lvl2"
-      // → trigger warp into Level 2 shooter.
-    },
+    if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
+    window.Level2.enter();
+    return;
+}
 
     // ------ UPDATE ------
     update(dt) {

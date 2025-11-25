@@ -645,6 +645,17 @@ window.damagePlayer = function damagePlayer() {
   window.flashMsg("HIT!");
 };
 
+// ===========================================================
+//  LEVEL 2 CORE REDIRECTORS
+// ===========================================================
+window.updateGameCore = function updateGameCore(dt) {
+    window.updateGame(dt);
+};
+
+window.drawGameCore = function drawGameCore(ctx) {
+    window.drawGame(ctx);
+};
+
 // =========================================================
 //  MAIN UPDATE – called from engine.js → updateGame(dt)
 // =========================================================
