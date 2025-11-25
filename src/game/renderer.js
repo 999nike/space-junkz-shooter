@@ -395,7 +395,7 @@ window.drawStars = function drawStars(ctx) {
 };
 
 // ---------- MAIN GAME DRAW ----------
-wwindow.drawGame = function drawGame() {
+window.drawGame = function drawGame() {
   const S = window.GameState;
   const ctx = S.ctx;
 
