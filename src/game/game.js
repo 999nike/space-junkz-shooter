@@ -1,6 +1,6 @@
-// ================================
-// N5 PATCH – LOAD PLAYER STATS
-// ================================
+// =========================================================
+//  RESTORE PLAYER STATS FROM DB (REAL WORKING VERSION)
+// =========================================================
 window.loadPlayerStats = async function loadPlayerStats(player_id) {
   try {
     const res = await fetch(`/api/get-stats?player_id=` + player_id);
@@ -8,10 +8,17 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
 
     if (data && data.stats) {
       const S = window.GameState;
-      S.score = Number(data.stats.score) || 0;
-      S.wizzCoins = Number(data.stats.coins) || 0;
 
-      console.log("N5 RESTORED:", S.score, S.wizzCoins);
+      // Apply restored values
+      S.score     = Number(data.stats.score) || 0;
+      S.wizzCoins = Number(data.stats.coins) || 0;
+      S.xp        = Number(data.stats.xp) || 0;
+
+      // Update HUD
+      if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
+      if (S.scoreEl) S.scoreEl.textContent = S.score;
+
+      console.log("🔥 RESTORED FROM DB:", S.score, S.wizzCoins, S.xp);
     }
   } catch (err) {
     console.error("loadPlayerStats error:", err);
