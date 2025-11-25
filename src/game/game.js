@@ -39,6 +39,11 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
       window.WorldMap.init();
     }
 
+    // ------ HOME BASE INIT (ANKH CHAMBER) ------
+    if (window.HomeBase && window.HomeBase.init) {
+      window.HomeBase.init();
+    }
+
     // Load ship sprite
     S.shipImage = new Image();
     S.shipImage.src = "./src/game/AlphaFighter.png";

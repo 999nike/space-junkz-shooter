@@ -146,6 +146,12 @@ window.WorldMap = {
       this.ship.tx = node.x;
       this.ship.ty = node.y + 60;
 
+      // HOME BASE → Alien–Egyptian hub
+      if (node.id === "home" && window.HomeBase && window.HomeBase.enter) {
+        window.HomeBase.enter();
+        return;
+      }
+
       // TODO (next step):
       // when ship reaches node & node.id === "lvl2"
       // → trigger warp into Level 2 shooter.

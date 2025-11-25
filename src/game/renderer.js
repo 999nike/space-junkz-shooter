@@ -395,9 +395,15 @@ window.drawStars = function drawStars(ctx) {
 };
 
 // ---------- MAIN GAME DRAW ----------
-window.drawGame = function drawGame() {
+wwindow.drawGame = function drawGame() {
   const S = window.GameState;
   const ctx = S.ctx;
+
+  // HOME BASE MODE
+  if (window.HomeBase && window.HomeBase.active) {
+    window.HomeBase.draw(ctx);
+    return;
+  }
 
   // WORLD MAP MODE
   if (window.WorldMap && window.WorldMap.active) {

@@ -646,6 +646,12 @@ window.damagePlayer = function damagePlayer() {
 window.updateGame = function updateGame(dt) {
   const S = window.GameState;
 
+  // HOME BASE MODE – Alien–Egyptian chamber
+  if (window.HomeBase && window.HomeBase.active) {
+    window.HomeBase.update(dt);
+    return;
+  }
+
   // WORLD MAP MODE: hand off to WorldMap when active
   if (window.WorldMap && window.WorldMap.active) {
     window.WorldMap.update(dt);
