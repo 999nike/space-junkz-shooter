@@ -630,7 +630,7 @@ window.damagePlayer = function damagePlayer() {
   }
 
   // Then hull (lives)
-      S.lives = S.lives - 1;
+      S.lives = (S.lives || 0) - 1;
   if (S.livesEl) {
     S.livesEl.textContent = S.lives;
   }
