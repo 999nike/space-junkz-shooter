@@ -6,9 +6,9 @@
     S.canvas = document.getElementById("game");
     S.ctx = S.canvas.getContext("2d");
 
-    // ---- FULL LANDSCAPE CANVAS (90% fullscreen) ----
-    S.canvas.width = window.innerWidth * 0.90;
-    S.canvas.height = window.innerHeight * 0.90;
+    // ---- FULL VIEWPORT CANVAS (MATCH ENGINE, NO STRETCH) ----
+    S.canvas.width  = window.innerWidth;
+    S.canvas.height = window.innerHeight;
     S.W = S.canvas.width;
     S.H = S.canvas.height;
     

@@ -30,11 +30,13 @@ window.initEngine = function initEngine() {
   // Canvas
   S.canvas = document.getElementById("game");
   S.ctx = S.canvas.getContext("2d");
-  S.canvas.width = window.innerWidth * 0.90;
-  S.canvas.height = window.innerHeight * 0.90;
+
+  // Match viewport exactly (no extra scaling / zoom)
+  S.canvas.width  = window.innerWidth;
+  S.canvas.height = window.innerHeight;
   S.W = S.canvas.width;
   S.H = S.canvas.height;
-
+  
   // ---------- HUD ELEMENTS ----------
   S.scoreEl  = document.getElementById("score");
   S.livesEl  = document.getElementById("lives");
@@ -176,12 +178,15 @@ window.addEventListener("load", () => {
   window.GameState.startBtn.addEventListener("click", () => {
     const S = window.GameState;
 
-    // -------- LEADERBOARD FIX --------
-    // Upload previous run BEFORE wiping values
-    if ((S.score > 0) || (S.wizzCoins > 0)) {
-      if (typeof window.submitStats === "function") {
-        window.submitStats(true, S.wizzCoins, S.score);
-      }
+    // -------- SAFE RUN-END SYNC (NO RESET OVERRIDE) --------
+    // If the last run had real progress, push it once using syncStats().
+    const active = localStorage.getItem("sj_active_player");
+    if (
+      active &&
+      (S.score > 0 || S.wizzCoins > 0) &&
+      typeof window.syncStats === "function"
+    ) {
+      window.syncStats(active, S.wizzCoins, S.score);
     }
 
     // -------- NOW RESET AND START NEW RUN --------
