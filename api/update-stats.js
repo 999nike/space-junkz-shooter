@@ -5,11 +5,13 @@ import { sql } from './db.js';
 
 export default async function handler(req, res) {
   try {
+
     if (req.method !== 'POST') {
       res.status(405).json({ error: 'Method not allowed' });
       return;
     }
 
+    // Parse body safely
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body || '{}');
     if (!body) body = {};
@@ -21,6 +23,10 @@ export default async function handler(req, res) {
       return;
     }
 
+    // --------------------------------------------------------
+    // ACCUMULATION MODE (FINAL)
+    // Adds new gains on top of existing totals
+    // --------------------------------------------------------
     const result = await sql/*sql*/`
       INSERT INTO stats (player_id, coins, score, xp)
       VALUES (
@@ -31,9 +37,9 @@ export default async function handler(req, res) {
       )
       ON CONFLICT (player_id)
       DO UPDATE SET
-        coins = EXCLUDED.coins,
-        score = EXCLUDED.score,
-        xp = EXCLUDED.xp,
+        coins = stats.coins + EXCLUDED.coins,
+        score = stats.score + EXCLUDED.score,
+        xp    = stats.xp    + EXCLUDED.xp,
         updated_at = NOW()
       RETURNING *;
     `;
