@@ -136,9 +136,9 @@ window.resetGameState = function resetGameState() {
   // ---- SCORE ----
   S.score = 0;
 
-  // ---- HEALTH / SHIELD ----
-  S.maxLives = 200;
-  S.lives    = 200;
+  // ---- HEALTH / SHIELD CORE (TEST MODE: 100 HP) ----
+  S.maxLives = 100;
+  S.lives    = 100;
 
   S.shield      = 0;
   S.maxShield   = 100;
