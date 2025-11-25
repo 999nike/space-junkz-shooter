@@ -124,13 +124,34 @@
         if (window.flashMsg) window.flashMsg("DEV: Score +100k");
       });
 
-      makeBtn("+50 WizzCoin", () => {
-        const S = window.GameState;
-        if (!S) return;
-        S.wizzCoins = (S.wizzCoins || 0) + 50;
-        if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
-        if (window.flashMsg) window.flashMsg("DEV: +50 WizzCoin");
-      });
+      // ------------------------------------------------------
+// MAX ALL POWERS LVL 5
+// ------------------------------------------------------
+makeBtn("MAX POWER LVL 5", () => {
+    const S = window.GameState;
+    if (!S) return;
+
+    // If you add more powers later, just include them here.
+    S.laserLevel = 5;
+    S.rocketLevel = 5;
+    S.shieldLevel = 5;
+    S.warpLevel = 5;
+    S.sidekickLevel = 5;
+
+    window.flashMsg("DEV: ALL POWERS SET TO LEVEL 5");
+});
+
+// ------------------------------------------------------
+// LOAD LEVEL 2 (MISSION 1)
+// ------------------------------------------------------
+makeBtn("LOAD LEVEL 2 NOW", () => {
+    if (window.Level2 && window.Level2.enter) {
+        window.Level2.enter();
+        window.flashMsg("DEV: LOADING LEVEL 2");
+    } else {
+        window.flashMsg("ERROR: Level2 not loaded");
+    }
+});
 
       this.godBtn = makeBtn("God Mode: OFF", () => {
         const S = window.GameState;
