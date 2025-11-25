@@ -34,7 +34,6 @@
 
     // BASIC ENGINE INIT
     window.initStars();
-    window.resetGameState();
     window.setupInput();
     window.flashMsg("Press START to play");
 

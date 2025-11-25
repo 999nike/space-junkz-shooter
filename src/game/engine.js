@@ -169,7 +169,6 @@ window.addEventListener("load", () => {
   requestAnimationFrame(() => {
     window.initEngine();
     window.initStars();
-    window.resetGameState();
     window.setupInput();
   });
 
@@ -186,7 +185,6 @@ window.addEventListener("load", () => {
     }
 
     // -------- NOW RESET AND START NEW RUN --------
-    window.resetGameState();
     S.running = true;
 
     window.flashMsg("GOOD LUCK, COMMANDER");
