@@ -238,9 +238,7 @@ if (pid && window.loadPlayerStats) {
     localStorage.setItem("sj_active_player", name);
     selectBox.style.display = "none";
 
-    // ⭐ Sync immediately on selection
-    const S = window.GameState;
-    syncStats(name, S.wizzCoins || 0, S.score || 0);
+    
   }
 
   function renderPlayers() {
