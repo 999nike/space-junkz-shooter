@@ -84,31 +84,30 @@ window.WorldMap = {
     },
 
     // Called by blackhole / level complete later
-    _moveShipToNode(node) {
+_moveShipToNode(node) {
   this.ship.tx = node.x;
   this.ship.ty = node.y + 60;
 
-  // HOME BASE
+  // ------ HOME BASE ------
   if (node.id === "home" && window.HomeBase && window.HomeBase.enter) {
-      window.HomeBase.enter();
-      this.active = false;   // hand control to HomeBase
-      return;
+    this.active = false;      // stop map updates
+    window.HomeBase.enter();  // enter Home Base
+    return;
   }
 
-  // LEVEL 2 (new)
+  // ------ LEVEL 2 (MISSION 1) ------
   if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
-      window.Level2.enter();
-      this.active = false;
-      return;
+    this.active = false;      // stop map updates
+    window.Level2.enter();    // start Level 2
+    return;
   }
 
-  // LEVEL 1 (existing)
+  // ------ LEVEL 1 (INTRO SHOOTER) ------
   if (node.id === "lvl1") {
-      // Reset engine + start normal gameplay
-      window.resetGameState();
-      window.GameState.running = true;
-      this.active = false;
-      return;
+    this.active = false;          // stop map updates
+    window.resetGameState();      // reset intro engine
+    window.GameState.running = true;
+    return;
   }
 },
 
