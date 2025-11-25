@@ -621,6 +621,12 @@ if (e.dropChance && Math.random() < e.dropChance) {
 window.damagePlayer = function damagePlayer() {
   const S = window.GameState;
 
+  // DEV GOD MODE – ignore all damage
+  if (S.devGodMode) {
+    if (window.flashMsg) window.flashMsg("GOD MODE – NO DAMAGE");
+    return;
+  }
+
   // Shield takes the hit first
   if (S.shield && S.shield > 0) {
     S.shield = Math.max(0, S.shield - 1);
@@ -630,7 +636,7 @@ window.damagePlayer = function damagePlayer() {
   }
 
   // Then hull (lives)
-      S.lives = (S.lives || 0) - 1;
+  S.lives = (S.lives || 0) - 1;
   if (S.livesEl) {
     S.livesEl.textContent = S.lives;
   }
