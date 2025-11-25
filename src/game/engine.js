@@ -185,8 +185,8 @@ window.addEventListener("load", () => {
     }
 
     // -------- NOW RESET AND START NEW RUN --------
+    window.resetGameState();
     S.running = true;
-
     window.flashMsg("GOOD LUCK, COMMANDER");
 
     // ---------- MUSIC PLAY ----------
