@@ -9,11 +9,6 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
     if (data && data.stats) {
       const S = window.GameState;
 
-      // Apply restored values
-      S.score     = Number(data.stats.score) || 0;
-      S.wizzCoins = Number(data.stats.coins) || 0;
-      S.xp        = Number(data.stats.xp) || 0;
-
       // Update HUD
       if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
       if (S.scoreEl) S.scoreEl.textContent = S.score;
