@@ -1,51 +1,61 @@
-// ===========================
-//  GALAXY MAP (LEVEL SELECT)
-// ===========================
-
-window.WorldMap = {
-  init() {
-    console.log("🌌 WorldMap loaded (placeholder)");
-    // Full UI comes after we finish LevelExit
-  }
-};
 // =========================================================
-//  WORLD MAP – PILLARS SECTOR (PARALLAX)
+//  WORLD MAP – PILLARS SECTOR (PARALLAX GALAXY MAP)
 //  Level Select / Galaxy View
 // =========================================================
-
 (function () {
   const S = window.GameState;
 
   // ------ CONFIG ------
-  const BG_IMAGE_SRC = "./src/game/assets/25th_m16.jpg";
-  // ^ drop your NASA Pillars image in that path & name
-
+  const BG_IMAGE_SRC = "./src/game/assets/25th_m16.jpg"; // starmap image
   const NODE_RADIUS = 16;
 
-  // ------ MAP NODES (TWEAK POSITIONS LATER) ------
+  // ------ MAP NODES ------
   const NODES = [
-    { id: "home",   xFactor: 0.18, yFactor: 0.78, label: "HOME BASE",              unlocked: true  },
-    { id: "lvl1",   xFactor: 0.38, yFactor: 0.45, label: "LEVEL 1 - GEMINI FIELD", unlocked: true  },
-    { id: "lvl2",   xFactor: 0.68, yFactor: 0.32, label: "LEVEL 2 - DRAX SYSTEM",  unlocked: false },
-    { id: "secret", xFactor: 0.82, yFactor: 0.62, label: "???",                    unlocked: false },
+    {
+      id: "home",
+      xFactor: 0.18,
+      yFactor: 0.78,
+      label: "HOME BASE",
+      unlocked: true,
+    },
+    {
+      id: "lvl1",
+      xFactor: 0.38,
+      yFactor: 0.45,
+      label: "LEVEL 1 - GEMINI FIELD",
+      unlocked: true,
+    },
+    {
+      id: "lvl2",
+      xFactor: 0.68,
+      yFactor: 0.32,
+      label: "LEVEL 2 - DRAX SYSTEM",
+      unlocked: false,
+    },
+    {
+      id: "secret",
+      xFactor: 0.82,
+      yFactor: 0.62,
+      label: "???",
+      unlocked: false,
+    },
   ];
 
   const WorldMap = {
     active: false,
     canvas: null,
     ctx: null,
-
     bgImage: null,
     bgLoaded: false,
-
-    layers: [],        // parallax star layers
+    layers: [],   // parallax star layers
     nodes: [],
     ship: {
-      x: 0, y: 0,
-      tx: 0, ty: 0,
-      speed: 3.0
+      x: 0,
+      y: 0,
+      tx: 0,
+      ty: 0,
+      speed: 3.0,
     },
-
     _inputBound: false,
 
     // ------ INIT ------
@@ -53,65 +63,133 @@ window.WorldMap = {
       this.canvas = S.canvas;
       this.ctx = S.ctx;
       if (!this.canvas || !this.ctx) return;
+
       // Background image
       this.bgImage = new Image();
       this.bgImage.src = BG_IMAGE_SRC;
       this.bgImage.onload = () => {
         this.bgLoaded = true;
       };
+
       // Parallax layers (far → near)
       this.layers = [
-        this._makeLayer(40,  4, 0.3), // far
-        this._makeLayer(60,  9, 0.6), // mid
+        this._makeLayer(40, 4, 0.3),  // far
+        this._makeLayer(60, 9, 0.6),  // mid
         this._makeLayer(90, 16, 1.0), // near
       ];
+
       // Node positions from factors
-      this.nodes = NODES.map(n => ({
+      this.nodes = NODES.map((n) => ({
         ...n,
         x: n.xFactor * S.W,
-        y: n.yFactor * S.H
+        y: n.yFactor * S.H,
       }));
+
       // Ship starts near HOME
-      const home = this.nodes.find(n => n.id === "home") || this.nodes[0];
+      const home = this.nodes.find((n) => n.id === "home") || this.nodes[0];
       this.ship.x = this.ship.tx = home.x;
       this.ship.y = this.ship.ty = home.y + 60;
+
       this._bindInput();
     },
 
-    // World map entry point (used by blackhole + cheats)
+    // Entry point used by blackhole + cheats
     enter() {
       if (!this.canvas || !this.ctx) this.init();
       this.active = true;
     },
 
-    // Called by blackhole / level complete later
+    exit() {
+      this.active = false;
+    },
+
+    // ------ LAYER FACTORY ------
+    _makeLayer(count, speed, alphaBase) {
+      const stars = [];
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * S.W,
+          y: Math.random() * S.H,
+          size: 1 + Math.random() * 2,
+          alpha: alphaBase + Math.random() * 0.3,
+        });
+      }
+      return {
+        stars,
+        speed,
+        driftX: (Math.random() * 2 - 1) * 0.15,
+        driftY: (Math.random() * 2 - 1) * 0.15,
+      };
+    },
+
+    // ------ INPUT BIND ------
+    _bindInput() {
+      if (!this.canvas || this._inputBound) return;
+      this._inputBound = true;
+
+      this.canvas.addEventListener("click", (ev) => {
+        if (!this.active) return;
+
+        const rect = this.canvas.getBoundingClientRect();
+        const x =
+          (ev.clientX - rect.left) * (this.canvas.width / rect.width);
+        const y =
+          (ev.clientY - rect.top) * (this.canvas.height / rect.height);
+
+        const clicked = this._hitNode(x, y);
+        if (clicked && clicked.unlocked) {
+          this._moveShipToNode(clicked);
+        }
+      });
+    },
+
+    _hitNode(x, y) {
+      for (const n of this.nodes) {
+        const dx = x - n.x;
+        const dy = y - n.y;
+        if (Math.hypot(dx, dy) <= NODE_RADIUS * 1.2) {
+          return n;
+        }
+      }
+      return null;
+    },
+
+    // Called by blackhole / level complete / node click
     _moveShipToNode(node) {
       this.ship.tx = node.x;
       this.ship.ty = node.y + 60;
 
       // ------ HOME BASE ------
-      if (node.id === "home" && window.HomeBase && window.HomeBase.enter) {
-        this.active = false;      // stop map updates
-        window.HomeBase.enter();  // enter Home Base
+      if (
+        node.id === "home" &&
+        window.HomeBase &&
+        window.HomeBase.enter
+      ) {
+        this.active = false;     // stop map updates
+        window.HomeBase.enter(); // enter Home Base
         return;
       }
 
       // ------ LEVEL 2 (MISSION 1) ------
       if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
-        this.active = false;      // stop map updates
-        window.Level2.enter();    // start Level 2
+        this.active = false;    // stop map updates
+        window.Level2.enter();  // start Level 2
         return;
       }
 
       // ------ LEVEL 1 (INTRO SHOOTER) ------
       if (node.id === "lvl1") {
         this.active = false;          // stop map updates
-        window.resetGameState();      // reset intro engine
-        window.GameState.running = true;
+        if (window.resetGameState) {
+          window.resetGameState();    // reset intro engine
+        }
+        if (window.GameState) {
+          window.GameState.running = true;
+        }
         return;
       }
     },
-    
+
     // ------ UPDATE ------
     update(dt) {
       if (!this.active) return;
@@ -133,10 +211,11 @@ window.WorldMap = {
       const dx = this.ship.tx - this.ship.x;
       const dy = this.ship.ty - this.ship.y;
       const dist = Math.hypot(dx, dy);
-
       if (dist > 2) {
-        const vx = (dx / dist) * this.ship.speed * (S.W / 1280) * 60 * dt;
-        const vy = (dy / dist) * this.ship.speed * (S.H / 720) * 60 * dt;
+        const vx =
+          (dx / dist) * this.ship.speed * (S.W / 1280) * 60 * dt;
+        const vy =
+          (dy / dist) * this.ship.speed * (S.H / 720) * 60 * dt;
         this.ship.x += vx;
         this.ship.y += vy;
       }
@@ -177,12 +256,21 @@ window.WorldMap = {
         // glow ring
         ctx.beginPath();
         ctx.arc(n.x, n.y, NODE_RADIUS, 0, Math.PI * 2);
-        ctx.strokeStyle = n.unlocked ? "rgba(0,255,255,0.8)" : "rgba(120,120,120,0.4)";
+        ctx.strokeStyle = n.unlocked
+          ? "rgba(0,255,255,0.8)"
+          : "rgba(120,120,120,0.4)";
         ctx.lineWidth = 2;
         ctx.stroke();
 
         // core
-        const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, NODE_RADIUS);
+        const grad = ctx.createRadialGradient(
+          n.x,
+          n.y,
+          0,
+          n.x,
+          n.y,
+          NODE_RADIUS
+        );
         if (n.unlocked) {
           grad.addColorStop(0, "#00f7ff");
           grad.addColorStop(1, "rgba(0,247,255,0)");
@@ -213,7 +301,7 @@ window.WorldMap = {
       ctx.fillStyle = "#00ffea";
       ctx.fill();
       ctx.restore();
-    }
+    },
   };
 
   window.WorldMap = WorldMap;
