@@ -111,11 +111,11 @@ window.shoot = function shoot() {
     );
   }
 };
-
 // =========================================================
 //  GAME RESET (WizzCoin + Shield Core)
 // =========================================================
-window.resetGameState = function resetGameState() {
+window.res
+etGameState = function resetGameState() {
   const S = window.GameState;
 
   if (window.initStars) window.initStars();
@@ -142,8 +142,6 @@ window.resetGameState = function resetGameState() {
 
   S.shield      = 0;
   S.maxShield   = 100;
-
-  if (S.coinsEl) S.coinsEl.textContent = 0;
 
   // ---- BOSS FLAGS ----
   S.bossSpawned       = false;
