@@ -230,16 +230,18 @@ window.syncStats = async function (name, coins, score, xp = 0) {
 
   // ⭐ PATCH SECTION 4 (Synced)
   function setActivePlayer(name) {
-    // N5 restore stats
-const pid = localStorage.getItem("sj_player_id");
-if (pid && window.loadPlayerStats) {
+  // Restore stats from DB (read-only)
+  const pid = localStorage.getItem("sj_player_id");
+  if (pid && window.loadPlayerStats) {
     window.loadPlayerStats(pid);
-}
-    localStorage.setItem("sj_active_player", name);
-    selectBox.style.display = "none";
-
-    
   }
+
+  // Set active player locally
+  localStorage.setItem("sj_active_player", name);
+
+  // Hide selector
+  selectBox.style.display = "none";
+}
 
   function renderPlayers() {
     list.innerHTML = "";
