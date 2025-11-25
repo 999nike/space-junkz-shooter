@@ -84,10 +84,33 @@ window.WorldMap = {
     },
 
     // Called by blackhole / level complete later
-    enter() {
-      if (!this.canvas || !this.ctx) this.init();
-      this.active = true;
-    },
+    _moveShipToNode(node) {
+  this.ship.tx = node.x;
+  this.ship.ty = node.y + 60;
+
+  // HOME BASE
+  if (node.id === "home" && window.HomeBase && window.HomeBase.enter) {
+      window.HomeBase.enter();
+      this.active = false;   // hand control to HomeBase
+      return;
+  }
+
+  // LEVEL 2 (new)
+  if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
+      window.Level2.enter();
+      this.active = false;
+      return;
+  }
+
+  // LEVEL 1 (existing)
+  if (node.id === "lvl1") {
+      // Reset engine + start normal gameplay
+      window.resetGameState();
+      window.GameState.running = true;
+      this.active = false;
+      return;
+  }
+},
 
     exit() {
       this.active = false;
