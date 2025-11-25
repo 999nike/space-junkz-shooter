@@ -161,37 +161,54 @@ window.addEventListener("load", () => {
   });
 
   // ----- SNAPSHOT TRACKERS -----
+// These must stay OUTSIDE the click handler so they run on page load
 S._sessionStartScore = S.score ?? 0;
 S._sessionStartCoins = S.wizzCoins ?? 0;
-
 S._snapshotLastScore = S.score ?? 0;
 S._snapshotLastCoins = S.wizzCoins ?? 0;
 
- window.GameState.startBtn.addEventListener("click", () => {
-    const S = window.GameState;
-    const active = localStorage.getItem("sj_active_player");
-    if (
-      active &&
-      (S.score > 0 || S.wizzCoins > 0) &&
-      typeof window.syncStats === "function"
-    ) {
-      window.syncStats(active, S.wizzCoins, S.score);
-    }
-    window.resetGameState();
-    S.running = true;
-    window.flashMsg("GOOD LUCK, COMMANDER");
-    const bgm = document.getElementById("bgm");
-    if (bgm) {
-      bgm.volume = 0.35;
-      bgm.play().catch(() => {
-        console.warn("Music blocked until user interacts again.");
-      });
-    }
-  });
-  window.flashMsg("Press START to play");
+window.GameState.startBtn.addEventListener("click", () => {
+  const S = window.GameState;
+  const active = localStorage.getItem("sj_active_player");
+
+  // ---- Optional pre-sync if you had stats this session ----
+  if (
+    active &&
+    (S.score > 0 || S.wizzCoins > 0) &&
+    typeof window.syncStats === "function"
+  ) {
+    window.syncStats(active, S.wizzCoins, S.score);
+  }
+
+  // ---- SAFETY CHECK: Player must be selected ----
+  if (!active) {
+    window.showPlayerSelect();
+    return;
+  }
+
+  // ---- Initialize snapshot trackers for this new session ----
+  S._sessionStartScore = S.score ?? 0;
+  S._sessionStartCoins = S.wizzCoins ?? 0;
+  S._snapshotLastScore = S.score ?? 0;
+  S._snapshotLastCoins = S.wizzCoins ?? 0;
+
+  // ---- Start the game ----
+  window.resetGameState();
+  S.running = true;
+  window.flashMsg("GOOD LUCK, COMMANDER");
+
+  const bgm = document.getElementById("bgm");
+  if (bgm) {
+    bgm.volume = 0.35;
+    bgm.play().catch(() => {
+      console.warn("Music blocked until user interacts again.");
+    });
+  }
 });
 
+// First load message
 window.flashMsg("Press START to play");
+
 
 // =========================================================
 //  MAIN LOOP
