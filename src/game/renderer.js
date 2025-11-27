@@ -37,17 +37,34 @@ window.updateStars = function updateStars(dt) {
 
 // ---------- DIAGONAL / NEBULA BACKGROUND ----------
 window.drawRunway = function drawRunway(ctx) {
-  const S = window.GameState;
-  const nebula = S.sprites.nebulaBG;
+  const S = window.GameState || {};
+  const sprites = S.sprites || null;
 
-  // Nebula backdrop
   ctx.save();
-  if (nebula) {
-    ctx.globalAlpha = 1.0;
-    ctx.drawImage(nebula, 0, 0, S.W, S.H);
-  }
-  ctx.restore();
 
+  if (sprites && sprites.nebulaBG) {
+    const nebula = sprites.nebulaBG;
+
+    ctx.globalAlpha = 1.0;
+    ctx.drawImage(
+      nebula,
+      0,
+      0,
+      S.W || ctx.canvas.width,
+      S.H || ctx.canvas.height
+    );
+  } else {
+    // Fallback – simple gradient so the game never hard-crashes
+    const w = S.W || ctx.canvas.width;
+    const h = S.H || ctx.canvas.height;
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, "#02030a");
+    g.addColorStop(1, "#050018");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  ctx.restore();
   ctx.globalAlpha = 1;
 };
 
