@@ -22,7 +22,7 @@ window.loadSprites = function loadSprites() {
   // --- Core Sprites ---
   add("ship",        "./src/game/assets/ship.png");
   add("playerBullet","./src/game/assets/bullet_blue.png");
-  add("enemyBullet", "./src/game/assets/Laser.png");
+  add("enemyBullet", "./src/game/assets/laser.png");
   add("explosionSheet", "./src/game/assets/Explo01.png");
 
   // Boss / Side ships
