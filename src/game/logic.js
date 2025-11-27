@@ -687,29 +687,48 @@ window.updateGame = function updateGame(dt) {
     }
   }
 
-  // ----- Player movement (keyboard on top of pointer) -----
-  let dx = 0;
-  let dy = 0;
-  const keys = S.keys || {};
+  // ----- NOVA MODE THRUSTER PHYSICS -----
+const keys = S.keys || {};
+const p = player;
 
-  if (keys["arrowleft"] || keys["a"]) dx -= 1;
-  if (keys["arrowright"] || keys["d"]) dx += 1;
-  if (keys["arrowup"] || keys["w"]) dy -= 1;
-  if (keys["arrowdown"] || keys["s"]) dy += 1;
+// THRUST forward (W / ArrowUp / joystick up)
+let thrusting = false;
 
-  if (dx || dy) {
-    const len = Math.hypot(dx, dy) || 1;
-    dx /= len;
-    dy /= len;
-    player.x += dx * player.speed * dt;
-    player.y += dy * player.speed * dt;
-  }
+if (keys["w"] || keys["arrowup"]) thrusting = true;
+if (S.moveY < -0.35) thrusting = true; // mobile joystick push forward
 
-  // Mobile analog movement
-  if (S.moveX || S.moveY) {
-    player.x += (S.moveX || 0) * player.speed * dt;
-    player.y += (S.moveY || 0) * player.speed * dt;
-  }
+if (thrusting) {
+  p.vx += Math.cos(p.angle) * p.accel * dt;
+  p.vy += Math.sin(p.angle) * p.accel * dt;
+}
+
+// SIDE THRUST (A/D or left/right on joystick)
+let side = 0;
+if (keys["a"] || keys["arrowleft"]) side = -1;
+if (keys["d"] || keys["arrowright"]) side = 1;
+if (Math.abs(S.moveX) > 0.35) side = S.moveX;
+
+if (side !== 0) {
+  const sideAngle = p.angle + Math.PI / 2 * side;
+  p.vx += Math.cos(sideAngle) * (p.accel * 0.65) * dt;
+  p.vy += Math.sin(sideAngle) * (p.accel * 0.65) * dt;
+}
+
+// APPLY DRAG
+p.vx *= p.drag;
+p.vy *= p.drag;
+
+// CAP SPEED
+const spd = Math.hypot(p.vx, p.vy);
+if (spd > p.maxSpeed) {
+  const scale = p.maxSpeed / spd;
+  p.vx *= scale;
+  p.vy *= scale;
+}
+
+// APPLY VELOCITY
+p.x += p.vx * dt;
+p.y += p.vy * dt;
 
   // Full-screen movement with a small safe border
   player.x = clamp(player.x, 24, S.W - 24);

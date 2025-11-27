@@ -22,20 +22,39 @@ window.drawPlayer = function drawPlayer(ctx) {
   //   - We add bank as a small roll for nice lean
   ctx.rotate(baseAngle + Math.PI / 2 + p.bank * 0.10);
 
-  // Glow FX to hide cut edges / look nice in 4K
-  ctx.shadowColor = "rgba(120,200,255,0.35)";
-  ctx.shadowBlur = 10;
+  // ---- THRUSTER GLOW (Nova Style) ----
+  const speed = Math.hypot(p.vx, p.vy);
+  const thrusterSize = Math.min(40, 12 + speed * 0.05);
 
-  // Scale sprite
-  const scale = 0.06; // tweak if you want bigger/smaller
+  ctx.save();
+  ctx.rotate(baseAngle + Math.PI / 2);
+
+  const grad = ctx.createRadialGradient(
+    0, 30, 0,
+    0, 30, thrusterSize
+  );
+  grad.addColorStop(0.0, "rgba(0, 255, 255, 0.9)");
+  grad.addColorStop(0.4, "rgba(0, 180, 255, 0.5)");
+  grad.addColorStop(1.0, "rgba(0, 80, 255, 0)");
+
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 30, thrusterSize, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // ---- SHIP SPRITE (with glow) ----
+  ctx.shadowColor = "rgba(120,200,255,0.45)";
+  ctx.shadowBlur = 12;
+
+  const scale = 0.06;
   const w = img.width * scale;
   const h = img.height * scale;
 
-  // Centered nicely + slightly lifted to compensate for long nose
   ctx.drawImage(
     img,
-    -w * 0.50,  // centered horizontally
-    -h * 0.60,  // lifted a bit
+    -w * 0.50,
+    -h * 0.60,
     w,
     h
   );
