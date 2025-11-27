@@ -66,7 +66,29 @@ window.drawBullets = function drawBullets(ctx) {
   for (const b of S.bullets) {
     ctx.save();
     ctx.translate(b.x, b.y);
+    ctx.save();
+    ctx.translate(b.x, b.y);
+
+    // Glow bloom behind bullet
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = "rgba(0,255,255,0.35)";
+    ctx.beginPath();
+    ctx.arc(0, 0, w * 0.9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Motion trail (elongated streak)
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.scale(1.4, 0.55);
     ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    ctx.restore();
+
+    // Original bullet sprite
+    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+
+    ctx.restore();
     ctx.restore();
   }
 };
@@ -91,7 +113,20 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
 
     ctx.save();
     ctx.translate(b.x, b.y);
+    // Enemy bullet glow
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = "rgba(255,180,50,0.35)";
+    ctx.beginPath();
+    ctx.arc(0, 0, w * 0.9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Enemy bullet (scaled for sharper core)
+    ctx.save();
+    ctx.scale(1.15, 1.15);
     ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    ctx.restore();
     ctx.restore();
   }
 };
@@ -140,6 +175,25 @@ window.drawParticles = function drawParticles(ctx) {
 
     const scale = e.scale || 1.0;
 
+    // ---- CORE FLASH ----
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.beginPath();
+    ctx.arc(0, 0, frameW * scale * 0.55, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // ---- SHOCKWAVE RING ----
+    ctx.save();
+    ctx.strokeStyle = "rgba(0,255,255,0.35)";
+    ctx.lineWidth = frameW * scale * 0.20;
+    ctx.beginPath();
+    ctx.arc(0, 0, frameW * scale * 0.8, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // ---- SPRITE EXPLOSION FRAME ----
     ctx.drawImage(
       sheet,
       sx, sy, frameW, frameH,
@@ -148,6 +202,15 @@ window.drawParticles = function drawParticles(ctx) {
       frameW * scale,
       frameH * scale
     );
+
+    // ---- NEON BLOOM ----
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = "rgba(0,180,255,0.25)";
+    ctx.beginPath();
+    ctx.arc(0, 0, frameW * scale * 1.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
 
     ctx.restore();
   }
