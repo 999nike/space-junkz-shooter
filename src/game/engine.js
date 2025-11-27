@@ -159,39 +159,46 @@ window.resetGameState = function resetGameState() {
 //  ENGINE STARTUP + START BUTTON
 // =========================================================
 window.addEventListener("load", () => {
+  const S = window.GameState;
+
   // Wait for all sprite images to be fully loaded before starting engine
   window.preloadSprites(() => {
+
     window.initEngine();
-    window.initStars();
-    window.setupInput();
-  });
-});
+    if (window.initStars) window.initStars();
+    if (window.setupInput) window.setupInput();
 
- window.GameState.startBtn.addEventListener("click", () => {
-    const S = window.GameState;
-    const active = localStorage.getItem("sj_active_player");
-    if (
-      active &&
-      (S.score > 0 || S.wizzCoins > 0) &&
-      typeof window.syncStats === "function"
-    ) {
-      window.syncStats(active, S.wizzCoins, S.score);
-    }
-    window.resetGameState();
-    S.running = true;
-    window.flashMsg("GOOD LUCK, COMMANDER");
-    const bgm = document.getElementById("bgm");
-    if (bgm) {
-      bgm.volume = 0.35;
-      bgm.play().catch(() => {
-        console.warn("Music blocked until user interacts again.");
+    // Hook up START button after engine + HUD elements exist
+    if (S.startBtn) {
+      S.startBtn.addEventListener("click", () => {
+        const active = localStorage.getItem("sj_active_player");
+
+        if (
+          active &&
+          (S.score > 0 || S.wizzCoins > 0) &&
+          typeof window.syncStats === "function"
+        ) {
+          window.syncStats(active, S.wizzCoins, S.score);
+        }
+
+        window.resetGameState();
+        S.running = true;
+        window.flashMsg("GOOD LUCK, COMMANDER");
+
+        const bgm = document.getElementById("bgm");
+        if (bgm) {
+          bgm.volume = 0.35;
+          bgm.play().catch(() => {
+            console.warn("Music blocked until user interacts again.");
+          });
+        }
       });
+
+      // Initial menu message
+      window.flashMsg("Press START to play");
     }
   });
-  window.flashMsg("Press START to play");
 });
-
-window.flashMsg("Press START to play");
 
 // =========================================================
 //  MAIN LOOP
