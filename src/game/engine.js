@@ -159,11 +159,13 @@ window.resetGameState = function resetGameState() {
 //  ENGINE STARTUP + START BUTTON
 // =========================================================
 window.addEventListener("load", () => {
-  requestAnimationFrame(() => {
+  // Wait for all sprite images to be fully loaded before starting engine
+  window.preloadSprites(() => {
     window.initEngine();
     window.initStars();
     window.setupInput();
   });
+});
 
  window.GameState.startBtn.addEventListener("click", () => {
     const S = window.GameState;

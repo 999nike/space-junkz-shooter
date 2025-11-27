@@ -39,6 +39,33 @@ window.loadSprites = function loadSprites() {
   S.shipImage = S.sprites.ship;
 };
 
+// =============================
+// WAIT FOR ALL SPRITES TO LOAD
+// =============================
+window.preloadSprites = function preloadSprites(startCallback) {
+  const S = window.GameState;
+  const sprites = S.sprites;
+  const keys = Object.keys(sprites);
+
+  let loaded = 0;
+  const total = keys.length;
+
+  if (total === 0) {
+    startCallback();
+    return;
+  }
+
+  keys.forEach((key) => {
+    const img = sprites[key];
+    img.onload = () => {
+      loaded++;
+      if (loaded === total) {
+        startCallback();
+      }
+    };
+  });
+};
+
 // =========================================================
 //  PLAYER BASE + PHYSICS (NOVA MODE)
 // =========================================================
