@@ -13,6 +13,10 @@ Object.assign(window.GameState, {
   H: 0,
   canvas: null,
   ctx: null,
+
+  // ensure sprites always exists so renderer never reads from undefined
+  sprites: window.GameState.sprites || {},
+
   player: Object.assign(window.GameState.player || {}, {
     x: 0,
     y: 0,

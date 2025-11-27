@@ -151,12 +151,18 @@ for (const p of S.powerUps) {
 
 // Explosion renderer (sprite sheet)
 window.drawParticles = function drawParticles(ctx) {
-  const S = window.GameState;
-  const sheet = S.sprites.explosionSheet;
-  if (!sheet) return;
+  const S = window.GameState || {};
+  const sprites = S.sprites || null;
+
+  // Hard guard – if sprites not ready or particles not set, do nothing
+  if (!sprites || !sprites.explosionSheet || !Array.isArray(S.particles) || S.particles.length === 0) {
+    return;
+  }
+
+  const sheet = sprites.explosionSheet;
 
   const rows = 4;
-  const cols = 4;   // 4x4 grid
+  const cols = 4; // 4x4 grid
 
   const frameW = sheet.width / cols;
   const frameH = sheet.height / rows;
