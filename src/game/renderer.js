@@ -533,8 +533,10 @@ window.drawGame = function drawGame() {
 
   // Background first
   window.drawRunway(ctx);
+
   // Stars
-  drawStars(ctx);
+  window.drawStars2(ctx);
+
   // Enemies
   window.drawEnemies(ctx);
 
@@ -558,14 +560,14 @@ window.drawGame = function drawGame() {
   window.drawPowerUps(ctx);
 
   // Particles
-window.drawParticles(ctx);
+  window.drawParticles(ctx);
 
 // Player
-window.drawPlayer(ctx);
+  window.drawPlayer(ctx);
 
 // ------- PLAYER HEALTH + SHIELD BARS (N5) -------
 if (window.drawPlayerBars && S) {
-  window.drawPlayerBars(ctx, S);
+   window.drawPlayerBars(ctx, S);
 }
 };
 
