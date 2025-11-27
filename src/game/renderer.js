@@ -13,26 +13,9 @@ window.drawStars = function drawStars(ctx) {
   ctx.restore();
 };
 
-// STARFIELD MOVEMENT (top-right → bottom-left, 30° tilt)
-window.updateStars = function updateStars(dt) {
-  const S = window.GameState;
-
-  const angle = (30 * Math.PI) / 180;
-  const dirX = -Math.sin(angle);   // left
-  const dirY =  Math.cos(angle);   // down
-
-  for (const s of S.stars) {
-    s.x += dirX * s.speed * dt;
-    s.y += dirY * s.speed * dt;
-
-    if (s.y > S.H + 50 || s.x < -50) {
-      s.x = rand(S.W * 0.55, S.W + 140);
-      s.y = rand(-160, S.H * 0.25);
-      s.size = rand(1, 3);
-      s.speed = rand(30, 110);
-      s.alpha = rand(0.4, 1);
-    }
-  }
+// STARFIELD MOVEMENT — DISABLED (LOGIC.JS VERSION ACTIVE)
+window.updateStars = function updateStars() {
+  // Renderer version disabled to prevent double starfield updates.
 };
 
 // ---------- DIAGONAL / NEBULA BACKGROUND ----------
@@ -239,10 +222,13 @@ window.drawParticles = function drawParticles(ctx) {
 
 // ---------- SIDEKICK RENDERER ----------
 window.drawSidekicks = function drawSidekicks(ctx) {
-  const S = window.GameState;
-  const img = S.sprites.sideShip;
-  if (!img || !S.sidekicks) return;
+  const S = window.GameState || {};
+  const sprites = S.sprites || null;
 
+  // No renderer errors before assets load
+  if (!sprites || !sprites.sideShip || !S.sidekicks) return;
+
+  const img = sprites.sideShip;
   const scale = 0.6;
   const w = img.width * scale;
   const h = img.height * scale;
@@ -250,8 +236,7 @@ window.drawSidekicks = function drawSidekicks(ctx) {
   for (const s of S.sidekicks) {
     ctx.save();
     ctx.translate(s.x, s.y);
-    // Rotate 180° so ship faces upward
-    ctx.rotate(Math.PI);
+    ctx.rotate(Math.PI); // face upward
     ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
     ctx.restore();
   }
