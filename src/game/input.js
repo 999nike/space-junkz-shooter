@@ -1,8 +1,8 @@
 // ===============================
-//  INPUT.JS – CLEAN FINAL VERSION
-//  • setupInput called from engine.js
+//  INPUT.JS – NOVA MODE VERSION
 //  • Keyboard, mouse, touch, joystick, fire
-//  • Works on PC + mobile
+//  • PC + mobile
+//  • Mouse ONLY aims (no position move)
 // ===============================
 
 (function () {
@@ -27,6 +27,7 @@
     window.addEventListener("keydown", (e) => {
       const k = e.key.toLowerCase();
       S.keys[k] = true;
+
       if (k === "shift") S.keys["shift"] = true;
       if (e.code === "Space") S.firing = true;
     });
@@ -34,43 +35,42 @@
     window.addEventListener("keyup", (e) => {
       const k = e.key.toLowerCase();
       S.keys[k] = false;
+
       if (k === "shift") S.keys["shift"] = false;
       if (e.code === "Space") S.firing = false;
     });
 
     // ---------------------------
-    // POINTER MOVE → ship aim + position
+    // POINTER MOVE → ship aim (NO MOVEMENT)
     // ---------------------------
     function pointerMove(e) {
       const rect = canvas.getBoundingClientRect();
-      const px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const py = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+      const px =
+        (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const py =
+        (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
 
       const gx = (px / rect.width) * S.W;
       const gy = (py / rect.height) * S.H;
 
       const p = S.player;
       if (!p) return;
-      const oldX = p.x;
 
+      // store mouse in game space
       S.mouseX = gx;
       S.mouseY = gy;
 
-      const targetX = clamp(gx, 24, S.W - 24);
-      const targetY = clamp(gy, 24, S.H - 24);
-
+      // ---- NOVA MODE: POINTER ONLY AIMS, NO MOVEMENT ----
       const dx = gx - p.x;
       const dy = gy - p.y;
+
       if (dx || dy) {
         p.angle = Math.atan2(dy, dx);
       }
 
-      if (!S.keys["shift"]) {
-        p.x = targetX;
-        p.y = targetY;
-      }
-
-      const deltaX = p.x - oldX;
+      // Banking (visual lean)
+      const deltaX = dx;
       if (deltaX < -2)      p.bank = Math.max(p.bank - 0.10, -1);
       else if (deltaX > 2) p.bank = Math.min(p.bank + 0.10, 1);
       else                 p.bank *= 0.92;
@@ -80,20 +80,25 @@
     canvas.addEventListener("mousemove", pointerMove);
 
     // touch move ONLY inside canvas bounds
-    canvas.addEventListener("touchmove", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const t = e.touches[0];
-      const inside =
-        t.clientX >= rect.left &&
-        t.clientX <= rect.right &&
-        t.clientY >= rect.top &&
-        t.clientY <= rect.bottom;
+    canvas.addEventListener(
+      "touchmove",
+      (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const t = e.touches[0];
 
-      if (inside) {
-        e.preventDefault();
-        pointerMove(e);
-      }
-    }, { passive: false });
+        const inside =
+          t.clientX >= rect.left &&
+          t.clientX <= rect.right &&
+          t.clientY >= rect.top &&
+          t.clientY <= rect.bottom;
+
+        if (inside) {
+          e.preventDefault();
+          pointerMove(e);
+        }
+      },
+      { passive: false }
+    );
 
     // ---------------------------
     // FIRE BUTTON (tap & hold)
@@ -104,6 +109,7 @@
       if (ev && ev.preventDefault) ev.preventDefault();
       S.firing = true;
     }
+
     function stopFire() {
       S.firing = false;
     }
@@ -164,21 +170,30 @@
       joyActive = false;
       S.moveX = 0;
       S.moveY = 0;
+
       if (joyInner) {
         joyInner.style.transform = "translate(0px,0px)";
       }
     }
 
     if (joyOuter) {
-      joyOuter.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        joyStart(e);
-      }, { passive: false });
+      joyOuter.addEventListener(
+        "touchstart",
+        (e) => {
+          e.preventDefault();
+          joyStart(e);
+        },
+        { passive: false }
+      );
 
-      joyOuter.addEventListener("touchmove", (e) => {
-        e.preventDefault();
-        joyMove(e);
-      }, { passive: false });
+      joyOuter.addEventListener(
+        "touchmove",
+        (e) => {
+          e.preventDefault();
+          joyMove(e);
+        },
+        { passive: false }
+      );
 
       joyOuter.addEventListener("touchend", joyEnd);
       joyOuter.addEventListener("touchcancel", joyEnd);

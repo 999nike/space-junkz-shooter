@@ -1,138 +1,84 @@
-// ---------- ASSETS / GLOBAL STATE ----------
+// =========================================================
+//  ASSETS.JS – NOVA MODE READY
+//  Sprites, Player Base Stats, Physics (vx/vy)
+// =========================================================
 
-window.GameState = {
-  // Canvas + drawing
-  canvas: null,
-  ctx: null,
-  W: 480,
-  H: 640,
+// Global GameState container
+window.GameState = window.GameState || {};
 
-  // UI
-  scoreEl: null,
-  livesEl: null,
-  msgEl: null,
-  startBtn: null,
-
- // Game state
-  running: false,
-  lastTime: 0,
-  score: 0,
-  lives: 3,
-  wizzCoins: 0,   // ⭐ NEW
-
-  // Entities
-  stars: [],
-  enemies: [],
-  bullets: [],
-  enemyBullets: [],
-  powerUps: [],
-  particles: [],
-  sidekicks: [],
-  rockets: [],
-
-  // Timers
-  spawnTimer: 0,
-  shootTimer: 0,
-
-  // Sprites (individual + atlas bucket)
-  shipImage: null,   // player ship
-  fireImage: null,   // optional thruster sprite (future)
-  sprites: {
-    playerBullet: null,     // Bullet_player.png
-    enemyBullet: null,      // Laser.png
-    megaBeam: null,         // laser.png (future beam)
-    explosionSheet: null,   // Explo01.png
-    bossScorpion: null      // oldSCORPIO2.png
-  },
-
-  // Player
-  player: {
-    x: 180,
-    y: 560,
-    radius: 22,        // collision radius
-    speed: 250,
-    weaponLevel: 1,    // 1 = single, 2 = twin, 3 = spread
-    invuln: 0,
-    bank: 0,           // -1 left, +1 right, 0 neutral
-    angle: -Math.PI / 2 // facing "up" by default
-  },
-
-  // Input state
-  keys: {},
-
-  // Pointer tracking (for angle-based shooting)
-  mouseX: 0,
-  mouseY: 0
-};
-
-// Helpers
-window.rand = function rand(min, max) {
-  return Math.random() * (max - min) + min;
-};
-
-window.clamp = function clamp(v, min, max) {
-  return v < min ? min : v > max ? max : v;
-};
-
-window.circleHit = function circleHit(a, b, pad = 0) {
-  const dx = a.x - b.x;
-  const dy = a.y - b.y;
-  const r = (a.radius || 0) + (b.radius || 0) + pad;
-  return dx * dx + dy * dy <= r * r;
-};
-
-// ---------- SPRITE LOADER ----------
-// Centralised place to hang all images used by the renderer / logic.
-// Safe to call multiple times; it just rewires the same objects.
+// ----------------------------
+//  SPRITE LOADER
+// ----------------------------
 window.loadSprites = function loadSprites() {
   const S = window.GameState;
-  if (!S) return;
+  S.sprites = {};
 
-  const sprites = (S.sprites = S.sprites || {});
-
-  function makeImage(path) {
+  function add(name, src) {
     const img = new Image();
-    img.src = path;
-
-    img.onerror = () => console.error("❌ Failed to load:", path);
-    img.onload = () => console.log("✅ Loaded:", path);
-
-    return img;
+    img.src = src;
+    S.sprites[name] = img;
   }
 
-  
-  // Sidekick ship (parafighter drone)
-  sprites.sideShip = makeImage("./src/game/assets/parafighter.png");
+  // --- Core Sprites ---
+  add("ship",        "./src/game/assets/ship.png");
+  add("playerBullet","./src/game/assets/bullet_blue.png");
+  add("enemyBullet", "./src/game/assets/bullet_yellow.png");
+  add("explosionSheet", "./src/game/assets/Explo01.png");
 
-  // Rocket bullet (used by sidekicks)
-  sprites.rocket = makeImage("./src/game/assets/rocket.png");
-  
-  // Player bullet
-  sprites.playerBullet = makeImage("./src/game/assets/Bullet_player.png");
+  // Boss / Side ships
+  add("bossScorpion", "./src/game/assets/boss_scorpion.png");
+  add("bossGemini",   "./src/game/assets/boss_gemini.png");
+  add("sideShip",     "./src/game/assets/side_ship.png");
+  add("rocket",       "./src/game/assets/rocket.png");
 
-  // Enemy bullet orb
-  sprites.enemyBullet = makeImage("./src/game/assets/Laser.png");  // CASE-SENSITIVE
+  // Backgrounds
+  add("nebulaBG", "./src/game/assets/nebulaBG.jpg");
 
-  // Mega-beam (tail laser)
-  sprites.megaBeam = makeImage("./src/game/assets/laser.png");     // lower-case file
+  // Player ship (cached for renderer.js)
+  S.shipImage = S.sprites.ship;
+};
 
-  // Explosion sheet
-  sprites.explosionSheet = makeImage("./src/game/assets/Explo01.png");
+// =========================================================
+//  PLAYER BASE + PHYSICS (NOVA MODE)
+// =========================================================
+window.GameState.player = {
+  x: 0,
+  y: 0,
+  radius: 16,
 
-  // Boss (scorpion)
-  sprites.bossScorpion = makeImage("./src/game/oldSCORPIO2.png");
+  // ---------- NOVA THRUSTER PHYSICS ----------
+  vx: 0,            // horizontal velocity
+  vy: 0,            // vertical velocity
+  accel: 680,       // thrust power (adjust to taste)
+  drag: 0.86,       // friction / space resistance
+  maxSpeed: 480,    // cap (Nova uses capped but slippery)
 
-  // Boss 2 (Gemini Warship)
-  sprites.bossGemini = makeImage("./src/game/oldGEMINI2.png");
+  // ---------- AIM & VISUALS ----------
+  angle: -Math.PI / 2,
+  bank: 0,          // visual lean during turns
 
-  
-  // Enemy ship sprites
-  sprites.enemyGrunt   = makeImage("./src/game/assets/oldARIES2.png");
-  sprites.enemyZigzag  = makeImage("./src/game/assets/oldLIBRA12.png");
-  sprites.enemyShooter = makeImage("./src/game/assets/oldTAURUS2.png");
-  sprites.enemyTank    = makeImage("./src/game/assets/cruiser.png");
+  // ---------- COMBAT ----------
+  weaponLevel: 1,
+  invuln: 0,
 
-  // Nebula background
-  sprites.nebulaBG = makeImage("./src/game/assets/nebula_bg.png");
-  
+  // ---------- SHIP SYSTEMS ----------
+  speed: 260,       // legacy – still used by rockets/sidekicks
+};
+
+// =========================================================
+//  INITIAL VALUES AT ENGINE START
+// =========================================================
+window.preparePlayerForStart = function preparePlayerForStart() {
+  const S = window.GameState;
+  const p = S.player;
+
+  p.x = S.W / 2;
+  p.y = S.H - 80;
+
+  p.vx = 0;
+  p.vy = 0;
+  p.bank = 0;
+
+  p.weaponLevel = 1;
+  p.invuln = 0;
 };
