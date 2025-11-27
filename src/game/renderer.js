@@ -93,28 +93,25 @@ window.drawBullets = function drawBullets(ctx) {
 };
 
 
-// ---------- ENEMY BULLETS ----------
+// ----------- ENEMY BULLETS -----------
 window.drawEnemyBullets = function drawEnemyBullets(ctx) {
-  const S = window.GameState;
-  const yellow = S.sprites.enemyBullet;
-  const blue   = S.sprites.playerBullet;
-  if (!yellow && !blue) return;
+  const S = window.GameState || {};
+  const sprites = S.sprites || null;
+
+  if (!sprites || !sprites.enemyBullet || !S.enemyBullets) return;
+
+  const img = sprites.enemyBullet;
+  const w = img.width;
+  const h = img.height;
 
   for (const b of S.enemyBullets) {
-    const img =
-      b.type === "bossClaw"
-        ? (blue || yellow)
-        : (yellow || blue);
-
     if (!img) continue;
-
-    const w = img.width;
-    const h = img.height;
 
     ctx.save();
     ctx.translate(b.x, b.y);
+    ctx.scale(1.1, 1.1);
 
-    // Enemy bullet glow
+    // Glow
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     ctx.fillStyle = "rgba(255,180,50,0.35)";
@@ -123,14 +120,8 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
     ctx.fill();
     ctx.restore();
 
-    // Enemy bullet core (scaled sharper) – centered correctly
-    ctx.save();
-    ctx.scale(1.15, 1.15);
-
-    // ✔ FIXED centering for enemy bullets
-    ctx.drawImage(img, -w / 2, -h / 2, w, h);
-
-    ctx.restore();
+    // Centered draw
+    ctx.drawImage(img, -w/2, -h/2, w, h);
     ctx.restore();
   }
 };
