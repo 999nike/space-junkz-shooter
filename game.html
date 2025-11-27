@@ -84,23 +84,29 @@
     loop
   ></audio>
 
-<!-- GAME SCRIPTS (CORRECT LOAD ORDER) -->
+<!-- ================================ -->
+<!-- GAME SCRIPTS (FINAL LOAD ORDER) -->
+<!-- ================================ -->
 
-<!-- MUST LOAD FIRST -->
+<!-- MUST LOAD FIRST: SPRITE + IMAGE DEFINITIONS -->
 <script src="./src/game/assets.js"></script>
 
-<!-- Game data + movement logic -->
+<!-- ENGINE + GLOBALS MUST LOAD BEFORE ANYONE CALLS flashMsg(), rand(), etc -->
+<script src="./src/game/engine.js"></script>
+
+<!-- SYSTEM + DATA FILES -->
 <script src="./src/game/enemies.js"></script>
 <script src="./src/game/input.js"></script>
 <script src="./src/game/player.js"></script>
 
-<!-- Renderers AFTER assets -->
+<!-- RENDERERS (require assets + engine ready) -->
 <script src="./src/game/renderer.js"></script>
 
-<!-- Core logic + systems -->
+<!-- CORE GAME LOGIC (spawns, bosses, explosions, sidekicks) -->
 <script src="./src/game/logic.js"></script>
+
+<!-- OPTIONAL MODULES -->
 <script src="./src/game/blachole.js"></script>
-<script src="./src/game/engine.js"></script>
 <script src="./src/game/world.js"></script>
 <script src="./src/game/levels/lvl2.js"></script>
 <script src="./src/game/homebase.js"></script>
