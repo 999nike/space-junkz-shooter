@@ -7,6 +7,10 @@
 //   - Clean exit back to WorldMap
 // ===========================================================
 
+if (!S.sprites) {
+    loadSprites();
+}
+
 (function () {
   const S = window.GameState;
 
