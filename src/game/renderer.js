@@ -386,6 +386,58 @@ window.drawGeminiBoss = function drawGeminiBoss(ctx) {
   }
 };
 
+// ----------- PLAYER RENDERING (ANGLE + BANK) -----------
+window.drawPlayer = function drawPlayer(ctx) {
+  const S = window.GameState;
+  const p = S.player;
+
+  // HARD GUARD — stop until ship.png is fully decoded
+  if (!S.shipImage || S.shipImage.naturalWidth === 0) {
+    return;
+  }
+
+  const img = S.shipImage;
+
+  ctx.save();
+
+  // Move to player position
+  ctx.translate(p.x, p.y);
+
+  // Default facing angle (Nova patch fix — face upward)
+  const baseAngle = typeof p.angle === "number" ? p.angle : -Math.PI / 2;
+
+  // Rotate so ship nose points in movement direction
+  ctx.rotate(baseAngle + Math.PI / 2 + (p.bank || 0) * 0.10);
+
+  // ---- THRUSTER GLOW (Nova Style) ----
+  const speed = Math.hypot(p.vx || 0, p.vy || 0);
+  const thrusterSize = Math.min(40, 12 + speed * 0.05);
+
+  ctx.save();
+  ctx.rotate(baseAngle + Math.PI / 2);
+
+  const grad = ctx.createRadialGradient(
+    0, 30, 0,
+    0, 30, thrusterSize
+  );
+  grad.addColorStop(0, "rgba(0,255,255,0.7)");
+  grad.addColorStop(1, "rgba(0,100,255,0.0)");
+
+  ctx.globalCompositeOperation = "lighter";
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 30, thrusterSize, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // ---- DRAW SHIP IMAGE ----
+  const w = img.width;
+  const h = img.height;
+  ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+
+  ctx.restore();
+};
+
 // --------------------------------------------------------
 //  PLAYER HEALTH + SHIELD BARS (LERP ANIMATED)
 // --------------------------------------------------------
