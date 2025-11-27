@@ -28,6 +28,15 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
     S.canvas = document.getElementById("game");
     S.ctx = S.canvas.getContext("2d");
 
+    // --- FIX: Ensure arrays exist before renderer touches them ---
+    S.enemies      = [];
+    S.bullets      = [];
+    S.enemyBullets = [];
+    S.rockets      = [];
+    S.particles    = [];
+    S.powerUps     = [];   // REQUIRED – prevents “not iterable”
+    S.sidekicks    = [];
+
     // ---- FULL VIEWPORT CANVAS (MATCH ENGINE, NO STRETCH) ----
     S.canvas.width  = window.innerWidth;
     S.canvas.height = window.innerHeight;
