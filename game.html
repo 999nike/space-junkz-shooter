@@ -84,22 +84,30 @@
     loop
   ></audio>
 
-  <!-- GAME SCRIPTS (order matters) -->
-  <script src="./src/game/assets.js"></script>
-  <script src="./src/game/enemies.js"></script>
-  <script src="./src/game/input.js"></script>
-  <script src="./src/game/player.js"></script>
-  <script src="./src/game/renderer.js"></script>
-  <script src="./src/game/logic.js"></script>
-  <script src="./src/game/blachole.js"></script>
-  <script src="./src/game/engine.js"></script>
-  <script src="./src/game/world.js"></script>
-  <script src="./src/game/levels/lvl2.js"></script>
-  <!-- NEW: Alien–Egyptian Home Base hub -->
-  <script src="./src/game/homebase.js"></script>
-  <!-- NEW: Dev cheat console (toggle with C) -->
-  <script src="./src/game/devconsole.js"></script>
-  <script src="./src/game/game.js"></script>
+<!-- GAME SCRIPTS (CORRECT LOAD ORDER) -->
+
+<!-- MUST LOAD FIRST -->
+<script src="./src/game/assets.js"></script>
+
+<!-- Game data + movement logic -->
+<script src="./src/game/enemies.js"></script>
+<script src="./src/game/input.js"></script>
+<script src="./src/game/player.js"></script>
+
+<!-- Renderers AFTER assets -->
+<script src="./src/game/renderer.js"></script>
+
+<!-- Core logic + systems -->
+<script src="./src/game/logic.js"></script>
+<script src="./src/game/blachole.js"></script>
+<script src="./src/game/engine.js"></script>
+<script src="./src/game/world.js"></script>
+<script src="./src/game/levels/lvl2.js"></script>
+<script src="./src/game/homebase.js"></script>
+<script src="./src/game/devconsole.js"></script>
+
+<!-- Main game bootstrap LAST -->
+<script src="./src/game/game.js"></script>
 
   <!-- Eruda console ALWAYS enabled (remove later if you want) -->
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
