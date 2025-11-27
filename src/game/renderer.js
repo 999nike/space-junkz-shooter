@@ -244,20 +244,23 @@ window.drawSidekicks = function drawSidekicks(ctx) {
 
 // ---------- ROCKET RENDERER ----------
 window.drawRockets = function drawRockets(ctx) {
-  const S = window.GameState;
-  const img = S.sprites.rocket;
-  if (!img || !S.rockets) return;
+  const S = window.GameState || {};
+  const sprites = S.sprites || null;
 
+  // Prevent crashes before assets load
+  if (!sprites || !sprites.rocket || !S.rockets) return;
+
+  const img = sprites.rocket;
   const w = img.width;
   const h = img.height;
-  const scale = 2.0; // visible
+  const scale = 2.0;
 
   for (const r of S.rockets) {
     ctx.save();
     ctx.translate(r.x, r.y);
 
     const angle = Math.atan2(r.vy, r.vx);
-    ctx.rotate(angle); // rocket oriented along movement
+    ctx.rotate(angle);
 
     ctx.drawImage(
       img,
