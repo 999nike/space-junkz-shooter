@@ -161,14 +161,24 @@ window.resetGameState = function resetGameState() {
 window.addEventListener("load", () => {
   const S = window.GameState;
 
-  // Wait for all sprite images to be fully loaded before starting engine
+  // Engine + HUD init
+  window.initEngine();
+
+  // Create sprite dictionary before preloading
+  if (typeof window.loadSprites === "function") {
+    window.loadSprites();
+  }
+
+  // Preload all sprites THEN start systems
   window.preloadSprites(() => {
 
-    window.initEngine();
     if (window.initStars) window.initStars();
     if (window.setupInput) window.setupInput();
 
-    // Hook up START button after engine + HUD elements exist
+    // Main game loop
+    requestAnimationFrame(window.gameLoop);
+
+    // Hook up start button AFTER HUD exists
     if (S.startBtn) {
       S.startBtn.addEventListener("click", () => {
         const active = localStorage.getItem("sj_active_player");
@@ -194,7 +204,6 @@ window.addEventListener("load", () => {
         }
       });
 
-      // Initial menu message
       window.flashMsg("Press START to play");
     }
   });
