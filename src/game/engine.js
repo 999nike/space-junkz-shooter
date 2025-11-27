@@ -1,3 +1,8 @@
+// Random helper (restored utility)
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 // =========================================================
 //  ENGINE INIT (FULL PATCHED + CLEANED)  
 //  WizzCoin HUD support + Leaderboard Safe Start
