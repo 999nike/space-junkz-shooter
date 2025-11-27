@@ -51,10 +51,9 @@ window.drawRunway = function drawRunway(ctx) {
   ctx.globalAlpha = 1;
 };
 
-// ---------- BULLETS ----------
+/// ---------- BULLETS ----------
 window.drawBullets = function drawBullets(ctx) {
   const S = window.GameState;
-
   if (!S.sprites) return;
 
   const img = S.sprites.playerBullet;
@@ -64,8 +63,6 @@ window.drawBullets = function drawBullets(ctx) {
   const h = img.height;
 
   for (const b of S.bullets) {
-    ctx.save();
-    ctx.translate(b.x, b.y);
     ctx.save();
     ctx.translate(b.x, b.y);
 
@@ -82,18 +79,21 @@ window.drawBullets = function drawBullets(ctx) {
     ctx.save();
     ctx.globalAlpha = 0.55;
     ctx.scale(1.4, 0.55);
-    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
-    ctx.restore();
 
-    // Original bullet sprite
-    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    // ✔ FIXED: true centered bullet
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
 
     ctx.restore();
+
+    // Original bullet sprite (centered)
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+
     ctx.restore();
   }
 };
 
-// Enemy bullets renderer
+
+// ---------- ENEMY BULLETS ----------
 window.drawEnemyBullets = function drawEnemyBullets(ctx) {
   const S = window.GameState;
   const yellow = S.sprites.enemyBullet;
@@ -113,6 +113,7 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
 
     ctx.save();
     ctx.translate(b.x, b.y);
+
     // Enemy bullet glow
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -122,10 +123,13 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
     ctx.fill();
     ctx.restore();
 
-    // Enemy bullet (scaled for sharper core)
+    // Enemy bullet core (scaled sharper) – centered correctly
     ctx.save();
     ctx.scale(1.15, 1.15);
-    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+
+    // ✔ FIXED centering for enemy bullets
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+
     ctx.restore();
     ctx.restore();
   }
