@@ -110,3 +110,21 @@ window.preparePlayerForStart = function preparePlayerForStart() {
   p.weaponLevel = 1;
   p.invuln = 0;
 };
+
+// ----------------------------------------------------------
+//  INIT ASSETS (MUST RUN BEFORE GAME STARTS)
+// ----------------------------------------------------------
+window.initAssets = function initAssets() {
+  // 1. Load sprites into GameState.sprites
+  window.loadSprites();
+
+  // 2. Preload all images THEN boot the engine
+  window.preloadSprites(function () {
+    console.log("✔ All sprites loaded");
+    // Kick off engine AFTER sprites exist
+    if (window.initEngine) window.initEngine();
+  });
+};
+
+// Auto-run on page load
+window.addEventListener("load", window.initAssets);
