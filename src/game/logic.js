@@ -1,3 +1,10 @@
+// =========================
+// GLOBAL RANDOM HELPER
+// =========================
+window.rand = function rand(min, max) {
+  return Math.random() * (max - min) + min;
+};
+
 // =========================================================
 //  LOGIC CORE – CLEAN REBUILD
 //  Stars, enemies, bosses, WizzCoin, updateGame()
