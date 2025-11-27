@@ -32,7 +32,7 @@ window.loadSprites = function loadSprites() {
   add("rocket",       "./src/game/assets/rocket.png");
 
   // Backgrounds
-  add("nebulaBG", "./src/game/assets/nebulaBG.jpg");
+  add("nebulaBG", "./src/game/assets/nebula_bg.png");
 
   // Player ship (cached for renderer.js)
   S.shipImage = S.sprites.ship;
