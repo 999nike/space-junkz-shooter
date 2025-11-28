@@ -374,42 +374,6 @@ window.drawPlayerBars = function drawPlayerBars(ctx, S) {
   }
 };
 
-// --------------------------------------------------------
-//  SIMPLE STARFIELD SYSTEM (RESTORE)
-// --------------------------------------------------------
-let _stars = [];
-
-window.initStars = function initStars() {
-  const S = window.GameState;
-  _stars = [];
-  for (let i = 0; i < 120; i++) {
-    _stars.push({
-      x: Math.random() * S.W,
-      y: Math.random() * S.H,
-      s: Math.random() * 2 + 1,
-      v: 0.2 + Math.random() * 0.4
-    });
-  }
-};
-
-window.drawStars = function drawStars(ctx) {
-  const S = window.GameState;
-  ctx.fillStyle = "#ffffff";
-
-  for (const s of _stars) {
-    ctx.globalAlpha = 0.5 + Math.random() * 0.5;
-    ctx.fillRect(s.x, s.y, s.s, s.s);
-
-    s.y += s.v;
-    if (s.y > S.H) {
-      s.y = 0;
-      s.x = Math.random() * S.W;
-    }
-  }
-
-  ctx.globalAlpha = 1;
-};
-
 // ---------- MAIN GAME DRAW ----------
 window.drawGame = function drawGame() {
   const S = window.GameState;
