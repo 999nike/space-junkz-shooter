@@ -18,81 +18,98 @@ window.drawPlayer = function drawPlayer(ctx) {
   const baseAngle = typeof p.angle === "number" ? p.angle : -Math.PI / 2;
 
   // Rotate so sprite nose points in the movement direction
-  //   - Image is drawn pointing up by default (−90° in our angle system)
-  //   - We add bank as a small roll for nice lean
   ctx.rotate(baseAngle + Math.PI / 2 + p.bank * 0.10);
-  
-// ---- THRUSTER EMBER PARTICLES ----
-{
-  const boost = (S.keys?.["w"] || S.keys?.["arrowup"]) ? 3 : 1;
 
-  for (let i = 0; i < boost; i++) {
-    S.thrustParticles.push({
-      x: p.x + (Math.random() - 0.5) * 6,
-      y: p.y + 40,
-      vx: (Math.random() - 0.5) * 30,
-      vy: 120 + Math.random() * 80,
-      life: 0.35 + Math.random() * 0.15,
-      size: 1.5 + Math.random() * 2.0
-    });
+  //
+  // ============================================================
+  //   THRUSTER EMBER PARTICLES (ALWAYS ON + BOOST TRIPLE)
+  // ============================================================
+  //
+  {
+    const boost = (S.keys?.["w"] || S.keys?.["arrowup"]) ? 3 : 1;
+
+    for (let i = 0; i < boost; i++) {
+      S.thrustParticles.push({
+        x: p.x + (Math.random() - 0.5) * 6,
+        y: p.y + 40,
+        vx: (Math.random() - 0.5) * 30,
+        vy: 120 + Math.random() * 80,
+        life: 0.35 + Math.random() * 0.15,
+        size: 1.5 + Math.random() * 2.0
+      });
+    }
   }
-}
 
-// ----- THRUSTER FLAME V2 (big hot core) -----
-{
-  const flameOffset = 42;      // further behind ship for your scale
-  const jitter = (Math.random() - 0.5) * 6;
+  //
+  // ============================================================
+  //      PNG THRUSTER FLAME (3-FRAME ANIMATED SPRITE)
+  // ============================================================
+  //
+  {
+    const frames = S.sprites.thrusterFrames;
 
-  ctx.save();
-  ctx.translate(0, flameOffset + jitter);
+    if (frames && frames.length === 3) {
+      // Which frame to draw
+      S.thrustFrame = (S.thrustFrame || 0);
+      S.thrustTimer = (S.thrustTimer || 0);
+      S.thrustTimer += S.dt || 0.016; // safety fallback
 
-  // flame length scales when moving forward
-  const isBoost = (S.keys?.["w"] || S.keys?.["arrowup"]);
-  const flameLen = isBoost ? 110 : 70;
-  const flameWidth = isBoost ? 28 : 20;
+      // Animation speed
+      if (S.thrustTimer > 0.05) {
+        S.thrustTimer = 0;
+        S.thrustFrame = (S.thrustFrame + 1) % 3;
+      }
 
-  // white-hot to orange gradient
-  const g = ctx.createLinearGradient(0, 0, 0, flameLen);
-  g.addColorStop(0.0, "rgba(255,255,220,1)");
-  g.addColorStop(0.2, "rgba(255,200,90,1)");
-  g.addColorStop(0.6, "rgba(255,120,40,0.8)");
-  g.addColorStop(1.0, "rgba(255,80,20,0)");
+      // Grab frame
+      const flame = frames[S.thrustFrame];
 
-  ctx.fillStyle = g;
+      // How far behind the ship to draw it
+      const flameOffset = 38;
 
-  // cone shape
-  ctx.beginPath();
-  ctx.moveTo(-flameWidth, 0);
-  ctx.lineTo(flameWidth, 0);
-  ctx.lineTo(0, flameLen);
-  ctx.closePath();
-  ctx.fill();
+      // Boost scaling
+      const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
+      const flameScale = boosting ? 1.55 : 1.0;
 
-  ctx.restore();
-}
-// ----- END THRUSTER -----
+      ctx.save();
+      ctx.translate(0, flameOffset);
 
-  // Glow FX to hide cut edges / look nice in 4K
+      // Scale + draw
+      const fw = flame.width * flameScale;
+      const fh = flame.height * flameScale;
+
+      ctx.drawImage(flame, -fw / 2, 0, fw, fh);
+      ctx.restore();
+    }
+  }
+
+  //
+  // ============================================================
+  //                    RENDER PLAYER SHIP
+  // ============================================================
+  //
   ctx.shadowColor = "rgba(120,200,255,0.35)";
   ctx.shadowBlur = 10;
 
   // Scale sprite
-  const scale = 0.06; // tweak if you want bigger/smaller
+  const scale = 0.06;
   const w = img.width * scale;
   const h = img.height * scale;
 
-  // Centered nicely + slightly lifted to compensate for long nose
   ctx.drawImage(
     img,
-    -w * 0.50,  // centered horizontally
-    -h * 0.60,  // lifted a bit
+    -w * 0.50,   // center
+    -h * 0.60,   // slight lift
     w,
     h
   );
 
   ctx.restore();
 
-  // Invulnerability ring (unchanged)
+  //
+  // ============================================================
+  //                   INVULNERABILITY RING
+  // ============================================================
+  //
   if (p.invuln > 0) {
     ctx.strokeStyle = "#fffd8b";
     ctx.lineWidth = 2;
