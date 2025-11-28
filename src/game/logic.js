@@ -720,18 +720,6 @@ window.updateGame = function updateGame(dt) {
   // Stars
   window.updateStars(dt);
 
-  // ---- THRUSTER PARTICLE UPDATE ----
-for (let i = S.thrustParticles.length - 1; i >= 0; i--) {
-  const t = S.thrustParticles[i];
-  t.x += t.vx * dt;
-  t.y += t.vy * dt;
-  t.life -= dt;
-
-  if (t.life <= 0) {
-    S.thrustParticles.splice(i, 1);
-  }
-}
-
   // -------- SIDEKICKS (FOLLOW + ROCKET FIRE) --------
   for (const s of S.sidekicks) {
     // Follow player

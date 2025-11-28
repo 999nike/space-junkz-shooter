@@ -28,16 +28,17 @@ window.drawPlayer = function drawPlayer(ctx) {
   {
     const boost = (S.keys?.["w"] || S.keys?.["arrowup"]) ? 3 : 1;
 
-    for (let i = 0; i < boost; i++) {
-      S.thrustParticles.push({
-        x: p.x + (Math.random() - 0.5) * 6,
-        y: p.y + 40,
-        vx: (Math.random() - 0.5) * 30,
-        vy: 120 + Math.random() * 80,
-        life: 0.35 + Math.random() * 0.15,
-        size: 1.5 + Math.random() * 2.0
-      });
-    }
+for (let i = 0; i < boost; i++) {
+  S.thrustParticles.push({
+    x: p.x + (Math.random() - 0.5) * 10,   // wider spread
+    y: p.y + 46,                            // slightly lower
+    vx: (Math.random() - 0.5) * 55,         // stronger sideways scatter
+    vy: 140 + Math.random() * 120,          // longer trails
+    life: 0.60 + Math.random() * 0.35,      // stays on screen longer
+    size: 3 + Math.random() * 4,            // 3–7px = clearly visible
+    colour: "#ffaa33"                       // brighter ember
+  });
+}
   }
 
   // ---- PNG THRUSTER FLAME ----
