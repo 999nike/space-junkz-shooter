@@ -785,16 +785,57 @@ window.updateGame = function updateGame(dt) {
       continue;
     }
 
-    // Base downward movement with 30° diagonal
-    const angle = (30 * Math.PI) / 180;
-    e.x += -Math.sin(angle) * e.speedY * dt;
-    e.y +=  Math.cos(angle) * e.speedY * dt;
+        // ==========================================================
+        //   NEW ENEMY AI – TRACK / CHASE / ATTACK THE PLAYER
+        // ============================================================
+        const px = S.player.x;
+        const py = S.player.y;
 
-    // ZigZag path
-    if (e.type === "zigzag") {
-      e.phase += e.waveSpeed * dt;
-      e.x = e.baseX + Math.sin(e.phase) * e.waveAmp;
-    }
+        // Distance vector to player
+        const dx = px - e.x;
+        const dy = py - e.y;
+
+        // Normalised (homing) direction
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = dx / len;
+        const ny = dy / len;
+
+        // Base chase speed
+        const chaseSpeed = e.speedY * 1.1;
+
+        // HOMING MOVEMENT
+        e.x += nx * chaseSpeed * dt;
+        e.y += ny * chaseSpeed * dt;
+
+        // ------- ZIGZAG VARIANT -------
+        if (e.type === "zigzag") {
+            e.phase += e.waveSpeed * dt;
+            e.x += Math.sin(e.phase) * e.waveAmp * dt;
+        }
+
+        // ------- SHOOTER BEHAVIOUR -------
+        if (e.type === "shooter") {
+            e.shootTimer -= dt;
+            if (e.shootTimer <= 0) {
+                S.enemyBullets.push({
+                    x: e.x,
+                    y: e.y + e.radius,
+                    vy: rand(150, 260),
+                    vx: (Math.random() - 0.5) * 120,
+                    radius: 4,
+                    colour: "#ffae4b"
+                });
+                e.shootTimer = rand(0.8, 1.6);
+            }
+        }
+
+        // Reset when off screen
+        if (e.y > S.H + 120) {
+            e.x = rand(40, S.W - 40);
+            e.y = rand(-180, -40);
+            e.speedY = rand(40, 90);
+            e.hp = rand(1, 3);
+        }
 
     // Shooter bullets
     if (e.type === "shooter") {
