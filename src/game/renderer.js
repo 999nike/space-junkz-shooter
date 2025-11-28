@@ -439,11 +439,14 @@ window.drawGame = function drawGame() {
   // Power-ups
   window.drawPowerUps(ctx);
 
-  // Particles
-window.drawParticles(ctx);
+  // Particles (explosions)
+  window.drawParticles(ctx);
 
-// Player
-window.drawPlayer(ctx);
+  // 🔥 tiny dust particles under player
+  window.drawHeatDust(ctx);
+
+  // Player
+  window.drawPlayer(ctx);
 
 // ------- PLAYER HEALTH + SHIELD BARS (N5) -------
 if (window.drawPlayerBars && S) {

@@ -83,6 +83,21 @@ window.drawPlayer = function drawPlayer(ctx) {
   }
 }
 
+// Heat-dust spawn
+  if (!S.heatDust) S.heatDust = [];
+
+  if (S.keys?.["w"] || S.keys?.["arrowup"])
+    S.heatDust.push({
+      x: p.x + (Math.random() - 0.5) * 14,
+      y: p.y + 4 + (Math.random() - 0.5) * 6,
+      vx: (Math.random() - 0.5) * 12,
+      vy: (Math.random() - 0.5) * 12,
+      size: 1 + Math.random() * 1.2,
+      alpha: 0.9,
+      life: 0.25
+    });
+  }
+
   //
   // ============================================================
   //                    RENDER PLAYER SHIP
