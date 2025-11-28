@@ -21,31 +21,49 @@ window.drawPlayer = function drawPlayer(ctx) {
   //   - Image is drawn pointing up by default (−90° in our angle system)
   //   - We add bank as a small roll for nice lean
   ctx.rotate(baseAngle + Math.PI / 2 + p.bank * 0.10);
-
-// ----- THRUSTER FX (Nova Drift style) -----
+  
+// ---- THRUSTER EMBER PARTICLES ----
 {
-  const thrusterOffset = 28;
-  const tx = 0;
-  const ty = thrusterOffset;
+  const boost = (S.keys?.["w"] || S.keys?.["arrowup"]) ? 3 : 1;
 
-  const speed = Math.hypot(S.moveX || 0, S.moveY || 0);
-  const flameLen = 18 + speed * 18;
+  for (let i = 0; i < boost; i++) {
+    S.thrustParticles.push({
+      x: p.x + (Math.random() - 0.5) * 6,
+      y: p.y + 40,
+      vx: (Math.random() - 0.5) * 30,
+      vy: 120 + Math.random() * 80,
+      life: 0.35 + Math.random() * 0.15,
+      size: 1.5 + Math.random() * 2.0
+    });
+  }
+}
 
-  const jitter = (Math.random() - 0.5) * 4;
+// ----- THRUSTER FLAME V2 (big hot core) -----
+{
+  const flameOffset = 42;      // further behind ship for your scale
+  const jitter = (Math.random() - 0.5) * 6;
 
   ctx.save();
-  ctx.translate(tx, ty + jitter);
+  ctx.translate(0, flameOffset + jitter);
 
+  // flame length scales when moving forward
+  const isBoost = (S.keys?.["w"] || S.keys?.["arrowup"]);
+  const flameLen = isBoost ? 110 : 70;
+  const flameWidth = isBoost ? 28 : 20;
+
+  // white-hot to orange gradient
   const g = ctx.createLinearGradient(0, 0, 0, flameLen);
-  g.addColorStop(0, "rgba(255,180,80,1)");
-  g.addColorStop(0.4, "rgba(255,120,40,0.9)");
-  g.addColorStop(1, "rgba(255,80,20,0)");
+  g.addColorStop(0.0, "rgba(255,255,220,1)");
+  g.addColorStop(0.2, "rgba(255,200,90,1)");
+  g.addColorStop(0.6, "rgba(255,120,40,0.8)");
+  g.addColorStop(1.0, "rgba(255,80,20,0)");
 
   ctx.fillStyle = g;
 
+  // cone shape
   ctx.beginPath();
-  ctx.moveTo(-6, 0);
-  ctx.lineTo(6, 0);
+  ctx.moveTo(-flameWidth, 0);
+  ctx.lineTo(flameWidth, 0);
   ctx.lineTo(0, flameLen);
   ctx.closePath();
   ctx.fill();

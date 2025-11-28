@@ -30,6 +30,9 @@ window.GameState = {
   sidekicks: [],
   rockets: [],
 
+  // Thruster ember particles (afterburner effect)
+  thrustParticles: [],
+
   // Timers
   spawnTimer: 0,
   shootTimer: 0,
