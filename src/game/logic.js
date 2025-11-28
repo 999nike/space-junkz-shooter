@@ -1,3 +1,8 @@
+// ----- UTILITY: CLAMP -----
+window.clamp = function clamp(v, min, max) {
+  return v < min ? min : v > max ? max : v;
+};
+
 // =========================
 // GLOBAL RANDOM HELPER
 // =========================
