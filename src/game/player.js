@@ -125,7 +125,7 @@ window.drawPlayer = function drawPlayer(ctx) {
     // LEFT FLAME
     if (S.keys["a"] || S.keys["arrowleft"]) {
       ctx.save();
-      ctx.translate(-14, 18);
+      ctx.translate(-0, 2);
       ctx.rotate(Math.PI + leftAng);
       const fw = flame.width * scaleX;
       const fh = flame.height * (scaleY * turningBoost);
@@ -136,7 +136,7 @@ window.drawPlayer = function drawPlayer(ctx) {
     // RIGHT FLAME
     if (S.keys["d"] || S.keys["arrowright"]) {
       ctx.save();
-      ctx.translate(14, 18);
+      ctx.translate(0, 2);
       ctx.rotate(Math.PI + rightAng);
       const fw = flame.width * scaleX;
       const fh = flame.height * (scaleY * turningBoost);
