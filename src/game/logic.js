@@ -817,15 +817,19 @@ window.updateGame = function updateGame(dt) {
         if (e.type === "shooter") {
             e.shootTimer -= dt;
             if (e.shootTimer <= 0) {
+
+                // small clean bullet
                 S.enemyBullets.push({
                     x: e.x,
                     y: e.y + e.radius,
-                    vy: rand(150, 260),
-                    vx: (Math.random() - 0.5) * 120,
-                    radius: 4,
-                    colour: "#ffae4b"
+                    vy: 260,             // fast downward
+                    vx: 0,               // no sideways randomness
+                    radius: 3,           // small bullet
+                    colour: "#61d6ff"    // cyan blue
                 });
-                e.shootTimer = rand(0.8, 1.6);
+
+                // fire every 2 seconds
+                e.shootTimer = 2.0;
             }
         }
 
@@ -836,21 +840,6 @@ window.updateGame = function updateGame(dt) {
             e.speedY = rand(40, 90);
             e.hp = rand(1, 3);
         }
-
-    // Shooter bullets
-    if (e.type === "shooter") {
-      e.shootTimer -= dt;
-      if (e.shootTimer <= 0) {
-        S.enemyBullets.push({
-          x: e.x,
-          y: e.y + e.radius,
-          vy: rand(140, 220),
-          radius: 4,
-          colour: "#ffae4b"
-        });
-        e.shootTimer = rand(1.0, 2.2);
-      }
-    }
 
     // Flash fade
     if (e.hitFlash > 0) e.hitFlash -= dt;
