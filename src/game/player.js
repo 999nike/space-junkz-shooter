@@ -56,7 +56,7 @@ window.drawPlayer = function drawPlayer(ctx) {
     const flame = frames[S.thrustFrame];
 
     // Position behind/below ship
-    const flameOffsetX = -4;    // move left
+    const flameOffsetX = -6;    // move left
     const flameOffsetY = 100;   // move down/back
 
     // Flame size
@@ -68,8 +68,6 @@ window.drawPlayer = function drawPlayer(ctx) {
 
     // Move flame under ship
     ctx.translate(flameOffsetX, flameOffsetY);
-
-    ctx.rotate(-Math.PI / 2);
 
     // Point backwards
     ctx.rotate(Math.PI);
