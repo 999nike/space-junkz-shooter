@@ -813,25 +813,21 @@ window.updateGame = function updateGame(dt) {
             e.x += Math.sin(e.phase) * e.waveAmp * dt;
         }
 
-        // ------- SHOOTER BEHAVIOUR -------
-        if (e.type === "shooter") {
-            e.shootTimer -= dt;
-            if (e.shootTimer <= 0) {
+        // ------- ALL ENEMIES SHOOT -------
+e.shootTimer -= dt;
+if (e.shootTimer <= 0) {
 
-                // small clean bullet
-                S.enemyBullets.push({
-                    x: e.x,
-                    y: e.y + e.radius,
-                    vy: 260,             // fast downward
-                    vx: 0,               // no sideways randomness
-                    radius: 3,           // small bullet
-                    colour: "#61d6ff"    // cyan blue
-                });
+    S.enemyBullets.push({
+        x: e.x,
+        y: e.y + e.radius,
+        vy: 260,             // fast downward
+        vx: 0,               // straight
+        radius: 3,           // small bullet
+        colour: "#61d6ff"    // cyan-blue
+    });
 
-                // fire every 2 seconds
-                e.shootTimer = 2.0;
-            }
-        }
+    e.shootTimer = 2.0;      // shoot every 2 seconds
+}
 
         // Reset when off screen
         if (e.y > S.H + 120) {
