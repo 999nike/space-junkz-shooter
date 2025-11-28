@@ -112,7 +112,7 @@ window.drawPlayer = function drawPlayer(ctx) {
       ctx.save();
 
       // Match your drawing: slightly outwards + behind ship
-      ctx.translate(0, 12);     
+      ctx.translate(0, 0);     
 
       // Rotate so flame points outward 30°
       ctx.rotate(Math.PI + leftAng);
@@ -131,7 +131,7 @@ window.drawPlayer = function drawPlayer(ctx) {
       ctx.save();
 
       // Mirror offset
-      ctx.translate(22, 24);
+      ctx.translate(0, 0);
 
       ctx.rotate(Math.PI + rightAng);
 
