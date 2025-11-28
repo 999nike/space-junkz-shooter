@@ -112,7 +112,7 @@ window.drawPlayer = function drawPlayer(ctx) {
       ctx.save();
 
       // Match your drawing: slightly outwards + behind ship
-      ctx.translate(-22, 24);     
+      ctx.translate(0, 12);     
 
       // Rotate so flame points outward 30°
       ctx.rotate(Math.PI + leftAng);
