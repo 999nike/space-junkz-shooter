@@ -40,12 +40,11 @@ window.drawPlayer = function drawPlayer(ctx) {
     }
   }
 
-  // ---- PNG THRUSTER FLAME (short, tight engine flame) ----
+  // ---- PNG THRUSTER FLAME ----
 {
   const frames = S.sprites.thrusterFrames;
 
   if (frames && frames.length === 3) {
-    // Animation timing
     S.thrustFrame = (S.thrustFrame ?? 0);
     S.thrustTimer = (S.thrustTimer ?? 0);
     S.thrustTimer += S.dt || 0.016;
@@ -57,28 +56,22 @@ window.drawPlayer = function drawPlayer(ctx) {
 
     const flame = frames[S.thrustFrame];
 
-    // Where the flame attaches to ship (underneath)
-const flameOffset = 26;
+    // Move flame BEHIND ship (safe)
+    const flameOffset = -32;
 
-// flame sizes
-const flameScaleX = boosting ? 0.35 : 0.25;
-const flameScaleY = boosting ? 0.18 : 0.12;
+    // Small tight flame
+    const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
+    const flameScaleX = boosting ? 0.28 : 0.20;  // width
+    const flameScaleY = boosting ? 0.14 : 0.10;  // height
 
     ctx.save();
-
-    // Move flame under the ship
     ctx.translate(0, flameOffset);
-
-    // Flip flame backwards (180°)
     ctx.rotate(Math.PI);
 
-    // Apply squash scale
     const fw = flame.width * flameScaleX;
     const fh = flame.height * flameScaleY;
 
-    // Render tight flame
     ctx.drawImage(flame, -fw / 2, 0, fw, fh);
-
     ctx.restore();
   }
 }
