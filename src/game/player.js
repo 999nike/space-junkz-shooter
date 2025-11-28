@@ -83,6 +83,67 @@ window.drawPlayer = function drawPlayer(ctx) {
   }
 }
 
+// ============================================================
+//   SIDE THRUSTERS (A / D) – angled 30° outward
+// ============================================================
+{
+  const frames = S.sprites.thrusterFrames;
+  if (frames && frames.length === 3) {
+
+    const flame = frames[S.thrustFrame];
+
+    // Radians
+    const leftAng  = (30 * Math.PI) / 180;
+    const rightAng = -(30 * Math.PI) / 180;
+
+    // Smaller scale than main flame
+    const scaleX = 0.12;
+    const scaleY = 0.07;
+
+    // How strong when turning (like your W boost)
+    const turningBoost =
+      (S.keys["a"] || S.keys["arrowleft"] || 
+       S.keys["d"] || S.keys["arrowright"]) ? 1.25 : 1.0;
+
+    // -------------------------------------------------------
+    // LEFT THRUSTER (press A / ←)
+    // -------------------------------------------------------
+    if (S.keys["a"] || S.keys["arrowleft"]) {
+      ctx.save();
+
+      // Match your drawing: slightly outwards + behind ship
+      ctx.translate(-22, 24);     
+
+      // Rotate so flame points outward 30°
+      ctx.rotate(Math.PI + leftAng);
+
+      const fw = flame.width * scaleX;
+      const fh = flame.height * (scaleY * turningBoost);
+
+      ctx.drawImage(flame, -fw / 2, -fh, fw, fh);
+      ctx.restore();
+    }
+
+    // -------------------------------------------------------
+    // RIGHT THRUSTER (press D / →)
+    // -------------------------------------------------------
+    if (S.keys["d"] || S.keys["arrowright"]) {
+      ctx.save();
+
+      // Mirror offset
+      ctx.translate(22, 24);
+
+      ctx.rotate(Math.PI + rightAng);
+
+      const fw = flame.width * scaleX;
+      const fh = flame.height * (scaleY * turningBoost);
+
+      ctx.drawImage(flame, -fw / 2, -fh, fw, fh);
+      ctx.restore();
+    }
+  }
+}
+
   //
   // ============================================================
   //                    RENDER PLAYER SHIP
