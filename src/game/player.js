@@ -57,13 +57,12 @@ window.drawPlayer = function drawPlayer(ctx) {
 
     const flame = frames[S.thrustFrame];
 
-    // Where the flame attaches to ship (underneath)
-    const flameOffset = 26;
+    // Correct spot: directly behind the UFO
+    const flameOffset = -22;
 
-    // Compact engine flame size
-    const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
-    const flameScaleX = boosting ? 0.45 : 0.35;  // width
-    const flameScaleY = boosting ? 0.25 : 0.18;  // height (short)
+    // Tight small flame
+    const flameScaleX = boosting ? 0.28 : 0.20;
+    const flameScaleY = boosting ? 0.14 : 0.10;
 
     ctx.save();
 
