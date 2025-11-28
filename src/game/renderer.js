@@ -153,6 +153,22 @@ window.drawParticles = function drawParticles(ctx) {
   }
 };
 
+window.drawHeatDust = function drawHeatDust(ctx) {
+  const S = window.GameState;
+  if (!S.heatDust) return;
+
+  ctx.save();
+
+  for (const d of S.heatDust) {
+    ctx.globalAlpha = d.alpha;
+    ctx.fillStyle = d.color;
+    ctx.fillRect(d.x, d.y, d.size, d.size);
+  }
+
+  ctx.restore();
+  ctx.globalAlpha = 1;
+};
+
 // ---------- SIDEKICK RENDERER ----------
 window.drawSidekicks = function drawSidekicks(ctx) {
   const S = window.GameState;
