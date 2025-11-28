@@ -41,10 +41,11 @@ window.loadSprites = function loadSprites() {
 
 // =============================
 // WAIT FOR ALL SPRITES TO LOAD
+//  - Works even with cached images
 // =============================
 window.preloadSprites = function preloadSprites(startCallback) {
   const S = window.GameState;
-  const sprites = S.sprites;
+  const sprites = S.sprites || {};
   const keys = Object.keys(sprites);
 
   let loaded = 0;
@@ -55,13 +56,36 @@ window.preloadSprites = function preloadSprites(startCallback) {
     return;
   }
 
+  function markLoaded() {
+    loaded++;
+    if (loaded === total) {
+      startCallback();
+    }
+  }
+
   keys.forEach((key) => {
     const img = sprites[key];
-    img.onload = () => {
-      loaded++;
-      if (loaded === total) {
-        startCallback();
-      }
+
+    // If something is missing, just count it and move on
+    if (!img) {
+      console.warn("Missing sprite entry:", key);
+      markLoaded();
+      return;
+    }
+
+    // If already loaded from cache, count immediately
+    if (img.complete && img.naturalWidth > 0) {
+      markLoaded();
+      return;
+    }
+
+    // Normal async load
+    img.onload = markLoaded;
+
+    // Don’t hard-crash on a bad image – just log + continue
+    img.onerror = (err) => {
+      console.warn("Sprite failed to load:", key, err);
+      markLoaded();
     };
   });
 };
