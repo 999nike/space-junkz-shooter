@@ -61,8 +61,8 @@ window.drawPlayer = function drawPlayer(ctx) {
 
     // Flame size
     const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
-    const flameScaleX = boosting ? 0.28 : 0.20;
-    const flameScaleY = boosting ? 0.14 : 0.10;
+    const flameScaleX = boosting ? 0.24 : 0.18;
+    const flameScaleY = boosting ? 0.12 : 0.09;
 
     ctx.save();
 
