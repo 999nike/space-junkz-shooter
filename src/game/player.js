@@ -56,8 +56,13 @@ window.drawPlayer = function drawPlayer(ctx) {
 
     const flame = frames[S.thrustFrame];
 
-    // Move flame BEHIND ship (safe)
-    const flameOffset = -32;
+    // Correct placement underneath UFO
+    const flameOffsetX = -6;   // left
+    const flameOffsetY = -20;  // down/behind
+
+    ctx.save();
+    ctx.translate(flameOffsetX, flameOffsetY);  // <— new 2-axis offset
+    ctx.rotate(Math.PI);
 
     // Small tight flame
     const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
