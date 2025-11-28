@@ -45,7 +45,6 @@ window.drawPlayer = function drawPlayer(ctx) {
   const frames = S.sprites.thrusterFrames;
   if (frames && frames.length === 3) {
 
-    // Animation frame
     S.thrustFrame = (S.thrustFrame ?? 0);
     S.thrustTimer = (S.thrustTimer ?? 0) + (S.dt || 0.016);
     if (S.thrustTimer > 0.05) {
@@ -55,30 +54,26 @@ window.drawPlayer = function drawPlayer(ctx) {
 
     const flame = frames[S.thrustFrame];
 
-    // Position behind/below ship
-    const flameOffsetX = -6;    // move left
-    const flameOffsetY = 100;   // move down/back
+    // ✔ Move slightly RIGHT and DOWN
+    const flameOffsetX = 4;      // tweak 2→6
+    const flameOffsetY = 105;    // tweak 100→115
 
-    // Flame size
     const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
     const flameScaleX = boosting ? 0.28 : 0.20;
     const flameScaleY = boosting ? 0.14 : 0.10;
 
     ctx.save();
 
-    // Move flame under ship
+    // ✔ Position relative to player (no rotation)
     ctx.translate(flameOffsetX, flameOffsetY);
 
-    // Point backwards
-    ctx.rotate(Math.PI);
+    // ❌ DO NOT rotate here — player already rotates globally
+    // ctx.rotate(...);  <-- remove completely
 
-    // Apply scale
     const fw = flame.width * flameScaleX;
     const fh = flame.height * flameScaleY;
 
-    // Draw flame
     ctx.drawImage(flame, -fw / 2, 0, fw, fh);
-
     ctx.restore();
   }
 }
