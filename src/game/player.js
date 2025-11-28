@@ -20,28 +20,59 @@ window.drawPlayer = function drawPlayer(ctx) {
   // Rotate so sprite nose points in the movement direction
   ctx.rotate(baseAngle + Math.PI / 2 + p.bank * 0.10);
 
-  //
   // ============================================================
-  //   THRUSTER EMBER PARTICLES (ALWAYS ON + BOOST TRIPLE)
-  // ============================================================
-  //
-  {
-    const boost = (S.keys?.["w"] || S.keys?.["arrowup"]) ? 3 : 1;
+//   THRUSTER EMBER PARTICLES (MAIN + SIDE JETS)
+// ============================================================
+{
+  const boost = (S.keys?.["w"] || S.keys?.["arrowup"]) ? 3 : 1;
 
-for (let i = 0; i < boost; i++) {
-  S.thrustParticles.push({
-    x: p.x + (Math.random() - 0.5) * 10,   // wider spread
-    y: p.y + 46,                            // slightly lower
-    vx: (Math.random() - 0.5) * 55,         // stronger sideways scatter
-    vy: 140 + Math.random() * 120,          // longer trails
-    life: 0.60 + Math.random() * 0.35,      // stays on screen longer
-    size: 3 + Math.random() * 4,            // 3–7px = clearly visible
-    colour: "#ffaa33"                       // brighter ember
-  });
-}
+  // ===== MAIN ENGINE PARTICLES =====
+  for (let i = 0; i < boost; i++) {
+    S.thrustParticles.push({
+      x: p.x + (Math.random() - 0.5) * 12,
+      y: p.y + 46 + (Math.random() * 4),
+      vx: (Math.random() - 0.5) * 55,
+      vy: 140 + Math.random() * 120,
+      life: 0.60 + Math.random() * 0.35,
+      size: 4 + Math.random() * 4,
+      colour: "#ffaa33"
+    });
   }
 
-  // ---- PNG THRUSTER FLAME ----
+  // ===== LEFT THRUSTER PARTICLES (A or ←) =====
+  if (S.keys["a"] || S.keys["arrowleft"]) {
+    for (let i = 0; i < 2; i++) {
+      S.thrustParticles.push({
+        x: p.x - 14 + (Math.random() - 0.5) * 6,
+        y: p.y + 18 + (Math.random() * 4),
+        vx: (Math.random() - 0.5) * 40,
+        vy: 120 + Math.random() * 100,
+        life: 0.60 + Math.random() * 0.25,
+        size: 3 + Math.random() * 3,
+        colour: "#ffbb33"
+      });
+    }
+  }
+
+  // ===== RIGHT THRUSTER PARTICLES (D or →) =====
+  if (S.keys["d"] || S.keys["arrowright"]) {
+    for (let i = 0; i < 2; i++) {
+      S.thrustParticles.push({
+        x: p.x + 14 + (Math.random() - 0.5) * 6,
+        y: p.y + 18 + (Math.random() * 4),
+        vx: (Math.random() - 0.5) * 40,
+        vy: 120 + Math.random() * 100,
+        life: 0.60 + Math.random() * 0.25,
+        size: 3 + Math.random() * 3,
+        colour: "#ffbb33"
+      });
+    }
+  }
+}
+
+// ============================================================
+//   PNG THRUSTER FLAME (MAIN ENGINE)
+// ============================================================
 {
   const frames = S.sprites.thrusterFrames;
   if (frames && frames.length === 3) {
@@ -56,30 +87,18 @@ for (let i = 0; i < boost; i++) {
 
     const flame = frames[S.thrustFrame];
 
-    // Position behind/below ship
-    const flameOffsetX = 0;    // move left
-    const flameOffsetY = 0;   // move down/back
-
-    // Flame size
     const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
-    const flameScaleX = boosting ? 0.16 : 0.15;  // narrower
-    const flameScaleY = boosting ? 0.10 : 0.08;  // slightly shorter
+    const flameScaleX = boosting ? 0.16 : 0.15;
+    const flameScaleY = boosting ? 0.10 : 0.08;
 
     ctx.save();
-
-    // Move flame under ship
-    ctx.translate(flameOffsetX, flameOffsetY);
-
-    // Point backwards
+    ctx.translate(0, 0);
     ctx.rotate(Math.PI);
 
-    // Apply scale
     const fw = flame.width * flameScaleX;
     const fh = flame.height * flameScaleY;
 
-    // Draw flame
     ctx.drawImage(flame, -fw / 2, -fh, fw, fh);
-
     ctx.restore();
   }
 }
@@ -90,61 +109,42 @@ for (let i = 0; i < boost; i++) {
 {
   const frames = S.sprites.thrusterFrames;
   if (frames && frames.length === 3) {
-
     const flame = frames[S.thrustFrame];
 
-    // Radians
     const leftAng  = (30 * Math.PI) / 180;
     const rightAng = -(30 * Math.PI) / 180;
 
-    // Smaller scale than main flame
     const scaleX = 0.12;
     const scaleY = 0.07;
 
-    // How strong when turning (like your W boost)
     const turningBoost =
-      (S.keys["a"] || S.keys["arrowleft"] || 
-       S.keys["d"] || S.keys["arrowright"]) ? 1.25 : 1.0;
+      (S.keys["a"] || S.keys["arrowleft"] ||
+       S.keys["d"]   || S.keys["arrowright"])
+       ? 1.25 : 1.0;
 
-    // -------------------------------------------------------
-    // LEFT THRUSTER (press A / ←)
-    // -------------------------------------------------------
+    // LEFT FLAME
     if (S.keys["a"] || S.keys["arrowleft"]) {
       ctx.save();
-
-      // Match your drawing: slightly outwards + behind ship
-      ctx.translate(0, 0);     
-
-      // Rotate so flame points outward 30°
+      ctx.translate(-14, 18);
       ctx.rotate(Math.PI + leftAng);
-
       const fw = flame.width * scaleX;
       const fh = flame.height * (scaleY * turningBoost);
-
       ctx.drawImage(flame, -fw / 2, -fh, fw, fh);
       ctx.restore();
     }
 
-    // -------------------------------------------------------
-    // RIGHT THRUSTER (press D / →)
-    // -------------------------------------------------------
+    // RIGHT FLAME
     if (S.keys["d"] || S.keys["arrowright"]) {
       ctx.save();
-
-      // Mirror offset
-      ctx.translate(0, 0);
-
+      ctx.translate(14, 18);
       ctx.rotate(Math.PI + rightAng);
-
       const fw = flame.width * scaleX;
       const fh = flame.height * (scaleY * turningBoost);
-
       ctx.drawImage(flame, -fw / 2, -fh, fw, fh);
       ctx.restore();
     }
   }
 }
-
   //
   // ============================================================
   //                    RENDER PLAYER SHIP
