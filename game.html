@@ -88,31 +88,33 @@
 <!-- GAME SCRIPTS (FINAL LOAD ORDER) -->
 <!-- ================================ -->
 
-<!-- MUST LOAD FIRST: SPRITE + IMAGE DEFINITIONS -->
+<!-- MUST LOAD FIRST -->
 <script src="./src/game/assets.js"></script>
 
-<!-- ENGINE + GLOBALS MUST LOAD BEFORE ANYONE CALLS flashMsg(), rand(), etc -->
-<script src="./src/game/engine.js"></script>
-
-<!-- SYSTEM + DATA FILES -->
+<!-- CORE SYSTEMS -->
 <script src="./src/game/enemies.js"></script>
 <script src="./src/game/input.js"></script>
 <script src="./src/game/player.js"></script>
 
-<!-- RENDERERS (require assets + engine ready) -->
+<!-- RENDER + LOGIC -->
 <script src="./src/game/renderer.js"></script>
-
-<!-- CORE GAME LOGIC (spawns, bosses, explosions, sidekicks) -->
 <script src="./src/game/logic.js"></script>
 
 <!-- OPTIONAL MODULES -->
 <script src="./src/game/blachole.js"></script>
+
+<!-- ENGINE MUST LOAD AFTER LOGIC + RENDERER -->
+<script src="./src/game/engine.js"></script>
+
+<!-- MAP + LEVELS + HOMEBASE -->
 <script src="./src/game/world.js"></script>
 <script src="./src/game/levels/lvl2.js"></script>
 <script src="./src/game/homebase.js"></script>
+
+<!-- DEV CONSOLE -->
 <script src="./src/game/devconsole.js"></script>
 
-<!-- Main game bootstrap LAST -->
+<!-- BOOTSTRAP LAST -->
 <script src="./src/game/game.js"></script>
 
   <!-- Eruda console ALWAYS enabled (remove later if you want) -->
