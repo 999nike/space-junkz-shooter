@@ -3,6 +3,11 @@ window.clamp = function clamp(v, min, max) {
   return v < min ? min : v > max ? max : v;
 };
 
+// ----- GLOBAL RANDOM HELPER -----
+window.rand = function rand(min, max) {
+  return Math.random() * (max - min) + min;
+};
+
 // ----- COLLISION: CIRCLE vs CIRCLE -----
 window.circleHit = function circleHit(ax, ay, ar, bx, by, br) {
   const dx = ax - bx;
@@ -10,13 +15,6 @@ window.circleHit = function circleHit(ax, ay, ar, bx, by, br) {
   const dist = dx * dx + dy * dy;
   const r = (ar + br) * (ar + br);
   return dist <= r;
-};
-
-// =========================
-// GLOBAL RANDOM HELPER
-// =========================
-window.rand = function rand(min, max) {
-  return Math.random() * (max - min) + min;
 };
 
 // =========================================================
