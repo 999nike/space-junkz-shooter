@@ -56,7 +56,7 @@ window.drawPlayer = function drawPlayer(ctx) {
     const flame = frames[S.thrustFrame];
 
     // Position behind/below ship
-    const flameOffsetX = -6;    // move left
+    const flameOffsetX = -4;    // move left
     const flameOffsetY = 0;   // move down/back
 
     // Flame size
