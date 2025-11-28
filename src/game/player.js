@@ -43,12 +43,11 @@ window.drawPlayer = function drawPlayer(ctx) {
   // ---- PNG THRUSTER FLAME ----
 {
   const frames = S.sprites.thrusterFrames;
-
   if (frames && frames.length === 3) {
-    S.thrustFrame = (S.thrustFrame ?? 0);
-    S.thrustTimer = (S.thrustTimer ?? 0);
-    S.thrustTimer += S.dt || 0.016;
 
+    // Animation frame
+    S.thrustFrame = (S.thrustFrame ?? 0);
+    S.thrustTimer = (S.thrustTimer ?? 0) + (S.dt || 0.016);
     if (S.thrustTimer > 0.05) {
       S.thrustTimer = 0;
       S.thrustFrame = (S.thrustFrame + 1) % 3;
@@ -56,27 +55,30 @@ window.drawPlayer = function drawPlayer(ctx) {
 
     const flame = frames[S.thrustFrame];
 
-    // Correct placement underneath UFO
-    const flameOffsetX = -6;   // left
-    const flameOffsetY = -20;  // down/behind
+    // Position behind/below ship
+    const flameOffsetX = -6;    // move left
+    const flameOffsetY = -20;   // move down/back
 
-    ctx.save();
-    ctx.translate(flameOffsetX, flameOffsetY);  // <— new 2-axis offset
-    ctx.rotate(Math.PI);
-
-    // Small tight flame
+    // Flame size
     const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
-    const flameScaleX = boosting ? 0.28 : 0.20;  // width
-    const flameScaleY = boosting ? 0.14 : 0.10;  // height
+    const flameScaleX = boosting ? 0.28 : 0.20;
+    const flameScaleY = boosting ? 0.14 : 0.10;
 
     ctx.save();
-    ctx.translate(0, flameOffset);
+
+    // Move flame under ship
+    ctx.translate(flameOffsetX, flameOffsetY);
+
+    // Point backwards
     ctx.rotate(Math.PI);
 
+    // Apply scale
     const fw = flame.width * flameScaleX;
     const fh = flame.height * flameScaleY;
 
+    // Draw flame
     ctx.drawImage(flame, -fw / 2, 0, fw, fh);
+
     ctx.restore();
   }
 }
