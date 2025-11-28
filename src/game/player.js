@@ -40,47 +40,48 @@ window.drawPlayer = function drawPlayer(ctx) {
     }
   }
 
-  //
-  // ============================================================
-  //      PNG THRUSTER FLAME (3-FRAME ANIMATED SPRITE)
-  // ============================================================
-  //
-  {
-    const frames = S.sprites.thrusterFrames;
+  // ---- PNG THRUSTER FLAME (rotate + correct size only) ----
+{
+  const frames = S.sprites.thrusterFrames;
 
-    if (frames && frames.length === 3) {
-      // Which frame to draw
-      S.thrustFrame = (S.thrustFrame || 0);
-      S.thrustTimer = (S.thrustTimer || 0);
-      S.thrustTimer += S.dt || 0.016; // safety fallback
+  if (frames && frames.length === 3) {
+    S.thrustFrame = (S.thrustFrame || 0);
+    S.thrustTimer = (S.thrustTimer || 0);
+    S.thrustTimer += S.dt || 0.016;
 
-      // Animation speed
-      if (S.thrustTimer > 0.05) {
-        S.thrustTimer = 0;
-        S.thrustFrame = (S.thrustFrame + 1) % 3;
-      }
-
-      // Grab frame
-      const flame = frames[S.thrustFrame];
-
-      // How far behind the ship to draw it
-      const flameOffset = 38;
-
-      // Boost scaling
-      const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
-      const flameScale = boosting ? 1.55 : 1.0;
-
-      ctx.save();
-      ctx.translate(0, flameOffset);
-
-      // Scale + draw
-      const fw = flame.width * flameScale;
-      const fh = flame.height * flameScale;
-
-      ctx.drawImage(flame, -fw / 2, 0, fw, fh);
-      ctx.restore();
+    // Animation speed
+    if (S.thrustTimer > 0.05) {
+      S.thrustTimer = 0;
+      S.thrustFrame = (S.thrustFrame + 1) % 3;
     }
+
+    const flame = frames[S.thrustFrame];
+
+    // Keep your current good offset
+    const flameOffset = 38;
+
+    // SCALE ONLY (smaller, fits ship)
+    const boosting = (S.keys?.["w"] || S.keys?.["arrowup"]);
+    const flameScale = boosting ? 0.45 : 0.30;
+
+    ctx.save();
+
+    // Use your same offset position
+    ctx.translate(0, flameOffset);
+
+    // FLIP 180° ONLY
+    ctx.rotate(Math.PI);
+
+    // Apply scale
+    const fw = flame.width * flameScale;
+    const fh = flame.height * flameScale;
+
+    // Draw
+    ctx.drawImage(flame, -fw / 2, 0, fw, fh);
+
+    ctx.restore();
   }
+}
 
   //
   // ============================================================
