@@ -77,7 +77,7 @@ window.drawPlayer = function drawPlayer(ctx) {
     const fh = flame.height * flameScaleY;
 
     // Draw flame
-    ctx.drawImage(flame, -fw / 2, 0, fw, fh);
+    ctx.drawImage(flame, -fw / 2, -fh, fw, fh);
 
     ctx.restore();
   }
