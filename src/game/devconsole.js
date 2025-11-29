@@ -176,13 +176,29 @@ makeBtn("LOAD LEVEL 2 NOW", () => {
         }
       });
 
-      makeBtn("End Level (Kill Player)", () => {
-        const S = window.GameState;
-        if (!S) return;
-        S.lives = 0;
-        if (S.livesEl) S.livesEl.textContent = S.lives;
-        if (window.flashMsg) window.flashMsg("DEV: Level ended");
-      });
+      makeBtn("END LEVEL NOW", () => {
+    const S = window.GameState;
+    if (!S) return;
+
+    // Stop all gameplay
+    S.running = false;
+
+    // Determine which level we are in
+    const lvl = S.currentLevel;
+
+    // Tell player
+    window.flashMsg("DEV: LEVEL FORCE-COMPLETE");
+
+    // Unlock next level (lvl -> lvl+1)
+    if (window.unlockNextLevel && lvl) {
+        window.unlockNextLevel(lvl);
+    }
+
+    // Send back to starmap cleanly
+    if (window.WorldMap && window.WorldMap.enter) {
+        setTimeout(() => window.WorldMap.enter(), 300);
+    }
+});
 
       const closeBtn = makeBtn("Close Panel", () => {
         this.toggle();
