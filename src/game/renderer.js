@@ -107,7 +107,7 @@ window.drawPowerUps = function drawPowerUps(ctx) {
     // Shield Part A
     if (p.type === "shieldA" && S.sprites && S.sprites.shieldPartA) {
       const img = S.sprites.shieldPartA;
-      const scale = 0.75;
+      const scale = 0.25;
       ctx.drawImage(
         img,
         p.x - (img.width * scale) / 2,
@@ -121,7 +121,7 @@ window.drawPowerUps = function drawPowerUps(ctx) {
     // Shield Part B
     if (p.type === "shieldB" && S.sprites && S.sprites.shieldPartB) {
       const img = S.sprites.shieldPartB;
-      const scale = 0.75;
+      const scale = 0.25;
       ctx.drawImage(
         img,
         p.x - (img.width * scale) / 2,
