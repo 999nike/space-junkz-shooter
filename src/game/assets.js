@@ -128,6 +128,10 @@ window.loadSprites = function loadSprites() {
   // Boss 2 (Gemini Warship)
   sprites.bossGemini = makeImage("./src/game/oldGEMINI2.png");
 
+  // Shield parts
+  sprites.shieldPartA = makeImage("./src/game/assets/shield_part_A.png");
+  sprites.shieldPartB = makeImage("./src/game/assets/shield_part_B.png");
+
   // Enemy ship sprites
   sprites.enemyGrunt   = makeImage("./src/game/assets/oldARIES2.png");
   sprites.enemyZigzag  = makeImage("./src/game/assets/oldLIBRA12.png");

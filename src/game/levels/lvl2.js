@@ -137,30 +137,28 @@ if (!S.sprites) {
     // ============================
 
     dropShieldPartA() {
-      const px = rand(40, S.W - 40);
-      S.powerUps.push({
-        x: px,
-        y: -20,
-        radius: 12,
-        speedY: 40,
-        type: "shieldA",
-        amount: 1
-      });
-      window.flashMsg("⚡ SHIELD PART A DETECTED");
-    },
+  const px = rand(40, S.W - 40);
+  S.powerUps.push({
+    x: px,
+    y: -20,
+    radius: 20,
+    speedY: 40,
+    type: "shieldA"
+  });
+  window.flashMsg("⚡ SHIELD PART A DETECTED");
+},
 
-    dropShieldPartB() {
-      const px = rand(40, S.W - 40);
-      S.powerUps.push({
-        x: px,
-        y: -20,
-        radius: 12,
-        speedY: 40,
-        type: "shieldB",
-        amount: 1
-      });
-      window.flashMsg("⚡ SHIELD PART B DETECTED");
-    },
+dropShieldPartB() {
+  const px = rand(40, S.W - 40);
+  S.powerUps.push({
+    x: px,
+    y: -20,
+    radius: 20,
+    speedY: 40,
+    type: "shieldB"
+  });
+  window.flashMsg("⚡ SHIELD PART B DETECTED");
+},
 
     // ============================
     //       CUSTOM BOSS

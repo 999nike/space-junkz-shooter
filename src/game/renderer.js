@@ -96,12 +96,36 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
   }
 };
 
-// Power-up renderer
-window.drawPowerUps = function drawPowerUps(ctx) {
-  const S = window.GameState;
-
- //////-------POWER-UP-RENDER-------
+///////-------POWER-UP-RENDER-------
 for (const p of S.powerUps) {
+
+  // Shield Part A
+  if (p.type === "shieldA" && S.sprites.shieldPartA) {
+    const img = S.sprites.shieldPartA;
+    const scale = 0.75;
+    ctx.drawImage(
+      img,
+      p.x - (img.width * scale) / 2,
+      p.y - (img.height * scale) / 2,
+      img.width * scale,
+      img.height * scale
+    );
+    continue;
+  }
+
+  // Shield Part B
+  if (p.type === "shieldB" && S.sprites.shieldPartB) {
+    const img = S.sprites.shieldPartB;
+    const scale = 0.75;
+    ctx.drawImage(
+      img,
+      p.x - (img.width * scale) / 2,
+      p.y - (img.height * scale) / 2,
+      img.width * scale,
+      img.height * scale
+    );
+    continue;
+  }
 
   // COIN PICKUP (green)
   if (p.type === "coin") {
@@ -117,7 +141,6 @@ for (const p of S.powerUps) {
   ctx.arc(p.x, p.y, p.radius || 10, 0, Math.PI * 2);
   ctx.fill();
 }
-};
 
 // Explosion renderer (sprite sheet)
 window.drawParticles = function drawParticles(ctx) {

@@ -1004,6 +1004,20 @@ if (e.shootTimer <= 0) {
         continue;
       }
 
+      // SHIELD PART A PICKUP
+      if (p.type === "shieldA") {
+        S.partsA = (S.partsA || 0) + 1;
+        window.flashMsg("⚡ SHIELD PART A COLLECTED (" + S.partsA + ")");
+        continue;
+      }
+
+      // SHIELD PART B PICKUP
+      if (p.type === "shieldB") {
+        S.partsB = (S.partsB || 0) + 1;
+        window.flashMsg("⚡ SHIELD PART B COLLECTED (" + S.partsB + ")");
+        continue;
+      }
+
      // WEAPON PICKUP
       if (player.weaponLevel < 5) {
         player.weaponLevel++;
