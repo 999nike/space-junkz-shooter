@@ -101,7 +101,6 @@ const NODES = [
   },
 ];
 
-];
 // ← END OF NODES ARRAY (PUT FUNCTION DIRECTLY BELOW THIS)
 
 // ======================================================
