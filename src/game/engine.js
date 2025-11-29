@@ -198,6 +198,12 @@ window.gameLoop = function gameLoop(timestamp) {
     window.updateGame(dt);
   }
 
-  window.drawGame();
+  // SAFETY: don’t crash if drawGame isn’t wired
+  if (typeof window.drawGame === "function") {
+    window.drawGame();
+  } else {
+    console.error("drawGame missing or not a function:", window.drawGame);
+  }
+
   requestAnimationFrame(window.gameLoop);
 };
