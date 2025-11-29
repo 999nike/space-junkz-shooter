@@ -601,17 +601,36 @@ if (e.dropChance && Math.random() < e.dropChance) {
     }
   }
 
- // Gemini defeated → jump to world map (temp hook)
-    if (e.type === "geminiBoss") {
-        S.running = false;
-        window.flashMsg("LEVEL COMPLETE!");
+  // Gemini defeated → jump to world map (intro chain)
+  if (e.type === "geminiBoss") {
+    S.running = false;
+    window.flashMsg("LEVEL COMPLETE!");
 
-        if (window.WorldMap && window.WorldMap.enter) {
-            setTimeout(() => {
-                window.WorldMap.enter();
-            }, 1200);
-        }
+    if (window.WorldMap && window.WorldMap.enter) {
+      setTimeout(() => {
+        window.WorldMap.enter();
+      }, 1200);
     }
+  }
+
+  // LEVEL 2 – HYDRA DRAX BOSS (MISSION 1)
+  // On kill: unlock Level 3 and return to starmap.
+  if (e.type === "mission1Boss") {
+    window.flashMsg("MISSION 1 COMPLETE!");
+
+    // Unlock lvl3 on world map
+    if (window.unlockNextLevel) {
+      window.unlockNextLevel(2); // 2 → unlock lvl3
+    }
+
+    // Stop shooter loop and go back to map
+    S.running = false;
+    if (window.WorldMap && window.WorldMap.enter) {
+      setTimeout(() => {
+        window.WorldMap.enter();
+      }, 1200);
+    }
+  }
 };
 
 // =========================================================

@@ -105,14 +105,26 @@ const NODES = [
 
 // ======================================================
 // AUTO-UNLOCK HELPER (enables level progression)
+//  - Updates both the NODES template and the live map
 // ======================================================
-window.unlockNextLevel = function(currentLevel) {
+window.unlockNextLevel = function (currentLevel) {
   const nextId = "lvl" + (currentLevel + 1);
-  const node = NODES.find(n => n.id === nextId);
+
+  // Update template node
+  const node = NODES.find((n) => n.id === nextId);
   if (node) {
     node.unlocked = true;
-    console.log("Unlocked:", nextId);
   }
+
+  // Also update live WorldMap nodes if already initialised
+  if (window.WorldMap && Array.isArray(window.WorldMap.nodes)) {
+    const live = window.WorldMap.nodes.find((n) => n.id === nextId);
+    if (live) {
+      live.unlocked = true;
+    }
+  }
+
+  console.log("Unlocked:", nextId);
 };
 
   const WorldMap = {
