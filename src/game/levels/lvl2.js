@@ -21,6 +21,9 @@ if (!S.sprites) {
     bg: null,
     bgLoaded: false,
 
+    // -----------------------------
+    // ENTER LEVEL
+    // -----------------------------
     enter() {
       console.log("🚀 Entering LEVEL 2 (Mission 1)");
 
@@ -46,7 +49,7 @@ if (!S.sprites) {
       // Level-specific background
       this.bg = new Image();
       this.bg.src = "./src/game/assets/mission1_bg.png";
-      this.bg.onload = () => this.bgLoaded = true;
+      this.bg.onload = () => (this.bgLoaded = true);
 
       // Switch off other modes
       if (window.WorldMap) window.WorldMap.active = false;
@@ -58,16 +61,21 @@ if (!S.sprites) {
       window.flashMsg("MISSION 1 – DRAX SYSTEM");
     },
 
+    // -----------------------------
+    // EXIT LEVEL
+    // -----------------------------
     exit() {
       this.active = false;
       S.running = false;
 
-      // Return to starmap
       if (window.WorldMap && window.WorldMap.enter) {
         window.WorldMap.enter();
       }
     },
 
+    // -----------------------------
+    // UPDATE LOOP
+    // -----------------------------
     update(dt) {
       if (!this.active || !S.running) return;
 
@@ -88,8 +96,18 @@ if (!S.sprites) {
 
       // Run core shooter loop
       if (window.updateGameCore) window.updateGameCore(dt);
+
+      // ---- HANDLE LEVEL 2 BOSS ----
+      for (const e of S.enemies) {
+        if (e.type === "mission1Boss") {
+          this.updateBoss(null, e, dt);
+        }
+      }
     },
 
+    // -----------------------------
+    // DRAW LOOP
+    // -----------------------------
     draw(ctx) {
       if (!this.active) return;
 
@@ -112,22 +130,17 @@ if (!S.sprites) {
     spawnWave() {
       const roll = Math.random();
 
-      // More zigzags early
       if (roll < 0.45) {
         window.spawnEnemyType("zigzag");
         window.spawnEnemyType("zigzag");
-      }
-      // Shooters
-      else if (roll < 0.75) {
+      } else if (roll < 0.75) {
         window.spawnEnemyType("shooter");
-      }
-      // Tanks & zigzag mix
-      else {
+      } else {
         window.spawnEnemyType("tank");
         window.spawnEnemyType("zigzag");
       }
 
-      // Tiny chance shield part drops any time
+      // Tiny chance shield part drops
       if (Math.random() < 0.002) this.dropShieldPartA();
       if (Math.random() < 0.002) this.dropShieldPartB();
     },
@@ -135,30 +148,29 @@ if (!S.sprites) {
     // ============================
     //    SHIELD PART DROPS
     // ============================
-
     dropShieldPartA() {
-  const px = rand(40, S.W - 40);
-  S.powerUps.push({
-    x: px,
-    y: -20,
-    radius: 20,
-    speedY: 40,
-    type: "shieldA"
-  });
-  window.flashMsg("⚡ SHIELD PART A DETECTED");
-},
+      const px = rand(40, S.W - 40);
+      S.powerUps.push({
+        x: px,
+        y: -20,
+        radius: 20,
+        speedY: 40,
+        type: "shieldA"
+      });
+      window.flashMsg("⚡ SHIELD PART A DETECTED");
+    },
 
-dropShieldPartB() {
-  const px = rand(40, S.W - 40);
-  S.powerUps.push({
-    x: px,
-    y: -20,
-    radius: 20,
-    speedY: 40,
-    type: "shieldB"
-  });
-  window.flashMsg("⚡ SHIELD PART B DETECTED");
-},
+    dropShieldPartB() {
+      const px = rand(40, S.W - 40);
+      S.powerUps.push({
+        x: px,
+        y: -20,
+        radius: 20,
+        speedY: 40,
+        type: "shieldB"
+      });
+      window.flashMsg("⚡ SHIELD PART B DETECTED");
+    },
 
     // ============================
     //       CUSTOM BOSS
@@ -191,7 +203,7 @@ dropShieldPartB() {
       // Circular drift
       e.x = S.W * 0.5 + Math.sin(e.timer * 0.5) * 120;
 
-      // Shoot patterns every 1.5 sec
+      // Shoot pattern every 1.5 sec
       if (e.timer % 1.5 < 0.05) {
         for (let i = -2; i <= 2; i++) {
           S.enemyBullets.push({
@@ -209,13 +221,12 @@ dropShieldPartB() {
       if (!this.levelComplete && e.hp <= 0) {
         this.levelComplete = true;
 
-        // Message + progression
         window.flashMsg("MISSION 1 COMPLETE!");
+
         if (window.unlockNextLevel) {
-          window.unlockNextLevel(2);   // unlock LEVEL 3 on clear
+          window.unlockNextLevel(2); // unlock LEVEL 3
         }
 
-        // Small delay, then exit back to star map
         setTimeout(() => this.exit(), 1200);
       }
     }
