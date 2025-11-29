@@ -101,6 +101,21 @@ const NODES = [
   },
 ];
 
+];
+// ← END OF NODES ARRAY (PUT FUNCTION DIRECTLY BELOW THIS)
+
+// ======================================================
+// AUTO-UNLOCK HELPER (enables level progression)
+// ======================================================
+window.unlockNextLevel = function(currentLevel) {
+  const nextId = "lvl" + (currentLevel + 1);
+  const node = NODES.find(n => n.id === nextId);
+  if (node) {
+    node.unlocked = true;
+    console.log("Unlocked:", nextId);
+  }
+};
+
   const WorldMap = {
     active: false,
     canvas: null,

@@ -206,13 +206,21 @@ dropShieldPartB() {
       }
 
       // Death → Level Complete
-      if (e.hp <= 0) {
+      if (!this.levelComplete && e.hp <= 0) {
+        this.levelComplete = true;
+
+        // Message + progression
         window.flashMsg("MISSION 1 COMPLETE!");
+        if (window.unlockNextLevel) {
+          window.unlockNextLevel(2);   // unlock LEVEL 3 on clear
+        }
+
+        // Small delay, then exit back to star map
         setTimeout(() => this.exit(), 1200);
       }
     }
   };
 
-  //Expose globally
+  // Expose globally
   window.Level2 = Level2;
 })();
