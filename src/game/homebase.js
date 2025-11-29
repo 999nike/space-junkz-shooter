@@ -116,6 +116,30 @@
       this.activePanel = null;
     },
 
+     // ----- SHIELD CRAFT BUTTON CLICK -----
+    if (this.activePanel === "craft") {
+      const bx = this.panelX + 40;
+      const by = this.panelY + 190;
+      const bw = 200;
+      const bh = 50;
+
+      if (px >= bx && px <= bx + bw && py >= by && py <= by + bh) {
+        if ((S.partsA || 0) >= 1 && (S.partsB || 0) >= 1) {
+
+          S.partsA -= 1;
+          S.partsB -= 1;
+
+          S.shieldUnlocked = true;
+          S.shield = 0;
+          S.maxShield = 100;
+
+          window.flashMsg("🔷 SHIELD CORE CRAFTED!");
+        } else {
+          window.flashMsg("❌ Missing Parts");
+        }
+      }
+    }
+
     update(dt) {
       if (!this.active) return;
       // No animations yet – safe placeholder for later FX
