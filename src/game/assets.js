@@ -18,6 +18,7 @@ window.GameState = {
   score: 0,
   lives: 3,
   wizzCoins: 0,   // ⭐ NEW
+  killsSinceShieldDrop: 0,
 
   // Entities
   stars: [],

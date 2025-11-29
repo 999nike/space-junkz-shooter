@@ -882,6 +882,27 @@ if (e.shootTimer <= 0) {
         if (e.hp <= 0) {
           S.enemies.splice(j, 1);
           window.handleEnemyDeath(e);
+          // === GUARANTEED SHIELD PART SYSTEM ===
+const GS = window.GameState;
+GS.killsSinceShieldDrop = (GS.killsSinceShieldDrop || 0) + 1;
+
+if (GS.killsSinceShieldDrop >= 50) {
+
+    // 50% chance A or B (or choose always A first)
+    const partType = Math.random() < 0.5 ? "shieldA" : "shieldB";
+
+    S.powerUps.push({
+      x: e.x,
+      y: e.y,
+      radius: 20,
+      speedY: 50,
+      type: partType
+    });
+
+    window.flashMsg("⚡ SHIELD PART DETECTED");
+
+    GS.killsSinceShieldDrop = 0; // reset counter
+}
         }
         break;
       }
