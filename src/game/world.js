@@ -168,9 +168,10 @@ window.unlockNextLevel = function(currentLevel) {
     },
 
     // Entry point used by blackhole + cheats
-    enter() {
-      if (!this.canvas || !this.ctx) this.init();
-      this.active = true;
+enter() {
+    // Always rebuild nodes so unlockNextLevel() shows correctly
+    this.init();    
+    this.active = true;
     },
 
     exit() {
