@@ -405,23 +405,6 @@ window.initStars = function initStars() {
   }
 };
 
-window.drawStars = function drawStars(ctx) {
-  const S = window.GameState;
-  ctx.fillStyle = "#ffffff";
-
-  for (const s of _stars) {
-    ctx.globalAlpha = 0.5 + Math.random() * 0.5;
-    ctx.fillRect(s.x, s.y, s.s, s.s);
-
-    s.y += s.v;
-    if (s.y > S.H) {
-      s.y = 0;
-      s.x = Math.random() * S.W;
-    }
-  }
-
-  ctx.globalAlpha = 1;
-};
 
 // ---------- MAIN GAME DRAW ----------
 window.drawGame = function drawGame() {
