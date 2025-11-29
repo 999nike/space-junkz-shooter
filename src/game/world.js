@@ -10,36 +10,96 @@
   const NODE_RADIUS = 16;
 
   // ------ MAP NODES ------
-  const NODES = [
-    {
-      id: "home",
-      xFactor: 0.18,
-      yFactor: 0.78,
-      label: "HOME BASE",
-      unlocked: true,
-    },
-    {
-      id: "lvl1",
-      xFactor: 0.38,
-      yFactor: 0.45,
-      label: "LEVEL 1 - GEMINI FIELD",
-      unlocked: true,
-    },
-    {
-      id: "lvl2",
-      xFactor: 0.68,
-      yFactor: 0.32,
-      label: "LEVEL 2 - DRAX SYSTEM",
-      unlocked: false,
-    },
-    {
-      id: "secret",
-      xFactor: 0.82,
-      yFactor: 0.62,
-      label: "???",
-      unlocked: false,
-    },
-  ];
+const NODES = [
+  {
+    id: "home",
+    xFactor: 0.18,
+    yFactor: 0.78,
+    label: "HOME BASE",
+    unlocked: true,
+  },
+  {
+    id: "lvl1",
+    xFactor: 0.38,
+    yFactor: 0.45,
+    label: "LEVEL 1 - GEMINI FIELD",
+    unlocked: true,
+  },
+  {
+    id: "lvl2",
+    xFactor: 0.68,
+    yFactor: 0.32,
+    label: "LEVEL 2 - DRAX SYSTEM",
+    unlocked: false,
+  },
+
+  // ------ FUTURE LEVEL NODES (SKELETON ONLY) ------
+  {
+    id: "lvl3",
+    xFactor: 0.78,
+    yFactor: 0.25,
+    label: "LEVEL 3 - TBA",
+    unlocked: false,
+  },
+  {
+    id: "lvl4",
+    xFactor: 0.82,
+    yFactor: 0.42,
+    label: "LEVEL 4 - TBA",
+    unlocked: false,
+  },
+  {
+    id: "lvl5",
+    xFactor: 0.74,
+    yFactor: 0.56,
+    label: "LEVEL 5 - TBA",
+    unlocked: false,
+  },
+  {
+    id: "lvl6",
+    xFactor: 0.60,
+    yFactor: 0.68,
+    label: "LEVEL 6 - TBA",
+    unlocked: false,
+  },
+  {
+    id: "lvl7",
+    xFactor: 0.46,
+    yFactor: 0.70,
+    label: "LEVEL 7 - TBA",
+    unlocked: false,
+  },
+  {
+    id: "lvl8",
+    xFactor: 0.32,
+    yFactor: 0.64,
+    label: "LEVEL 8 - TBA",
+    unlocked: false,
+  },
+  {
+    id: "lvl9",
+    xFactor: 0.26,
+    yFactor: 0.50,
+    label: "LEVEL 9 - TBA",
+    unlocked: false,
+  },
+  {
+    id: "lvl10",
+    xFactor: 0.22,
+    yFactor: 0.36,
+    label: "LEVEL 10 - TBA",
+    unlocked: false,
+  },
+
+  // Secret / special node stays as-is
+  {
+    id: "secret",
+    xFactor: 0.82,
+    yFactor: 0.62,
+    label: "???",
+    unlocked: false,
+  },
+];
 
   const WorldMap = {
     active: false,
@@ -171,24 +231,53 @@
       }
 
       // ------ LEVEL 2 (MISSION 1) ------
-      if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
-        this.active = false;    // stop map updates
-        window.Level2.enter();  // start Level 2
-        return;
+    if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
+      this.active = false;    // stop map updates
+      window.Level2.enter();  // start Level 2
+      return;
+    }
+
+    // ------ FUTURE LEVELS (3–10) ------
+    // For now: if a proper LevelX.enter() exists, use it.
+    // If not, fall back to Level 2 so you can test routes.
+    const levelMap = {
+      lvl3: "Level3",
+      lvl4: "Level4",
+      lvl5: "Level5",
+      lvl6: "Level6",
+      lvl7: "Level7",
+      lvl8: "Level8",
+      lvl9: "Level9",
+      lvl10: "Level10",
+    };
+
+    if (levelMap[node.id]) {
+      const globalName = levelMap[node.id];
+      const targetLevel = window[globalName];
+
+      this.active = false;
+
+      if (targetLevel && typeof targetLevel.enter === "function") {
+        targetLevel.enter();         // when you make Level3.js etc
+      } else if (window.Level2 && window.Level2.enter) {
+        window.Level2.enter();       // TEMP: reuse Level 2 layout
       }
 
-      // ------ LEVEL 1 (INTRO SHOOTER) ------
-      if (node.id === "lvl1") {
-        this.active = false;          // stop map updates
-        if (window.resetGameState) {
-          window.resetGameState();    // reset intro engine
-        }
-        if (window.GameState) {
-          window.GameState.running = true;
-        }
-        return;
+      return;
+    }
+
+    // ------ LEVEL 1 (INTRO SHOOTER) ------
+    if (node.id === "lvl1") {
+      this.active = false;          // stop map updates
+      if (window.resetGameState) {
+        window.resetGameState();    // reset intro engine
       }
-    },
+      if (window.GameState) {
+        window.GameState.running = true;
+      }
+      return;
+    }
+  },
 
     // ------ UPDATE ------
     update(dt) {
