@@ -601,16 +601,15 @@ if (e.dropChance && Math.random() < e.dropChance) {
     }
   }
 
- // Gemini defeated → jump to world map (temp hook)
-    if (e.type === "geminiBoss") {
-        S.running = false;
-        window.flashMsg("LEVEL COMPLETE!");
+ if (e.type === "geminiBoss") {
+    S.running = false;
+    window.flashMsg("LEVEL COMPLETE!");
 
-        if (window.WorldMap && window.WorldMap.enter) {
-            setTimeout(() => {
-                window.WorldMap.enter();
-            }, 1200);
-        }
+    // Use original LevelExit engine for Level 1
+    if (window.LevelExit && window.LevelExit.start) {
+        setTimeout(() => {
+            window.LevelExit.start();
+        }, 800);
     }
 };
 
