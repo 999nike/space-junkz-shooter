@@ -96,51 +96,57 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
   }
 };
 
-///////-------POWER-UP-RENDER-------
-for (const p of S.powerUps) {
+// ---------- POWER-UP RENDERER ----------
+window.drawPowerUps = function drawPowerUps(ctx) {
+  const S = window.GameState;
+  if (!S || !S.powerUps) return;
 
-  // Shield Part A
-  if (p.type === "shieldA" && S.sprites.shieldPartA) {
-    const img = S.sprites.shieldPartA;
-    const scale = 0.75;
-    ctx.drawImage(
-      img,
-      p.x - (img.width * scale) / 2,
-      p.y - (img.height * scale) / 2,
-      img.width * scale,
-      img.height * scale
-    );
-    continue;
+  ///////-------POWER-UP-RENDER-------
+  for (const p of S.powerUps) {
+
+    // Shield Part A
+    if (p.type === "shieldA" && S.sprites && S.sprites.shieldPartA) {
+      const img = S.sprites.shieldPartA;
+      const scale = 0.75;
+      ctx.drawImage(
+        img,
+        p.x - (img.width * scale) / 2,
+        p.y - (img.height * scale) / 2,
+        img.width * scale,
+        img.height * scale
+      );
+      continue;
+    }
+
+    // Shield Part B
+    if (p.type === "shieldB" && S.sprites && S.sprites.shieldPartB) {
+      const img = S.sprites.shieldPartB;
+      const scale = 0.75;
+      ctx.drawImage(
+        img,
+        p.x - (img.width * scale) / 2,
+        p.y - (img.height * scale) / 2,
+        img.width * scale,
+        img.height * scale
+      );
+      continue;
+    }
+
+    // COIN PICKUP (green)
+    if (p.type === "coin") {
+      ctx.fillStyle = "#7dff99";
+    }
+
+    // WEAPON PICKUP (yellow or default)
+    else {
+      ctx.fillStyle = "#ffe66b";
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius || 10, 0, Math.PI * 2);
+    ctx.fill();
   }
-
-  // Shield Part B
-  if (p.type === "shieldB" && S.sprites.shieldPartB) {
-    const img = S.sprites.shieldPartB;
-    const scale = 0.75;
-    ctx.drawImage(
-      img,
-      p.x - (img.width * scale) / 2,
-      p.y - (img.height * scale) / 2,
-      img.width * scale,
-      img.height * scale
-    );
-    continue;
-  }
-
-  // COIN PICKUP (green)
-  if (p.type === "coin") {
-    ctx.fillStyle = "#7dff99";
-  }
-
-  // WEAPON PICKUP (yellow)
-  else {
-    ctx.fillStyle = "#ffe66b";
-  }
-
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, p.radius || 10, 0, Math.PI * 2);
-  ctx.fill();
-}
+};
 
 // Explosion renderer (sprite sheet)
 window.drawParticles = function drawParticles(ctx) {
