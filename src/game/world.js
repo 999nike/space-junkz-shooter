@@ -257,12 +257,12 @@ enter() {
         return;
       }
 
-      // ------ LEVEL 2 (MISSION 1) ------
-    if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
-      this.active = false;    // stop map updates
-      window.Level2.enter();  // start Level 2
-      return;
-    }
+      // ------ LEVEL 3 < lvl3.js ,,,,drax system on map ------
+if (node.id === "lvl3" && window.Level3 && window.Level3.enter) {
+    this.active = false;
+    window.Level3.enter();
+    return;
+}
 
     // ------ FUTURE LEVELS (3–10) ------
     // For now: if a proper LevelX.enter() exists, use it.
