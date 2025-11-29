@@ -604,12 +604,10 @@ if (e.dropChance && Math.random() < e.dropChance) {
  if (e.type === "geminiBoss") {
     S.running = false;
     window.flashMsg("LEVEL COMPLETE!");
-
-    // Use original LevelExit engine for Level 1
-    if (window.LevelExit && window.LevelExit.start) {
+    if (window.WorldMap && window.WorldMap.enter) {
         setTimeout(() => {
-            window.LevelExit.start();
-        }, 800);
+            window.WorldMap.enter();
+        }, 1200);
     }
 };
 
