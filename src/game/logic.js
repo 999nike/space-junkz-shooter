@@ -995,9 +995,29 @@ if (GS.killsSinceShieldDrop >= 50) {
       continue;
     }
 
-    // Pickup
+      // Pickup
     if (circleHit(player, p)) {
       S.powerUps.splice(i, 1);
+
+      // ---- SHIELD PART PICKUP ----
+      if (p.type === "shieldA") {
+      S.hasShieldA = true;
+      window.flashMsg("🛡️ SHIELD PART A COLLECTED");
+      continue;
+      }
+
+       if (p.type === "shieldB") {
+       S.hasShieldB = true;
+       window.flashMsg("🛡️ SHIELD PART B COLLECTED");
+       continue;
+      }
+      
+// ---- AUTO-CRAFT SHIELD ----
+    if (!S.shieldUnlocked && S.hasShieldA && S.hasShieldB) {
+        S.shieldUnlocked = true;
+        S.shield = S.maxShield || 100;
+        window.flashMsg("⚡ SHIELD ACTIVATED!");
+    }
 
       // COIN PICKUP
       if (p.type === "coin") {
