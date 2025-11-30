@@ -150,8 +150,8 @@ window.resetGameState = function resetGameState() {
   S.player.invuln      = 0;
 };
 
-// =========================================================
-//  ENGINE STARTUP + START BUTTON
+/// =========================================================
+//  ENGINE STARTUP (START BUTTON DISABLED)
 // =========================================================
 window.addEventListener("load", () => {
   requestAnimationFrame(() => {
@@ -160,31 +160,14 @@ window.addEventListener("load", () => {
     window.setupInput();
   });
 
- window.GameState.startBtn.addEventListener("click", () => {
-    const S = window.GameState;
-    const active = localStorage.getItem("sj_active_player");
-    if (
-      active &&
-      (S.score > 0 || S.wizzCoins > 0) &&
-      typeof window.syncStats === "function"
-    ) {
-      window.syncStats(active, S.wizzCoins, S.score);
-    }
-    window.resetGameState();
-    S.running = true;
-    window.flashMsg("GOOD LUCK, COMMANDER");
-    const bgm = document.getElementById("bgm");
-    if (bgm) {
-      bgm.volume = 0.35;
-      bgm.play().catch(() => {
-        console.warn("Music blocked until user interacts again.");
-      });
-    }
+  // --- DISABLED START BUTTON ---
+  window.GameState.startBtn.addEventListener("click", () => {
+    console.log("⚠ START BUTTON DISABLED — LEVEL AUTO-MODE ACTIVE");
   });
-  window.flashMsg("Press START to play");
-});
 
-window.flashMsg("Press START to play");
+  // Optional message
+  window.flashMsg("Select a level from the starmap");
+});
 
 // =========================================================
 //  MAIN LOOP
