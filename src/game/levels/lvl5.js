@@ -1,9 +1,10 @@
 // ======================================================
-// LEVEL 5 – VOID SWARM
-// • Fast 60-sec survival mode
-// • Purple void background
-// • New enemy pattern: swirl + divebomb
-// • Clean exit to map
+// LEVEL 5 – THE VOID
+// • Total visual refresh
+// • Purple nebula background
+// • Void enemies (black + neon)
+// • Silent drift + ambient debris
+// • 45-sec survival
 // ======================================================
 
 (function () {
@@ -16,11 +17,8 @@
     bg: null,
     bgLoaded: false,
 
-    // -----------------------------
-    // ENTER
-    // -----------------------------
     enter() {
-      console.log("🚀 ENTERING LEVEL 5 – VOID SWARM");
+      console.log("🌌 ENTERING LEVEL 5 — THE VOID");
 
       this.active = true;
       this.timer = 0;
@@ -32,151 +30,170 @@
 
       // Player
       S.player.x = S.W / 2;
-      S.player.y = S.H - 80;
-      S.player.invuln = 1.0;
+      S.player.y = S.H - 90;
+      S.player.invuln = 1.2;
 
-      // Background (purple nebula)
+      // NEW: Purple void BG
       this.bg = new Image();
-      this.bg.src = "./src/game/assets/void_bg.png"; // custom purple
+      this.bg.src = "./src/game/assets/voidpurple.jpg";
       this.bg.onload = () => (this.bgLoaded = true);
 
-      // Turn off map/home
-      if (window.WorldMap) window.WorldMap.active = false;
-      if (window.HomeBase) window.HomeBase.active = false;
+      // Disable map + homebase
+      if (window.WorldMap) WorldMap.active = false;
+      if (window.HomeBase) HomeBase.active = false;
 
-      if (window.initStars) initStars();
+      // Reset stars → slower for void effect
+      if (window.initStars) {
+        initStars();
+        S.stars.forEach((s) => {
+          s.speed *= 0.45;
+          s.color = "#b56bff";
+        });
+      }
 
-      window.flashMsg("MISSION 5 – VOID SWARM");
-      setTimeout(() => window.flashMsg("SURVIVE 60 SECONDS"), 1000);
+      window.flashMsg("MISSION 5 — THE VOID");
+      setTimeout(() => window.flashMsg("SURVIVE 45 SECONDS"), 1200);
     },
 
-    // -----------------------------
-    // UPDATE
-    // -----------------------------
     update(dt) {
       if (!this.active || !S.running) return;
 
       this.timer += dt;
       this.spawnTimer -= dt;
 
-      // Finish after 60 seconds
-      if (this.timer >= 60) {
-        this.completeLevel();
+      // 45-second survival goal
+      if (this.timer >= 45) {
+        this.complete();
         return;
       }
 
-      // Enemy waves
+      // Unique Void waves
       if (this.spawnTimer <= 0) {
         this.spawnVoidWave();
-        this.spawnTimer = 0.35; // VERY fast
+        this.spawnTimer = 0.5;
       }
 
-      // Use core shooter engine
-      if (window.updateGameCore) window.updateGameCore(dt);
+      if (window.updateGameCore) updateGameCore(dt);
     },
 
-    // -----------------------------
-    // DRAW
-    // -----------------------------
     draw(ctx) {
       if (!this.active) return;
 
-      if (this.bgLoaded) ctx.drawImage(this.bg, 0, 0, S.W, S.H);
-      else {
-        ctx.fillStyle = "#120016";
+      // BG: deep purple
+      if (this.bgLoaded) {
+        ctx.drawImage(this.bg, 0, 0, S.W, S.H);
+      } else {
+        ctx.fillStyle = "#15001d";
         ctx.fillRect(0, 0, S.W, S.H);
       }
 
-      if (window.drawRunway) drawRunway(ctx);
+      // Void fog overlay
+      ctx.fillStyle = "rgba(120,0,180,0.15)";
+      ctx.fillRect(0, 0, S.W, S.H);
+
+      // Render normally
       if (window.drawGameCore) drawGameCore(ctx);
     },
 
-    // -----------------------------
-    // NEW VOID WAVE
-    // -----------------------------
+    // ---------------------------------------------------
+    // VOID WAVES — totally different behaviour
+    // ---------------------------------------------------
     spawnVoidWave() {
-      const pattern = Math.random();
+      const roll = Math.random();
 
-      // Swirl enemies (left → right curve)
-      if (pattern < 0.45) {
-        const ex = rand(60, S.W - 60);
-        const wave = 3 + Math.floor(Math.random() * 3);
-
-        for (let i = 0; i < wave; i++) {
-          const e = {
-            type: "voidSwirl",
-            x: ex,
-            y: -20 - i * 40,
-            radius: 18,
-            hp: 2,
-            maxHp: 2,
-            colour: "#d57bff",
-            timer: Math.random() * 2,
-            curveAmp: rand(40, 90)
-          };
-          S.enemies.push(e);
-        }
+      // Shadow ghosts (fade in at random)
+      if (roll < 0.33) {
+        const x = rand(40, S.W - 40);
+        const e = {
+          type: "voidGhost",
+          x,
+          y: -40,
+          radius: 20,
+          hp: 2,
+          maxHp: 2,
+          alpha: 0,
+          drift: rand(-20, 20),
+          colour: "#ffffff",
+        };
+        S.enemies.push(e);
       }
 
-      // Divebombers (extreme speed)
-      else {
-        const count = 3 + Math.floor(Math.random() * 4);
-
-        for (let i = 0; i < count; i++) {
+      // Portal spit (cluster burst)
+      else if (roll < 0.66) {
+        for (let i = 0; i < 5; i++) {
           const e = {
-            type: "voidDive",
-            x: rand(20, S.W - 20),
-            y: -20 - i * 30,
+            type: "voidSpit",
+            x: rand(40, S.W - 40),
+            y: -20 - i * 20,
             radius: 14,
             hp: 1,
             maxHp: 1,
-            colour: "#ff5be1",
-            diveSpeed: rand(300, 450)
+            vy: rand(180, 260),
+            colour: "#ff63d1",
           };
           S.enemies.push(e);
         }
       }
+
+      // Sidewinders (zigzag from the sides)
+      else {
+        const side = Math.random() < 0.5 ? -20 : S.W + 20;
+        const e = {
+          type: "voidSide",
+          x: side,
+          y: rand(40, S.H / 2),
+          radius: 16,
+          hp: 2,
+          maxHp: 2,
+          speed: rand(200, 260),
+          colour: "#6cfffa",
+          dir: side < 0 ? 1 : -1,
+        };
+        S.enemies.push(e);
+      }
     },
 
-    // -----------------------------
-    // COMPLETE
-    // -----------------------------
-    completeLevel() {
-      window.flashMsg("LEVEL 5 COMPLETE!");
-      S.running = false;
+    // ---------------------------------------------------
+    // COMPLETE LEVEL
+    // ---------------------------------------------------
+    complete() {
       this.active = false;
+      S.running = false;
+
+      window.flashMsg("LEVEL 5 COMPLETE!");
 
       if (window.unlockNextLevel) unlockNextLevel(5);
 
       setTimeout(() => {
-        if (window.WorldMap && window.WorldMap.enter) {
-          window.WorldMap.enter();
-        }
+        if (window.WorldMap) WorldMap.enter();
       }, 1200);
     },
   };
 
   // ------------------------------------------------------
-  // EXTEND MAIN ENGINE FOR CUSTOM VOID ENEMIES
+  // EXTEND ENGINE: custom enemy behaviour
   // ------------------------------------------------------
-  const originalUpdateGame = window.updateGame;
+  const orig = window.updateGame;
 
-  window.updateGame = function patchedUpdateGame(dt) {
-    originalUpdateGame(dt);
+  window.updateGame = function patched(dt) {
+    orig(dt);
 
     const S = window.GameState;
 
     for (const e of S.enemies) {
-      // ----- VOID SWIRL (curving path) -----
-      if (e.type === "voidSwirl") {
-        e.timer += dt;
-        e.y += 160 * dt;
-        e.x += Math.sin(e.timer * 3) * (e.curveAmp * dt);
+      if (e.type === "voidGhost") {
+        e.alpha = Math.min(1, e.alpha + dt);     // fade in
+        e.y += 60 * dt;
+        e.x += Math.sin(e.y * 0.02) * 60 * dt;
       }
 
-      // ----- VOID DIVE (straight down fast) -----
-      if (e.type === "voidDive") {
-        e.y += e.diveSpeed * dt;
+      if (e.type === "voidSpit") {
+        e.y += e.vy * dt;
+      }
+
+      if (e.type === "voidSide") {
+        e.x += e.dir * e.speed * dt;
+        e.y += Math.sin(e.x * 0.02) * 40 * dt;
       }
     }
   };
