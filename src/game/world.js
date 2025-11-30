@@ -224,14 +224,50 @@
       return null;
     },
 
-    // ======================================================
-    //   CLEAN — FIXED — LEVEL ROUTER
-    // ======================================================
+   // --------------------------------------------------
+    // MOVE SHIP + ENTER LEVEL / HOME / INTRO
+    // --------------------------------------------------
     _moveShipToNode(node) {
-      this.ship.tx = node.x;
-      this.ship.ty = node.y + 60;
+      const S = window.GameState;
+      if (!node) return;
 
-      // ------ HOME ------
+      // Move ship target for visual travel
+      this.ship.tx = node.x;
+      this.ship.ty = node.y - 60;
+
+      // Helper: start a level safely (with optional fallback)
+      const startLevel = (globalName, levelIndex, fallbackName) => {
+        const lvl = window[globalName];
+
+        // We are leaving the map now
+        this.active = false;
+
+        if (lvl && typeof lvl.enter === "function") {
+          if (S) S.currentLevel = levelIndex || null;
+          lvl.enter();
+          return;
+        }
+
+        // Optional fallback (eg. reuse Level2 for unimplemented)
+        if (fallbackName) {
+          const fb = window[fallbackName];
+          if (fb && typeof fb.enter === "function") {
+            console.warn(`WorldMap: ${globalName} missing, using ${fallbackName} instead.`);
+            if (S) S.currentLevel = levelIndex || null;
+            fb.enter();
+            return;
+          }
+        }
+
+        // Nothing to load → keep map alive so you don't get a freeze
+        console.warn(`WorldMap: No handler for ${globalName}. Staying on map.`);
+        this.active = true;
+        if (window.flashMsg) {
+          window.flashMsg("DEV: Level not wired yet.");
+        }
+      };
+
+      // ------ HOME BASE ------
       if (node.id === "home") {
         this.active = false;
         if (window.HomeBase && window.HomeBase.enter) {
@@ -240,58 +276,51 @@
         return;
       }
 
-      // ------ LEVEL 1 ------
+      // ------ LEVEL 1 INTRO (REPLAY) ------
       if (node.id === "lvl1") {
         this.active = false;
-        if (window.resetGameState) window.resetGameState();
-        if (window.GameState) window.GameState.running = true;
-        return;
-      }
 
-      // ------ LEVEL 2 ------
-      if (node.id === "lvl2") {
-        this.active = false;
-        if (window.Level2 && window.Level2.enter) window.Level2.enter();
-        return;
-      }
-
-      // ------ LEVEL 3 ------
-      if (node.id === "lvl3") {
-        this.active = false;
-        if (window.Level3 && window.Level3.enter) window.Level3.enter();
-        return;
-      }
-
-      // ------ LEVEL 4 ------
-      if (node.id === "lvl4") {
-        this.active = false;
-        if (window.Level4 && window.Level4.enter) window.Level4.enter();
-        return;
-      }
-
-      // ------ FUTURE LEVELS 5–10 ------
-      const levelMap = {
-        lvl5: "Level5",
-        lvl6: "Level6",
-        lvl7: "Level7",
-        lvl8: "Level8",
-        lvl9: "Level9",
-        lvl10: "Level10",
-      };
-
-      if (levelMap[node.id]) {
-        const levelName = levelMap[node.id];
-        const target = window[levelName];
-
-        this.active = false;
-
-        if (target && typeof target.enter === "function") {
-          target.enter();
-        } else if (window.Level2) {
-          window.Level2.enter();
+        if (window.resetGameState) {
+          window.resetGameState(); // intro engine reset
         }
+        if (S) {
+          S.running = true;
+          S.currentLevel = 1;
+        }
+
         return;
       }
+
+      // ------ LEVEL 2 – MISSION 1 (DRAX) ------
+      if (node.id === "lvl2") {
+        startLevel("Level2", 2);
+        return;
+      }
+
+      // ------ LEVEL 3 – MISSION 2 (DRAX FULL CUSTOM) ------
+      if (node.id === "lvl3") {
+        // Prefer Level3; fall back to Level2 if something is wrong
+        startLevel("Level3", 3, "Level2");
+        return;
+      }
+
+      // ------ LEVEL 4 – TEST CLONE (if present) ------
+      if (node.id === "lvl4") {
+        // Uses Level4 if it exists, otherwise reuses Level2
+        startLevel("Level4", 4, "Level2");
+        return;
+      }
+
+      // ------ FUTURE LEVELS (5–10) → TEMP REUSE LEVEL 2 ------
+      const reuseLevel2Ids = ["lvl5", "lvl6", "lvl7", "lvl8", "lvl9", "lvl10"];
+      if (reuseLevel2Ids.includes(node.id)) {
+        // All these nodes just boot the Level2 layout for now
+        startLevel("Level2", 2);
+        return;
+      }
+
+      // Unknown node id – do nothing but keep map active
+      console.warn("WorldMap: clicked unknown node id:", node.id);
     },
 
     // ------ UPDATE ------
