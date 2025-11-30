@@ -150,8 +150,8 @@ window.resetGameState = function resetGameState() {
   S.player.invuln      = 0;
 };
 
-/// =========================================================
-//  ENGINE STARTUP (START BUTTON DISABLED)
+// =========================================================
+//  ENGINE STARTUP (AUTO-START LEVEL 1)
 // =========================================================
 window.addEventListener("load", () => {
   requestAnimationFrame(() => {
@@ -162,11 +162,18 @@ window.addEventListener("load", () => {
 
   // --- DISABLED START BUTTON ---
   window.GameState.startBtn.addEventListener("click", () => {
-    console.log("⚠ START BUTTON DISABLED — LEVEL AUTO-MODE ACTIVE");
+    console.log("⚠ START BUTTON DISABLED — AUTO MODE ACTIVE");
   });
 
-  // Optional message
-  window.flashMsg("Select a level from the starmap");
+  // --- AUTO START LEVEL 1 ON GAME LOAD ---
+  setTimeout(() => {
+    if (window.Level1 && typeof window.Level1.enter === "function") {
+      console.log("🔥 AUTO-STARTING LEVEL 1 (INTRO)");
+      window.Level1.enter();
+    } else {
+      console.warn("⚠ Level1 not found — cannot auto-start.");
+    }
+  }, 600);
 });
 
 // =========================================================
