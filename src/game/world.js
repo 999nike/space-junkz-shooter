@@ -22,14 +22,14 @@ const NODES = [
     id: "lvl1",
     xFactor: 0.38,
     yFactor: 0.45,
-    label: "LEVEL 1 - GEMINI FIELD",
+    label: "LEVEL 1 - MISSION 1",
     unlocked: true,
   },
   {
     id: "lvl2",
     xFactor: 0.68,
     yFactor: 0.32,
-    label: "LEVEL 2 - DRAX SYSTEM",
+    label: "LEVEL 2 - MISSION 2",
     unlocked: true,
   },
 
