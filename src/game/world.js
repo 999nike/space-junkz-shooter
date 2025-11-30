@@ -258,7 +258,7 @@ enter() {
       }
 
       // ------ LEVEL 3 < lvl3.js ,,,,drax system on map ------
-if (node.id === "lvl3" && window.Level3 && window.Level3.enter) {
+if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
     this.active = false;
     window.Level3.enter();
     return;
