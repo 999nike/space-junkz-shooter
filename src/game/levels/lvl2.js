@@ -6,13 +6,13 @@
 //   - Custom Boss (Cyclops Hydra Mini)
 //   - Clean exit back to WorldMap
 // ===========================================================
-
-if (!S.sprites) {
-    loadSprites();
-}
-
 (function () {
   const S = window.GameState;
+
+  // Safe sprite loading
+  if (!S.sprites && typeof loadSprites === "function") {
+    loadSprites();
+  }
 
   const Level2 = {
     active: false,
