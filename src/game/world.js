@@ -225,7 +225,7 @@
     },
 
    // --------------------------------------------------
-    // MOVE SHIP + ENTER LEVEL / HOME / INTRO
+    // MOVE SHIP + ENTER LEVEL / HOME / MISSIONS
     // --------------------------------------------------
     _moveShipToNode(node) {
       const S = window.GameState;
@@ -252,7 +252,9 @@
         if (fallbackName) {
           const fb = window[fallbackName];
           if (fb && typeof fb.enter === "function") {
-            console.warn(`WorldMap: ${globalName} missing, using ${fallbackName} instead.`);
+            console.warn(
+              `WorldMap: ${globalName} missing, using ${fallbackName} instead.`
+            );
             if (S) S.currentLevel = levelIndex || null;
             fb.enter();
             return;
@@ -276,10 +278,9 @@
         return;
       }
 
-      // ------ LEVEL 1 INTRO (REPLAY) ------
+      // ------ INTRO REPLAY (if you add a lvl1 node later) ------
       if (node.id === "lvl1") {
         this.active = false;
-
         if (window.resetGameState) {
           window.resetGameState(); // intro engine reset
         }
@@ -287,47 +288,45 @@
           S.running = true;
           S.currentLevel = 1;
         }
-
         return;
       }
 
-      // ------ lvl2.js – MISSION 1  ------
+      // ------ MISSION 1  (lvl2.js → Level2) ------
       if (node.id === "lvl2") {
         startLevel("Level2", 2);
         return;
       }
 
-      // ------ lvl3.js – MISSION 2 ------
+      // ------ MISSION 2  (lvl3.js → Level3) ------
       if (node.id === "lvl3") {
-        // Prefer Level3; fall back to Level2 if something is wrong
         startLevel("Level3", 3, "Level2");
         return;
       }
 
-      // ------lvl4.js– mission 3 ------
+      // ------ MISSION 3  (Level4 clone test) ------
       if (node.id === "lvl4") {
-        // Uses Level4 if it exists, otherwise reuses Level2
         startLevel("Level4", 4, "Level2");
         return;
       }
 
-    // ------lvl5.js mission4  ------
-    if (node.id === "lvl5") {
-    startLevel("Level5", 5);
-    return;
-    }
+      // ------ MISSION 4  (lvl5.js → Level5) ------
+      if (node.id === "lvl5") {
+        startLevel("Level5", 5, "Level2");
+        return;
+      }
 
-   // ------ lvl6.js mission5 ------
-    if (node.id === "lvl6") {
-    startLevel("Level6", 6, "Level2");   // fallback because Level6 is template
-    return;
-    }
+      // ------ MISSION 5  (TEMP: reuse Level5 – no Level6 yet) ------
+      if (node.id === "lvl6") {
+        // There is no window.Level6 in your files, so reuse Level5 for now
+        startLevel("Level5", 5, "Level2");
+        return;
+      }
 
-    // ------ LEVEL 7 ------
-    if (node.id === "lvl7") {
-    startLevel("Level7", 7, "Level2");   // fallback because Level7 is template
-    return;
-    }
+      // ------ FUTURE NODES: TEMP → Level2 ------
+      if (["lvl7", "lvl8", "lvl9", "lvl10", "lvl11", "secret"].includes(node.id)) {
+        startLevel("Level2", 2);
+        return;
+      }
 
       // Unknown node id – do nothing but keep map active
       console.warn("WorldMap: clicked unknown node id:", node.id);
