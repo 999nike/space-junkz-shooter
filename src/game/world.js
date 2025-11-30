@@ -311,13 +311,23 @@
         return;
       }
 
-      // ------ FUTURE LEVELS (5–10) → TEMP REUSE LEVEL 2 ------
-      const reuseLevel2Ids = ["lvl5", "lvl6", "lvl7", "lvl8", "lvl9", "lvl10"];
-      if (reuseLevel2Ids.includes(node.id)) {
-        // All these nodes just boot the Level2 layout for now
-        startLevel("Level2", 2);
-        return;
-      }
+    // ------ LEVEL 5 ------
+    if (node.id === "lvl5") {
+    startLevel("Level5", 5);
+    return;
+    }
+
+   // ------ LEVEL 6 ------
+    if (node.id === "lvl6") {
+    startLevel("Level6", 6, "Level2");   // fallback because Level6 is template
+    return;
+    }
+
+    // ------ LEVEL 7 ------
+    if (node.id === "lvl7") {
+    startLevel("Level7", 7, "Level2");   // fallback because Level7 is template
+    return;
+    }
 
       // Unknown node id – do nothing but keep map active
       console.warn("WorldMap: clicked unknown node id:", node.id);
