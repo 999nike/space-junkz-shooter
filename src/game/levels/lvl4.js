@@ -22,79 +22,137 @@
     enter() {
       console.log("🚨 ENTERING TEST ZONE OMEGA 🚨");
 
+      // ======================================================
+// LEVEL 4 - CLONE OF LEVEL 2 (TEST MODE)
+// ======================================================
+
+(function () {
+  const S = window.GameState;
+
+  const Level4 = {
+    active: false,
+    bossSpawned: false,
+    timer: 0,
+    bg: null,
+    bgLoaded: false,
+
+    // -----------------------------
+    // ENTER LEVEL
+    // -----------------------------
+    enter() {
+      console.log("💥 ENTERING LEVEL 4 (CLONE TEST) 💥");
+
       this.active = true;
+      this.bossSpawned = false;
       this.timer = 0;
-      this.spawnTimer = 0;
 
-      // EXACT SAME START LOGIC AS LEVEL 2 (AUTO START)
-      if (window.resetGameState) window.resetGameState();
-      S.running = true;                      // ★ AUTO START FLAG ★
-      S.currentLevel = 99;                   // ★ Unique level number
-      window.WorldMap.active = false;        // ★ Disable map
-      window.HomeBase && (window.HomeBase.active = false);
+      // Reset state
+      S.running = true;
+      S.enemies = [];
+      S.bullets = [];
+      S.enemyBullets = [];
+      S.rockets = [];
+      S.particles = [];
+      S.powerUps = [];
+      S.sidekicks = S.sidekicks || [];
 
-      // Background (use any image)
+      // Player position
+      S.player.x = S.W / 2;
+      S.player.y = S.H - 80;
+      S.player.invuln = 1.0;
+
+      // Background
       this.bg = new Image();
-      this.bg.src = "./src/game/assets/mission1_bg.png";
+      this.bg.src = "./src/game/assets/mission1_bg.png"; 
       this.bg.onload = () => (this.bgLoaded = true);
+
+      // Turn off map + home
+      if (window.WorldMap) window.WorldMap.active = false;
+      if (window.HomeBase) window.HomeBase.active = false;
 
       if (window.initStars) window.initStars();
 
-      // GIANT OBVIOUS WARNING
-      window.flashMsg("⚠ WARNING ⚠");
-      setTimeout(() => window.flashMsg("🚨 TEST ZONE OMEGA ACTIVE 🚨"), 1200);
+      // BIG WARNING SO YOU KNOW IT LOADED
+      window.flashMsg("⚠ LEVEL 4 TEST MODE ⚠");
+      setTimeout(() => window.flashMsg("💥 LEVEL 4 (CLONE) ACTIVE 💥"), 1000);
     },
 
-    // ------------------------------
-    // UPDATE LOOP
-    // ------------------------------
+    // -----------------------------
+    // UPDATE
+    // -----------------------------
     update(dt) {
       if (!this.active || !S.running) return;
 
       this.timer += dt;
-      this.spawnTimer -= dt;
 
-      // Spawn behaviour (unique so you KNOW it's this level)
-      if (this.spawnTimer <= 0) {
-        this.spawnTestWave();
-        this.spawnTimer = 0.7; // predictable
+      // Same wave logic as Level 2
+      S.spawnTimer -= dt;
+      if (S.spawnTimer <= 0) {
+        this.spawnWave();
+        S.spawnTimer = rand(0.25, 0.7);
+      }
+
+      // Spawn boss after 45 sec (shorter for testing)
+      if (!this.bossSpawned && this.timer >= 45) {
+        this.spawnBoss();
+        this.bossSpawned = true;
       }
 
       if (window.updateGameCore) window.updateGameCore(dt);
     },
 
-    // ------------------------------
-    // DRAW LOOP
-    // ------------------------------
+    // -----------------------------
+    // DRAW
+    // -----------------------------
     draw(ctx) {
       if (!this.active) return;
 
       if (this.bgLoaded) {
         ctx.drawImage(this.bg, 0, 0, S.W, S.H);
       } else {
-        ctx.fillStyle = "#220011";
+        ctx.fillStyle = "#05010a";
         ctx.fillRect(0, 0, S.W, S.H);
       }
 
+      // Render same as Level 2
       if (window.drawRunway) window.drawRunway(ctx);
       if (window.drawGameCore) window.drawGameCore(ctx);
     },
 
-    // ------------------------------
-    // TEST WAVE (obvious pattern)
-    // ------------------------------
-    spawnTestWave() {
-      // These enemies *zigzag aggressively* so you know it's this level
-      window.spawnEnemyType("zigzag");
-      window.spawnEnemyType("zigzag");
-      window.spawnEnemyType("zigzag");
-
-      // Add a shooter every few seconds
-      if (Math.random() < 0.33) {
+    // -----------------------------
+    // WAVES (copied from Level 2)
+    // -----------------------------
+    spawnWave() {
+      const roll = Math.random();
+      if (roll < 0.45) {
+        window.spawnEnemyType("zigzag");
+        window.spawnEnemyType("zigzag");
+      } else if (roll < 0.75) {
         window.spawnEnemyType("shooter");
+      } else {
+        window.spawnEnemyType("tank");
+        window.spawnEnemyType("zigzag");
       }
+    },
+
+    // -----------------------------
+    // BOSS (copied from Level 2)
+    // -----------------------------
+    spawnBoss() {
+      const boss = {
+        type: "lvl4Boss",
+        x: S.W / 2,
+        y: -120,
+        radius: 90,
+        hp: 400, // small for test
+        maxHp: 400,
+        enterComplete: false,
+        timer: 0
+      };
+      S.enemies.push(boss);
+      window.flashMsg("⚠ LEVEL 4 TEST BOSS SPAWNED ⚠");
     },
   };
 
-  window.LevelX = LevelX;
+  window.Level4 = Level4;
 })();
