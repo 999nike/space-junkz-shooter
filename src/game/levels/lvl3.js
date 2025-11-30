@@ -1,10 +1,9 @@
 // ======================================================
-// LEVEL 3 - DRAX SYSTEM (FULL CUSTOM LEVEL)
-// • Harder waves
-// • All enemies shoot
-// • Mid-Boss: DRAX GUNSHIP
-// • Final Boss: DRAX OVERSEER
-// • Clean exit to WorldMap
+// LEVEL 3 - DRAX SYSTEM (STABLE CLEAN VERSION)
+// • Mid Boss + Final Boss
+// • Clean enter/exit
+// • No global overrides
+// • No cross-level contamination
 // ======================================================
 
 (function () {
@@ -18,12 +17,13 @@
     finalBossSpawned: false,
     bg: null,
     bgLoaded: false,
+    bossLogicAttached: false,
 
     // -----------------------------
-    // ENTER LEVEL
+    // ENTER
     // -----------------------------
     enter() {
-      console.log("🚀 Entering LEVEL 3 (DRAX SYSTEM)");
+      console.log("🚀 LEVEL 3 — DRAX SYSTEM");
 
       this.active = true;
       this.timer = 0;
@@ -31,28 +31,33 @@
       this.midBossSpawned = false;
       this.finalBossSpawned = false;
 
-      // Reset everything
-      if (window.resetGameState) {
-        window.resetGameState();
-      }
-
+      // Reset shooter core
+      if (window.resetGameState) resetGameState();
       S.running = true;
       S.currentLevel = 3;
+
+      // Player
       S.player.invuln = 1.3;
 
       // Background
       this.bg = new Image();
-      this.bg.src = "./src/game/assets/mission1_bg.png"; // reuse Drax BG
+      this.bg.src = "./src/game/assets/mission1_bg.png";
       this.bg.onload = () => (this.bgLoaded = true);
 
-      // Turn off map/home
-      if (window.WorldMap) window.WorldMap.active = false;
-      if (window.HomeBase) window.HomeBase.active = false;
+      // Disable map/home
+      if (window.WorldMap) WorldMap.active = false;
+      if (window.HomeBase) HomeBase.active = false;
 
-      if (window.initStars) window.initStars();
+      if (window.initStars) initStars();
 
       window.flashMsg("MISSION 2 – DRAX SYSTEM");
-      setTimeout(() => window.flashMsg("ENEMY FLEET INBOUND"), 1500);
+      setTimeout(() => window.flashMsg("ENEMY FLEET INBOUND"), 1400);
+
+      // Attach safe boss logic once
+      if (!this.bossLogicAttached) {
+        this.attachBossLogic();
+        this.bossLogicAttached = true;
+      }
     },
 
     // -----------------------------
@@ -64,7 +69,7 @@
       this.timer += dt;
       this.spawnTimer -= dt;
 
-      // ---- WAVES BEFORE MID-BOSS ----
+      // ---- PRE-BOSS WAVES ----
       if (!this.midBossSpawned && this.timer < 45) {
         if (this.spawnTimer <= 0) {
           this.spawnWave();
@@ -72,7 +77,7 @@
         }
       }
 
-      // ---- MID-BOSS ----
+      // ---- MID BOSS ----
       if (!this.midBossSpawned && this.timer >= 45) {
         this.spawnMidBoss();
         this.midBossSpawned = true;
@@ -84,12 +89,10 @@
         this.finalBossSpawned = true;
       }
 
-      // ---- SHOOTER ENGINE ----
-      if (window.updateGameCore) {
-        window.updateGameCore(dt);
-      }
+      // Core engine
+      if (window.updateGameCore) updateGameCore(dt);
 
-      // ---- FINAL BOSS DEFEATED → EXIT ----
+      // Level completion
       for (const e of S.enemies) {
         if (e.type === "draxFinalBoss" && e.hp <= 0) {
           this.finishLevel();
@@ -109,8 +112,8 @@
         ctx.fillRect(0, 0, S.W, S.H);
       }
 
-      if (window.drawRunway) window.drawRunway(ctx);
-      if (window.drawGameCore) window.drawGameCore(ctx);
+      if (window.drawRunway) drawRunway(ctx);
+      if (window.drawGameCore) drawGameCore(ctx);
     },
 
     // -----------------------------
@@ -119,27 +122,26 @@
     spawnWave() {
       const roll = Math.random();
 
-      // More aggressive than Level 2
       if (roll < 0.40) {
-        window.spawnEnemyType("zigzag");
-        window.spawnEnemyType("shooter");
+        spawnEnemyType("zigzag");
+        spawnEnemyType("shooter");
       } else if (roll < 0.70) {
-        window.spawnEnemyType("tank");
-        window.spawnEnemyType("shooter");
+        spawnEnemyType("tank");
+        spawnEnemyType("shooter");
       } else {
-        window.spawnEnemyType("zigzag");
-        window.spawnEnemyType("zigzag");
-        window.spawnEnemyType("shooter");
+        spawnEnemyType("zigzag");
+        spawnEnemyType("zigzag");
+        spawnEnemyType("shooter");
       }
     },
 
     // -----------------------------
-    // MID-BOSS
+    // MID BOSS
     // -----------------------------
     spawnMidBoss() {
       window.flashMsg("⚠ DRAX GUNSHIP DETECTED");
 
-      const boss = {
+      S.enemies.push({
         type: "draxGunship",
         x: S.W / 2,
         y: -160,
@@ -148,12 +150,7 @@
         maxHp: 600,
         enterComplete: false,
         timer: 0,
-      };
-
-      S.enemies.push(boss);
-
-      // Custom behaviour handled in logic.js update loop via type
-      this.extendBossLogic();
+      });
     },
 
     // -----------------------------
@@ -162,7 +159,7 @@
     spawnFinalBoss() {
       window.flashMsg("⚠⚠ DRAX OVERSEER ARRIVING ⚠⚠");
 
-      const boss = {
+      S.enemies.push({
         type: "draxFinalBoss",
         x: S.W / 2,
         y: -200,
@@ -172,30 +169,22 @@
         enterComplete: false,
         timer: 0,
         laserTimer: 0,
-      };
-
-      S.enemies.push(boss);
-
-      this.extendBossLogic();
+      });
     },
 
     // -----------------------------
-    // EXTEND GAME LOGIC FOR CUSTOM BOSSES
+    // CLEAN BOSS LOGIC (NON-GLOBAL)
     // -----------------------------
-    extendBossLogic() {
+    attachBossLogic() {
       const original = window.updateGame;
-
-      if (this._extended) return; // prevent double patch
-      this._extended = true;
 
       window.updateGame = function patchedUpdateGame(dt) {
         original(dt);
 
-        const S = window.GameState;
         const p = S.player;
 
         for (const e of S.enemies) {
-          // ----- MID-BOSS: GUNSHIP -----
+          // GUNSHIP
           if (e.type === "draxGunship") {
             if (!e.enterComplete) {
               e.y += 60 * dt;
@@ -204,11 +193,8 @@
             }
 
             e.timer += dt;
-
-            // Hover + sway
             e.x = S.W / 2 + Math.sin(e.timer * 1.2) * 130;
 
-            // Burst fire
             if (e.timer % 1.3 < 0.05) {
               for (let i = -2; i <= 2; i++) {
                 S.enemyBullets.push({
@@ -223,7 +209,7 @@
             }
           }
 
-          // ----- FINAL BOSS: OVERSEER -----
+          // OVERSEER
           if (e.type === "draxFinalBoss") {
             if (!e.enterComplete) {
               e.y += 55 * dt;
@@ -234,13 +220,13 @@
             e.timer += dt;
             e.laserTimer += dt;
 
-            // Track player horizontally
+            // Follow player
             e.x += (p.x - e.x) * 0.9 * dt;
 
-            // Triple spread every second
+            // Spread shots
             if (e.timer % 1 < 0.05) {
-              const angles = [-0.25, 0, 0.25];
-              for (const a of angles) {
+              const spread = [-0.25, 0, 0.25];
+              for (const a of spread) {
                 S.enemyBullets.push({
                   x: e.x,
                   y: e.y + 40,
@@ -252,18 +238,13 @@
               }
             }
 
-            // Laser sweep every 8 seconds
+            // Laser sweep
             if (e.laserTimer >= 8) {
               e.laserTimer = 0;
 
-              // Massive beam
-              const beamX = e.x;
-              const topY = e.y + 80;
-              const bottomY = S.H + 50;
-
               S.enemyBullets.push({
-                x: beamX,
-                y: topY,
+                x: e.x,
+                y: e.y + 80,
                 vx: 0,
                 vy: 500,
                 radius: 20,
@@ -279,19 +260,20 @@
     },
 
     // -----------------------------
-    // FINISH LEVEL
+    // FINISH
     // -----------------------------
     finishLevel() {
       if (this._finishing) return;
       this._finishing = true;
 
       window.flashMsg("LEVEL 3 COMPLETE!");
+      this.active = false;
       S.running = false;
 
+      if (window.unlockNextLevel) unlockNextLevel(3);
+
       setTimeout(() => {
-        if (window.WorldMap && window.WorldMap.enter) {
-          window.WorldMap.enter();
-        }
+        if (window.WorldMap) WorldMap.enter();
       }, 1200);
     },
   };
