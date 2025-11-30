@@ -151,7 +151,7 @@ window.resetGameState = function resetGameState() {
 };
 
 // =========================================================
-//  ENGINE STARTUP (AUTO-START LEVEL 1)
+//  ENGINE STARTUP + FIXED START BUTTON
 // =========================================================
 window.addEventListener("load", () => {
   requestAnimationFrame(() => {
@@ -160,20 +160,45 @@ window.addEventListener("load", () => {
     window.setupInput();
   });
 
-  // --- DISABLED START BUTTON ---
+  // --- FIXED START BUTTON (STARTS INTRO ONLY) ---
   window.GameState.startBtn.addEventListener("click", () => {
-    console.log("⚠ START BUTTON DISABLED — AUTO MODE ACTIVE");
+    const S = window.GameState;
+
+    // 🛑 If ANY level is active → ignore the Start button
+    if (
+      (window.Level2 && window.Level2.active) ||
+      (window.Level3 && window.Level3.active) ||
+      (window.Level4 && window.Level4.active)
+    ) {
+      console.log("Start ignored — level already active.");
+      return;
+    }
+
+    // ✅ Only runs when NO level is active → proper intro start
+    const active = localStorage.getItem("sj_active_player");
+
+    if (
+      active &&
+      (S.score > 0 || S.wizzCoins > 0) &&
+      typeof window.syncStats === "function"
+    ) {
+      window.syncStats(active, S.wizzCoins, S.score);
+    }
+
+    window.resetGameState();
+    S.running = true;
+    window.flashMsg("GOOD LUCK, COMMANDER");
+
+    const bgm = document.getElementById("bgm");
+    if (bgm) {
+      bgm.volume = 0.35;
+      bgm.play().catch(() => {
+        console.warn("Music blocked until user interacts again.");
+      });
+    }
   });
 
-  // --- AUTO START LEVEL 1 ON GAME LOAD ---
-  setTimeout(() => {
-    if (window.Level1 && typeof window.Level1.enter === "function") {
-      console.log("🔥 AUTO-STARTING LEVEL 1 (INTRO)");
-      window.Level1.enter();
-    } else {
-      console.warn("⚠ Level1 not found — cannot auto-start.");
-    }
-  }, 600);
+  window.flashMsg("Press START to play");
 });
 
 // =========================================================
