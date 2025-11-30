@@ -10,130 +10,120 @@
   const NODE_RADIUS = 16;
 
   // ------ MAP NODES ------
-const NODES = [
-  {
-    id: "home",
-    xFactor: 0.18,
-    yFactor: 0.78,
-    label: "HOME BASE",
-    unlocked: true,
-  },
-  {
-    id: "lvl1",
-    xFactor: 0.38,
-    yFactor: 0.45,
-    label: "LEVEL 1 - MISSION 1",
-    unlocked: true,
-  },
-  {
-    id: "lvl2",
-    xFactor: 0.68,
-    yFactor: 0.32,
-    label: "LEVEL 2 - MISSION 2",
-    unlocked: true,
-  },
+  const NODES = [
+    {
+      id: "home",
+      xFactor: 0.18,
+      yFactor: 0.78,
+      label: "HOME BASE",
+      unlocked: true,
+    },
+    {
+      id: "lvl1",
+      xFactor: 0.38,
+      yFactor: 0.45,
+      label: "LEVEL 1 - MISSION 1",
+      unlocked: true,
+    },
+    {
+      id: "lvl2",
+      xFactor: 0.68,
+      yFactor: 0.32,
+      label: "LEVEL 2 - MISSION 2",
+      unlocked: true,
+    },
+    {
+      id: "lvl3",
+      xFactor: 0.78,
+      yFactor: 0.25,
+      label: "LEVEL 3 - MISSION 3",
+      unlocked: true,
+    },
+    {
+      id: "lvl4",
+      xFactor: 0.82,
+      yFactor: 0.42,
+      label: "LEVEL 4 - MISSION 4",
+      unlocked: true,
+    },
+    {
+      id: "lvl5",
+      xFactor: 0.74,
+      yFactor: 0.56,
+      label: "LEVEL 5 - MISSION 5",
+      unlocked: true,
+    },
+    {
+      id: "lvl6",
+      xFactor: 0.60,
+      yFactor: 0.68,
+      label: "LEVEL 6 - TBA",
+      unlocked: false,
+    },
+    {
+      id: "lvl7",
+      xFactor: 0.46,
+      yFactor: 0.70,
+      label: "LEVEL 7 - TBA",
+      unlocked: false,
+    },
+    {
+      id: "lvl8",
+      xFactor: 0.32,
+      yFactor: 0.64,
+      label: "LEVEL 8 - TBA",
+      unlocked: false,
+    },
+    {
+      id: "lvl9",
+      xFactor: 0.26,
+      yFactor: 0.50,
+      label: "LEVEL 9 - TBA",
+      unlocked: false,
+    },
+    {
+      id: "lvl10",
+      xFactor: 0.22,
+      yFactor: 0.36,
+      label: "LEVEL 10 - TBA",
+      unlocked: false,
+    },
+    {
+      id: "secret",
+      xFactor: 0.82,
+      yFactor: 0.62,
+      label: "???",
+      unlocked: false,
+    },
+  ];
 
-  // ------ FUTURE LEVEL NODES (SKELETON ONLY) ------
-  {
-    id: "lvl3",
-    xFactor: 0.78,
-    yFactor: 0.25,
-    label: "LEVEL 3 - MISSION 3",
-    unlocked: true,
-  },
-  {
-    id: "lvl4",
-    xFactor: 0.82,
-    yFactor: 0.42,
-    label: "LEVEL 4 - MISSION 4",
-    unlocked: true,
-  },
-  {
-    id: "lvl5",
-    xFactor: 0.74,
-    yFactor: 0.56,
-    label: "LEVEL 5 - MISSION 5",
-    unlocked: true,
-  },
-  {
-    id: "lvl6",
-    xFactor: 0.60,
-    yFactor: 0.68,
-    label: "LEVEL 6 - TBA",
-    unlocked: false,
-  },
-  {
-    id: "lvl7",
-    xFactor: 0.46,
-    yFactor: 0.70,
-    label: "LEVEL 7 - TBA",
-    unlocked: false,
-  },
-  {
-    id: "lvl8",
-    xFactor: 0.32,
-    yFactor: 0.64,
-    label: "LEVEL 8 - TBA",
-    unlocked: false,
-  },
-  {
-    id: "lvl9",
-    xFactor: 0.26,
-    yFactor: 0.50,
-    label: "LEVEL 9 - TBA",
-    unlocked: false,
-  },
-  {
-    id: "lvl10",
-    xFactor: 0.22,
-    yFactor: 0.36,
-    label: "LEVEL 10 - TBA",
-    unlocked: false,
-  },
+  // ======================================================
+  // AUTO-UNLOCK HELPER
+  // ======================================================
+  window.unlockNextLevel = function (currentLevel) {
+    const nextId = "lvl" + (currentLevel + 1);
 
-  // Secret / special node stays as-is
-  {
-    id: "secret",
-    xFactor: 0.82,
-    yFactor: 0.62,
-    label: "???",
-    unlocked: false,
-  },
-];
+    const node = NODES.find((n) => n.id === nextId);
+    if (node) node.unlocked = true;
 
-// ← END OF NODES ARRAY (PUT FUNCTION DIRECTLY BELOW THIS)
-
-// ======================================================
-// AUTO-UNLOCK HELPER (enables level progression)
-//  - Updates both the NODES template and the live map
-// ======================================================
-window.unlockNextLevel = function (currentLevel) {
-  const nextId = "lvl" + (currentLevel + 1);
-
-  // Update template node
-  const node = NODES.find((n) => n.id === nextId);
-  if (node) {
-    node.unlocked = true;
-  }
-
-  // Also update live WorldMap nodes if already initialised
-  if (window.WorldMap && Array.isArray(window.WorldMap.nodes)) {
-    const live = window.WorldMap.nodes.find((n) => n.id === nextId);
-    if (live) {
-      live.unlocked = true;
+    if (window.WorldMap && Array.isArray(window.WorldMap.nodes)) {
+      const live = window.WorldMap.nodes.find((n) => n.id === nextId);
+      if (live) live.unlocked = true;
     }
-  }
 
-  console.log("Unlocked:", nextId);
-};
+    console.log("Unlocked:", nextId);
+  };
 
+  // ======================================================
+  // WORLD MAP OBJECT
+  // ======================================================
   const WorldMap = {
     active: false,
     canvas: null,
     ctx: null,
     bgImage: null,
     bgLoaded: false,
-    layers: [],   // parallax star layers
+    layers: [],
     nodes: [],
     ship: {
       x: 0,
@@ -150,28 +140,22 @@ window.unlockNextLevel = function (currentLevel) {
       this.ctx = S.ctx;
       if (!this.canvas || !this.ctx) return;
 
-      // Background image
       this.bgImage = new Image();
       this.bgImage.src = BG_IMAGE_SRC;
-      this.bgImage.onload = () => {
-        this.bgLoaded = true;
-      };
+      this.bgImage.onload = () => (this.bgLoaded = true);
 
-      // Parallax layers (far → near)
       this.layers = [
-        this._makeLayer(40, 4, 0.3),  // far
-        this._makeLayer(60, 9, 0.6),  // mid
-        this._makeLayer(90, 16, 1.0), // near
+        this._makeLayer(40, 4, 0.3),
+        this._makeLayer(60, 9, 0.6),
+        this._makeLayer(90, 16, 1.0),
       ];
 
-      // Node positions from factors
       this.nodes = NODES.map((n) => ({
         ...n,
         x: n.xFactor * S.W,
         y: n.yFactor * S.H,
       }));
 
-      // Ship starts near HOME
       const home = this.nodes.find((n) => n.id === "home") || this.nodes[0];
       this.ship.x = this.ship.tx = home.x;
       this.ship.y = this.ship.ty = home.y + 60;
@@ -179,11 +163,10 @@ window.unlockNextLevel = function (currentLevel) {
       this._bindInput();
     },
 
-    // Entry point used by blackhole + cheats
-enter() {
-    // Always rebuild nodes so unlockNextLevel() shows correctly
-    this.init();    
-    this.active = true;
+    // ------ ENTER ------
+    enter() {
+      this.init();
+      this.active = true;
     },
 
     exit() {
@@ -209,7 +192,7 @@ enter() {
       };
     },
 
-    // ------ INPUT BIND ------
+    // ------ INPUT ------
     _bindInput() {
       if (!this.canvas || this._inputBound) return;
       this._inputBound = true;
@@ -241,76 +224,80 @@ enter() {
       return null;
     },
 
-    // Called by blackhole / level complete / node click
+    // ======================================================
+    //   CLEAN — FIXED — LEVEL ROUTER
+    // ======================================================
     _moveShipToNode(node) {
       this.ship.tx = node.x;
       this.ship.ty = node.y + 60;
 
-      // ------ HOME BASE ------
-      if (
-        node.id === "home" &&
-        window.HomeBase &&
-        window.HomeBase.enter
-      ) {
-        this.active = false;     // stop map updates
-        window.HomeBase.enter(); // enter Home Base
+      // ------ HOME ------
+      if (node.id === "home") {
+        this.active = false;
+        if (window.HomeBase && window.HomeBase.enter) {
+          window.HomeBase.enter();
+        }
         return;
       }
 
-      // ------ LEVEL 3 < lvl3.js ,,,,drax system on map ------
-if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
-    this.active = false;
-    window.Level2.enter();
-    return;
-}
-
-    // ------ FUTURE LEVELS (3–10) ------
-    // For now: if a proper LevelX.enter() exists, use it.
-    // If not, fall back to Level 2 so you can test routes.
-    const levelMap = {
-      lvl3: "Level3",
-      lvl4: "Level4",
-      lvl5: "Level5",
-      lvl6: "Level6",
-      lvl7: "Level7",
-      lvl8: "Level8",
-      lvl9: "Level9",
-      lvl10: "Level10",
-    };
-
-    if (levelMap[node.id]) {
-      const globalName = levelMap[node.id];
-      const targetLevel = window[globalName];
-
-      this.active = false;
-
-      if (targetLevel && typeof targetLevel.enter === "function") {
-        targetLevel.enter();         // when you make Level3.js etc
-      } else if (window.Level2 && window.Level2.enter) {
-        window.Level2.enter();       // TEMP: reuse Level 2 layout
+      // ------ LEVEL 1 ------
+      if (node.id === "lvl1") {
+        this.active = false;
+        if (window.resetGameState) window.resetGameState();
+        if (window.GameState) window.GameState.running = true;
+        return;
       }
 
-      return;
-    }
+      // ------ LEVEL 2 ------
+      if (node.id === "lvl2") {
+        this.active = false;
+        if (window.Level2 && window.Level2.enter) window.Level2.enter();
+        return;
+      }
 
-    // ------ LEVEL 1 (INTRO SHOOTER) ------
-    if (node.id === "lvl1") {
-      this.active = false;          // stop map updates
-      if (window.resetGameState) {
-        window.resetGameState();    // reset intro engine
+      // ------ LEVEL 3 ------
+      if (node.id === "lvl3") {
+        this.active = false;
+        if (window.Level3 && window.Level3.enter) window.Level3.enter();
+        return;
       }
-      if (window.GameState) {
-        window.GameState.running = true;
+
+      // ------ LEVEL 4 ------
+      if (node.id === "lvl4") {
+        this.active = false;
+        if (window.Level4 && window.Level4.enter) window.Level4.enter();
+        return;
       }
-      return;
-    }
-  },
+
+      // ------ FUTURE LEVELS 5–10 ------
+      const levelMap = {
+        lvl5: "Level5",
+        lvl6: "Level6",
+        lvl7: "Level7",
+        lvl8: "Level8",
+        lvl9: "Level9",
+        lvl10: "Level10",
+      };
+
+      if (levelMap[node.id]) {
+        const levelName = levelMap[node.id];
+        const target = window[levelName];
+
+        this.active = false;
+
+        if (target && typeof target.enter === "function") {
+          target.enter();
+        } else if (window.Level2) {
+          window.Level2.enter();
+        }
+        return;
+      }
+    },
 
     // ------ UPDATE ------
     update(dt) {
       if (!this.active) return;
 
-      // Parallax star drift
       for (const layer of this.layers) {
         for (const s of layer.stars) {
           s.x += layer.driftX * layer.speed * dt;
@@ -323,10 +310,10 @@ if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
         }
       }
 
-      // Ship easing towards target
       const dx = this.ship.tx - this.ship.x;
       const dy = this.ship.ty - this.ship.y;
       const dist = Math.hypot(dx, dy);
+
       if (dist > 2) {
         const vx =
           (dx / dist) * this.ship.speed * (S.W / 1280) * 60 * dt;
@@ -343,7 +330,6 @@ if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
 
       ctx.clearRect(0, 0, S.W, S.H);
 
-      // Background
       if (this.bgLoaded && this.bgImage) {
         ctx.drawImage(this.bgImage, 0, 0, S.W, S.H);
       } else {
@@ -354,12 +340,8 @@ if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
         ctx.fillRect(0, 0, S.W, S.H);
       }
 
-    
-      // Nodes
       for (const n of this.nodes) {
         ctx.save();
-
-        // glow ring
         ctx.beginPath();
         ctx.arc(n.x, n.y, NODE_RADIUS, 0, Math.PI * 2);
         ctx.strokeStyle = n.unlocked
@@ -368,7 +350,6 @@ if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // core
         const grad = ctx.createRadialGradient(
           n.x,
           n.y,
@@ -377,6 +358,7 @@ if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
           n.y,
           NODE_RADIUS
         );
+
         if (n.unlocked) {
           grad.addColorStop(0, "#00f7ff");
           grad.addColorStop(1, "rgba(0,247,255,0)");
@@ -387,7 +369,6 @@ if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // label
         ctx.font = "14px system-ui, sans-serif";
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "center";
@@ -396,7 +377,6 @@ if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
         ctx.restore();
       }
 
-      // Ship (simple glowing triangle for now)
       ctx.save();
       ctx.translate(this.ship.x, this.ship.y);
       ctx.beginPath();
