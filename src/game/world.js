@@ -19,70 +19,70 @@
       unlocked: true,
     },
     {
-      id: "lvl1",
+      id: "lvl2",
       xFactor: 0.38,
       yFactor: 0.45,
-      label: "LEVEL 1 - MISSION 1",
-      unlocked: true,
-    },
-    {
-      id: "lvl2",
-      xFactor: 0.68,
-      yFactor: 0.32,
-      label: "LEVEL 2 - MISSION 2",
+      label: "MISSION 1",
       unlocked: true,
     },
     {
       id: "lvl3",
-      xFactor: 0.78,
-      yFactor: 0.25,
-      label: "LEVEL 3 - MISSION 3",
+      xFactor: 0.68,
+      yFactor: 0.32,
+      label: "MISSION 2",
       unlocked: true,
     },
     {
       id: "lvl4",
-      xFactor: 0.82,
-      yFactor: 0.42,
-      label: "LEVEL 4 - MISSION 4",
+      xFactor: 0.78,
+      yFactor: 0.25,
+      label: "MISSION 3",
       unlocked: true,
     },
     {
       id: "lvl5",
-      xFactor: 0.74,
-      yFactor: 0.56,
-      label: "LEVEL 5 - MISSION 5",
+      xFactor: 0.82,
+      yFactor: 0.42,
+      label: "MISSION 4",
       unlocked: true,
     },
     {
       id: "lvl6",
+      xFactor: 0.74,
+      yFactor: 0.56,
+      label: "MISSION 5",
+      unlocked: true,
+    },
+    {
+      id: "lvl7",
       xFactor: 0.60,
       yFactor: 0.68,
       label: "LEVEL 6 - TBA",
       unlocked: false,
     },
     {
-      id: "lvl7",
+      id: "lvl8",
       xFactor: 0.46,
       yFactor: 0.70,
       label: "LEVEL 7 - TBA",
       unlocked: false,
     },
     {
-      id: "lvl8",
+      id: "lvl9",
       xFactor: 0.32,
       yFactor: 0.64,
       label: "LEVEL 8 - TBA",
       unlocked: false,
     },
     {
-      id: "lvl9",
+      id: "lvl10",
       xFactor: 0.26,
       yFactor: 0.50,
       label: "LEVEL 9 - TBA",
       unlocked: false,
     },
     {
-      id: "lvl10",
+      id: "lvl11",
       xFactor: 0.22,
       yFactor: 0.36,
       label: "LEVEL 10 - TBA",
@@ -291,33 +291,33 @@
         return;
       }
 
-      // ------ LEVEL 2 – MISSION 1 (DRAX) ------
+      // ------ lvl2.js – MISSION 1  ------
       if (node.id === "lvl2") {
         startLevel("Level2", 2);
         return;
       }
 
-      // ------ LEVEL 3 – MISSION 2 (DRAX FULL CUSTOM) ------
+      // ------ lvl3.js – MISSION 2 ------
       if (node.id === "lvl3") {
         // Prefer Level3; fall back to Level2 if something is wrong
         startLevel("Level3", 3, "Level2");
         return;
       }
 
-      // ------ LEVEL 4 – TEST CLONE (if present) ------
+      // ------lvl4.js– mission 3 ------
       if (node.id === "lvl4") {
         // Uses Level4 if it exists, otherwise reuses Level2
         startLevel("Level4", 4, "Level2");
         return;
       }
 
-    // ------ LEVEL 5 ------
+    // ------lvl5.js mission4  ------
     if (node.id === "lvl5") {
     startLevel("Level5", 5);
     return;
     }
 
-   // ------ LEVEL 6 ------
+   // ------ lvl6.js mission5 ------
     if (node.id === "lvl6") {
     startLevel("Level6", 6, "Level2");   // fallback because Level6 is template
     return;
