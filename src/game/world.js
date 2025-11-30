@@ -354,17 +354,7 @@ if (node.id === "lvl2" && window.Level2 && window.Level2.enter) {
         ctx.fillRect(0, 0, S.W, S.H);
       }
 
-      // Parallax stars
-      for (const layer of this.layers) {
-        ctx.save();
-        ctx.fillStyle = "#ffffff";
-        for (const s of layer.stars) {
-          ctx.globalAlpha = s.alpha;
-          ctx.fillRect(s.x, s.y, s.size, s.size);
-        }
-        ctx.restore();
-      }
-
+    
       // Nodes
       for (const n of this.nodes) {
         ctx.save();
