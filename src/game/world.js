@@ -30,7 +30,7 @@ const NODES = [
     xFactor: 0.68,
     yFactor: 0.32,
     label: "LEVEL 2 - DRAX SYSTEM",
-    unlocked: false,
+    unlocked: true,
   },
 
   // ------ FUTURE LEVEL NODES (SKELETON ONLY) ------
@@ -39,21 +39,21 @@ const NODES = [
     xFactor: 0.78,
     yFactor: 0.25,
     label: "LEVEL 3 - TBA",
-    unlocked: false,
+    unlocked: true,
   },
   {
     id: "lvl4",
     xFactor: 0.82,
     yFactor: 0.42,
     label: "LEVEL 4 - TBA",
-    unlocked: false,
+    unlocked: true,
   },
   {
     id: "lvl5",
     xFactor: 0.74,
     yFactor: 0.56,
     label: "LEVEL 5 - TBA",
-    unlocked: false,
+    unlocked: true,
   },
   {
     id: "lvl6",
