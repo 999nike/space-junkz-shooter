@@ -45,7 +45,7 @@ const NODES = [
     id: "lvl4",
     xFactor: 0.82,
     yFactor: 0.42,
-    label: "LEVEL 4 - TBA",
+    label: "LEVEL 4 - wizzs new lvl",
     unlocked: true,
   },
   {
