@@ -101,6 +101,14 @@ window.shoot = function shoot() {
       makeBullet(0.18, "#fffd8b")
     );
   }
+// ---- BULLET SOUND ----
+try {
+  const pew = new Audio("./src/game/assets/sfx_lose.ogg");
+  pew.volume = 0.35;
+  pew.play().catch(() => {});
+} catch (err) {
+  console.warn("Bullet sound failed:", err);
+}
 };
 
 // =========================================================
@@ -149,14 +157,6 @@ window.resetGameState = function resetGameState() {
   S.player.weaponLevel = 1;
   S.player.invuln      = 0;
 
-// ---- BULLET SOUND ----
-  try {
-    const pew = new Audio("./src/game/assets/sfx_lose.ogg"); 
-    pew.volume = 0.35;
-    pew.play().catch(() => {});
-  } catch (err) {
-    console.warn("Bullet sound failed:", err);
-  }
 };
 
 
