@@ -148,7 +148,6 @@ window.resetGameState = function resetGameState() {
   S.player.y           = S.H - 80;
   S.player.weaponLevel = 1;
   S.player.invuln      = 0;
-};
 
 // ---- BULLET SOUND ----
   try {
@@ -158,6 +157,9 @@ window.resetGameState = function resetGameState() {
   } catch (err) {
     console.warn("Bullet sound failed:", err);
   }
+};
+
+
 
 // =========================================================
 //  ENGINE STARTUP + FIXED START BUTTON
