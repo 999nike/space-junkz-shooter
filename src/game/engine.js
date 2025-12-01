@@ -150,6 +150,15 @@ window.resetGameState = function resetGameState() {
   S.player.invuln      = 0;
 };
 
+// ---- BULLET SOUND ----
+  try {
+    const pew = new Audio("./src/game/assets/sfx_lose.ogg"); 
+    pew.volume = 0.35;
+    pew.play().catch(() => {});
+  } catch (err) {
+    console.warn("Bullet sound failed:", err);
+  }
+
 // =========================================================
 //  ENGINE STARTUP + FIXED START BUTTON
 // =========================================================
