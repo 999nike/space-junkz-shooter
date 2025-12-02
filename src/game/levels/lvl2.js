@@ -32,16 +32,27 @@
     // -----------------------------
     // ENTER LEVEL
     // -----------------------------
-    enter() {
-      console.log("🚀 Entering LEVEL 2 (Mission 1 – Drax Gauntlet)");
+   enter() {
+  console.log("🚀 Entering LEVEL 2 (Mission 1 – Drax Gauntlet)");
 
-      this.active = true;
-      this.globalTimer = 0;
-      this.phaseTimer = 0;
-      this.spawnTimer = 0.5;
-      this.phase = 0;
-      this.currentBossId = null;
-      this._finishing = false;
+  this.active = true;
+  this.globalTimer = 0;
+  this.phaseTimer = 0;
+  this.spawnTimer = 0.5;
+  this.phase = 0;
+  this.currentBossId = null;
+  this._finishing = false;
+
+  // ----- WIZZ PATCH: TAKE OVER GLOBAL UPDATE -----
+  const S = window.GameState;
+  if (!S._oldUpdateGame) {
+    S._oldUpdateGame = window.updateGame;   // save intro engine
+  }
+
+  // Level2 now controls the whole shooter engine
+  window.updateGame = (dt) => {
+    Level2.update(dt);
+  };
 
       // Reset core shooter state but KEEP score/coins
       if (typeof window.resetGameState === "function") {
@@ -56,18 +67,7 @@
         S.powerUps = [];
       }
 
-      // ===============================================================
-// STOP INTRO ENGINE OVERRIDING LEVEL 2 LOGIC
-// (DISABLE updateGameCore → updateGame FROM INTRO LEVEL)
-// ===============================================================
-if (!S._oldUpdateGame) {
-  S._oldUpdateGame = window.updateGameCore;
-}
-
-window.updateGameCore = function (dt) {
-  // Level 2 controls its own flow now.
-  // We do NOT call intro's updateGame(dt) in this level.
-};
+    
 
       if (S.player) {
         S.player.invuln = 1.2;
@@ -95,13 +95,19 @@ window.updateGameCore = function (dt) {
     // EXIT LEVEL → BACK TO MAP
     // -----------------------------
     exit() {
-      this.active = false;
-      S.running = false;
+  this.active = false;
+  S.running = false;
 
-      if (window.WorldMap && typeof window.WorldMap.enter === "function") {
-        window.WorldMap.enter();
-      }
-    },
+  // ----- WIZZ PATCH: RESTORE GLOBAL UPDATE -----
+  if (S._oldUpdateGame) {
+    window.updateGame = S._oldUpdateGame;
+    S._oldUpdateGame = null;
+  }
+
+  if (window.WorldMap && typeof window.WorldMap.enter === "function") {
+    window.WorldMap.enter();
+  }
+},
 
     // =======================
     //   WAVE SPAWNER
