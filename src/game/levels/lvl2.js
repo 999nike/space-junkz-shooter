@@ -55,19 +55,33 @@
   };
 
       // Reset core shooter state but KEEP score/coins
-      if (typeof window.resetGameState === "function") {
-        window.resetGameState();
-      } else {
-        // minimal safety fallback
-        S.enemies = [];
-        S.bullets = [];
-        S.enemyBullets = [];
-        S.rockets = [];
-        S.particles = [];
-        S.powerUps = [];
-      }
+if (typeof window.resetGameState === "function") {
+  window.resetGameState();
+} else {
+  // minimal safety fallback
+  S.enemies = [];
+  S.bullets = [];
+  S.enemyBullets = [];
+  S.rockets = [];
+  S.particles = [];
+  S.powerUps = [];
+}
 
-    
+// ===== WIZZ PATCH: LEVEL2 AUTO-START =====
+S.running = true;            // turn gameplay ON
+S.player.invuln = 1.2;       // spawn protection
+S.spawnTimer = 0.5;          // first wave soon
+S.shootTimer = 0;            // allow instant firing
+
+    // ===== WIZZ PATCH 2: TAKE OVER GLOBAL UPDATE =====
+if (!S._oldUpdateGame) {
+  S._oldUpdateGame = window.updateGame;   // save old intro engine
+}
+
+// Level2 now controls the entire shooter loop
+window.updateGame = (dt) => {
+  Level2.update(dt);
+};
 
       if (S.player) {
         S.player.invuln = 1.2;
@@ -95,15 +109,17 @@
     // EXIT LEVEL → BACK TO MAP
     // -----------------------------
     exit() {
+  // Turn level off
   this.active = false;
   S.running = false;
 
-  // ----- WIZZ PATCH: RESTORE GLOBAL UPDATE -----
+  // ===== WIZZ PATCH 3: RESTORE ORIGINAL ENGINE =====
   if (S._oldUpdateGame) {
-    window.updateGame = S._oldUpdateGame;
+    window.updateGame = S._oldUpdateGame; // restore intro/map engine
     S._oldUpdateGame = null;
   }
 
+  // Return to world map
   if (window.WorldMap && typeof window.WorldMap.enter === "function") {
     window.WorldMap.enter();
   }
