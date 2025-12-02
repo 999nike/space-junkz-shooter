@@ -1,157 +1,137 @@
 // ======================================================
-// LEVEL X – TEST ZONE OMEGA
-// A guaranteed-working test level with:
-// • Huge warning
-// • Obvious enemy behaviour
-// • Level2-style auto-start
+// LEVEL 4 – NEW SECTOR
+// A simple standalone mission with its own waves and boss.
+// • Uses the core engine (updateGameCore)
+// • Finishes after the boss is defeated and unlocks the next mission.
 // ======================================================
 
-(function () {
-  const S = window.GameState;
-
-  const LevelX = {
-    active: false,
-    timer: 0,
-    spawnTimer: 0,
-    bg: null,
-    bgLoaded: false,
-
-    // ------------------------------
-    // ENTER LEVEL
-    // ------------------------------
-    enter() {
-      console.log("🚨 ENTERING TEST ZONE OMEGA 🚨");
-
-      // ======================================================
-// LEVEL 4 - CLONE OF LEVEL 2 (TEST MODE)
-// ======================================================
-
-(function () {
+(function() {
   const S = window.GameState;
 
   const Level4 = {
     active: false,
-    bossSpawned: false,
     timer: 0,
+    spawnTimer: 0,
+    bossSpawned: false,
     bg: null,
     bgLoaded: false,
 
-    // -----------------------------
-    // ENTER LEVEL
-    // -----------------------------
     enter() {
-      console.log("💥 ENTERING LEVEL 4 (CLONE TEST) 💥");
-
+      console.log("ENTERING LEVEL 4 – NEW SECTOR");
       this.active = true;
-      this.bossSpawned = false;
       this.timer = 0;
+      this.spawnTimer = 0.5;
+      this.bossSpawned = false;
 
-      // Reset state
+      if (window.resetGameState) resetGameState();
       S.running = true;
-      S.enemies = [];
-      S.bullets = [];
-      S.enemyBullets = [];
-      S.rockets = [];
-      S.particles = [];
-      S.powerUps = [];
-      S.sidekicks = S.sidekicks || [];
+      S.currentLevel = 4;
 
-      // Player position
-      S.player.x = S.W / 2;
-      S.player.y = S.H - 80;
-      S.player.invuln = 1.0;
+      // Player starting position
+      if (S.player) {
+        S.player.x = S.W / 2;
+        S.player.y = S.H - 80;
+        S.player.invuln = 1.2;
+      }
 
       // Background
       this.bg = new Image();
-      this.bg.src = "./src/game/assets/mission1_bg.png"; 
+      this.bg.src = "./src/game/assets/mission1_bg.png";
+      this.bgLoaded = false;
       this.bg.onload = () => (this.bgLoaded = true);
 
-      // Turn off map + home
-      if (window.WorldMap) window.WorldMap.active = false;
-      if (window.HomeBase) window.HomeBase.active = false;
+      // Disable map/home
+      if (window.WorldMap) WorldMap.active = false;
+      if (window.HomeBase) HomeBase.active = false;
 
-      if (window.initStars) window.initStars();
+      if (window.initStars) initStars();
 
-      // BIG WARNING SO YOU KNOW IT LOADED
-      window.flashMsg("⚠ LEVEL 4 TEST MODE ⚠");
-      setTimeout(() => window.flashMsg("💥 LEVEL 4 (CLONE) ACTIVE 💥"), 1000);
+      window.flashMsg("MISSION 3 – NEW SECTOR");
+      setTimeout(() => window.flashMsg("HOSTILE FLEET DETECTED"), 1000);
     },
 
-    // -----------------------------
-    // UPDATE
-    // -----------------------------
     update(dt) {
       if (!this.active || !S.running) return;
 
       this.timer += dt;
+      this.spawnTimer -= dt;
 
-      // Same wave logic as Level 2
-      S.spawnTimer -= dt;
-      if (S.spawnTimer <= 0) {
-        this.spawnWave();
-        S.spawnTimer = rand(0.25, 0.7);
+      // Spawn small waves for 30 seconds
+      if (!this.bossSpawned && this.timer < 30) {
+        if (this.spawnTimer <= 0) {
+          this.spawnWave();
+          this.spawnTimer = Math.random() * 0.4 + 0.4;
+        }
       }
 
-      // Spawn boss after 45 sec (shorter for testing)
-      if (!this.bossSpawned && this.timer >= 45) {
+      // Then spawn the boss
+      if (!this.bossSpawned && this.timer >= 30) {
         this.spawnBoss();
         this.bossSpawned = true;
       }
 
-      if (window.updateGameCore) window.updateGameCore(dt);
+      // When boss HP ≤ 0, end mission
+      if (this.bossSpawned) {
+        for (const e of S.enemies) {
+          if (e.type === "lvl4Boss" && e.hp <= 0) {
+            this.finishLevel();
+            break;
+          }
+        }
+      }
+
+      if (window.updateGameCore) updateGameCore(dt);
     },
 
-    // -----------------------------
-    // DRAW
-    // -----------------------------
     draw(ctx) {
       if (!this.active) return;
-
       if (this.bgLoaded) {
         ctx.drawImage(this.bg, 0, 0, S.W, S.H);
       } else {
         ctx.fillStyle = "#05010a";
         ctx.fillRect(0, 0, S.W, S.H);
       }
-
-      // Render same as Level 2
-      if (window.drawRunway) window.drawRunway(ctx);
-      if (window.drawGameCore) window.drawGameCore(ctx);
+      if (window.drawGameCore) drawGameCore(ctx);
     },
 
-    // -----------------------------
-    // WAVES (copied from Level 2)
-    // -----------------------------
     spawnWave() {
-      const roll = Math.random();
-      if (roll < 0.45) {
-        window.spawnEnemyType("zigzag");
-        window.spawnEnemyType("zigzag");
-      } else if (roll < 0.75) {
-        window.spawnEnemyType("shooter");
+      const r = Math.random();
+      if (r < 0.5) {
+        spawnEnemyType("zigzag");
+        spawnEnemyType("shooter");
+      } else if (r < 0.8) {
+        spawnEnemyType("tank");
+        spawnEnemyType("zigzag");
       } else {
-        window.spawnEnemyType("tank");
-        window.spawnEnemyType("zigzag");
+        spawnEnemyType("shooter");
+        spawnEnemyType("shooter");
       }
     },
 
-    // -----------------------------
-    // BOSS (copied from Level 2)
-    // -----------------------------
     spawnBoss() {
       const boss = {
         type: "lvl4Boss",
         x: S.W / 2,
-        y: -120,
+        y: -140,
         radius: 90,
-        hp: 400, // small for test
-        maxHp: 400,
+        hp: 800,
+        maxHp: 800,
         enterComplete: false,
         timer: 0
       };
       S.enemies.push(boss);
-      window.flashMsg("⚠ LEVEL 4 TEST BOSS SPAWNED ⚠");
+      window.flashMsg("⚠ LEVEL 4 BOSS APPROACHING ⚠");
     },
+
+    finishLevel() {
+      this.active = false;
+      S.running = false;
+      window.flashMsg("MISSION 3 COMPLETE!");
+      if (window.unlockNextLevel) unlockNextLevel(4);
+      setTimeout(() => {
+        if (window.WorldMap) WorldMap.enter();
+      }, 1200);
+    }
   };
 
   window.Level4 = Level4;
