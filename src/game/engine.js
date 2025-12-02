@@ -179,7 +179,8 @@ window.addEventListener("load", () => {
     if (
       (window.Level2 && window.Level2.active) ||
       (window.Level3 && window.Level3.active) ||
-      (window.Level4 && window.Level4.active)
+      (window.Level4 && window.Level4.active) ||
+      (window.WorldMap && window.WorldMap.active)
     ) {
       console.log("Start ignored — level already active.");
       return;

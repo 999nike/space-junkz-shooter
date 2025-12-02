@@ -632,14 +632,16 @@ if (e.dropChance && Math.random() < e.dropChance) {
       window.unlockNextLevel(1);   // 1 → unlock lvl2
     }
 
-    // Stop shooter loop
-    S.running = false;
-
-    // Return to galaxy map
+    // Hand control to the starmap instead of restarting intro
     if (window.WorldMap && window.WorldMap.enter) {
       setTimeout(() => {
+        // Reactivate the update loop so WorldMap.update runs
+        S.running = true;
         window.WorldMap.enter();
       }, 1200);
+    } else {
+      // Fallback: keep shooter paused if map is missing
+      S.running = false;
     }
   }
 };
