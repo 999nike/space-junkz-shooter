@@ -299,28 +299,37 @@
 
       // ------ MISSION 2  (lvl3.js → Level3) ------
       if (node.id === "lvl3") {
-        startLevel("Level3", 3, "Level2");
+        startLevel("Level3", 3,);
         return;
       }
 
       // ------ MISSION 3  (Level4 clone test) ------
       if (node.id === "lvl4") {
-        startLevel("Level4", 4, "Level2");
+        startLevel("Level4", 4,);
         return;
       }
 
       // ------ MISSION 4  (lvl5.js → Level5) ------
       if (node.id === "lvl5") {
-        startLevel("Level5", 5, "Level2");
+        startLevel("Level5", 5);
         return;
       }
 
       // ------ MISSION 5  (TEMP: reuse Level5 – no Level6 yet) ------
       if (node.id === "lvl6") {
         // There is no window.Level6 in your files, so reuse Level5 for now
-        startLevel("Level5", 5, "Level2");
+        startLevel("Level5", 5,);
         return;
       }
+
+      // Mission 5 (since you have a lvl6.js file now)
+      if (node.id === "lvl6") {
+        // There is no window.Level6 in your files, so reuse Level5 for now
+        startLevel("Level6", 6);
+        return;
+      }
+        
+
 
       // ------ FUTURE NODES: TEMP → Level2 ------
       if (["lvl7", "lvl8", "lvl9", "lvl10", "lvl11", "secret"].includes(node.id)) {
