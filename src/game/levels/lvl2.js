@@ -32,58 +32,39 @@
     // -----------------------------
     // ENTER LEVEL
     // -----------------------------
-   enter() {
-  console.log("🚀 Entering LEVEL 2 (Mission 1 – Drax Gauntlet)");
+    enter() {
+      console.log("🚀 Entering LEVEL 2 (Mission 1 – Drax Gauntlet)");
 
-  this.active = true;
-  this.globalTimer = 0;
-  this.phaseTimer = 0;
-  this.spawnTimer = 0.5;
-  this.phase = 0;
-  this.currentBossId = null;
-  this._finishing = false;
+      this.active = true;
+      this.globalTimer = 0;
+      this.phaseTimer = 0;
+      this.spawnTimer = 0.5;
+      this.phase = 0;
+      this.currentBossId = null;
+      this._finishing = false;
 
-  // ----- WIZZ PATCH: TAKE OVER GLOBAL UPDATE -----
-  const S = window.GameState;
-  if (!S._oldUpdateGame) {
-    S._oldUpdateGame = window.updateGame;   // save intro engine
-  }
-
-  // Level2 now controls the whole shooter engine
-  window.updateGame = (dt) => {
-    Level2.update(dt);
-  };
+      const S = window.GameState;
 
       // Reset core shooter state but KEEP score/coins
-if (typeof window.resetGameState === "function") {
-  window.resetGameState();
-} else {
-  // minimal safety fallback
-  S.enemies = [];
-  S.bullets = [];
-  S.enemyBullets = [];
-  S.rockets = [];
-  S.particles = [];
-  S.powerUps = [];
-}
+      if (typeof window.resetGameState === "function") {
+        window.resetGameState();
+      } else {
+        // minimal safety fallback
+        S.enemies = [];
+        S.bullets = [];
+        S.enemyBullets = [];
+        S.rockets = [];
+        S.particles = [];
+        S.powerUps = [];
+      }
 
-// ===== WIZZ PATCH: LEVEL2 AUTO-START =====
-S.running = true;            // turn gameplay ON
-S.player.invuln = 1.2;       // spawn protection
-S.spawnTimer = 0.5;          // first wave soon
-S.shootTimer = 0;            // allow instant firing
-
-    // ===== WIZZ PATCH 2: TAKE OVER GLOBAL UPDATE =====
-if (!S._oldUpdateGame) {
-  S._oldUpdateGame = window.updateGame;   // save old intro engine
-}
-
-// Level2 now controls the entire shooter loop
-window.updateGame = (dt) => {
-  Level2.update(dt);
-};
+      // ---- AUTOSTART MISSION 1 ----
+      S.running = true;
+      S.currentLevel = 2;
 
       if (S.player) {
+        S.player.x = S.W / 2;
+        S.player.y = S.H - 90;
         S.player.invuln = 1.2;
       }
 
@@ -109,21 +90,13 @@ window.updateGame = (dt) => {
     // EXIT LEVEL → BACK TO MAP
     // -----------------------------
     exit() {
-  // Turn level off
-  this.active = false;
-  S.running = false;
+      this.active = false;
+      S.running = false;
 
-  // ===== WIZZ PATCH 3: RESTORE ORIGINAL ENGINE =====
-  if (S._oldUpdateGame) {
-    window.updateGame = S._oldUpdateGame; // restore intro/map engine
-    S._oldUpdateGame = null;
-  }
-
-  // Return to world map
-  if (window.WorldMap && typeof window.WorldMap.enter === "function") {
-    window.WorldMap.enter();
-  }
-},
+      if (window.WorldMap && typeof window.WorldMap.enter === "function") {
+        window.WorldMap.enter();
+      }
+    },
 
     // =======================
     //   WAVE SPAWNER
