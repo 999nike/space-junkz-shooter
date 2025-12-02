@@ -56,8 +56,18 @@
         S.powerUps = [];
       }
 
-      S.running = true;
-      S.currentLevel = 2;
+      // ===============================================================
+// STOP INTRO ENGINE OVERRIDING LEVEL 2 LOGIC
+// (DISABLE updateGameCore → updateGame FROM INTRO LEVEL)
+// ===============================================================
+if (!S._oldUpdateGame) {
+  S._oldUpdateGame = window.updateGameCore;
+}
+
+window.updateGameCore = function (dt) {
+  // Level 2 controls its own flow now.
+  // We do NOT call intro's updateGame(dt) in this level.
+};
 
       if (S.player) {
         S.player.invuln = 1.2;
