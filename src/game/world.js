@@ -235,25 +235,39 @@
       this.ship.tx = node.x;
       this.ship.ty = node.y - 60;
 
-        // Helper: start a level safely using the level manager
-        const startLevel = (levelName) => {
-          this.active = false;
-          if (window.EngineCore && window.LevelManager) {
-            window.EngineCore.startLevel(levelName);
+      // Helper: start a level safely (with optional fallback)
+      const startLevel = (globalName, levelIndex, fallbackName) => {
+        const lvl = window[globalName];
+
+        // We are leaving the map now
+        this.active = false;
+
+        if (lvl && typeof lvl.enter === "function") {
+          if (S) S.currentLevel = levelIndex || null;
+          lvl.enter();
+          return;
+        }
+
+        // Optional fallback (eg. reuse Level2 for unimplemented)
+        if (fallbackName) {
+          const fb = window[fallbackName];
+          if (fb && typeof fb.enter === "function") {
+            console.warn(
+              `WorldMap: ${globalName} missing, using ${fallbackName} instead.`
+            );
+            if (S) S.currentLevel = levelIndex || null;
+            fb.enter();
             return;
           }
-          if (window.LevelManager) {
-            window.LevelManager.startLevel(levelName);
-            return;
-          }
-          const lvl = window[levelName];
-          if (lvl && typeof lvl.enter === "function") {
-            lvl.enter();
-            return;
-          }
-          this.active = true;
-          if (window.flashMsg) window.flashMsg("DEV: Level not wired yet.");
-        };
+        }
+
+        // Nothing to load → keep map alive so you don't get a freeze
+        console.warn(`WorldMap: No handler for ${globalName}. Staying on map.`);
+        this.active = true;
+        if (window.flashMsg) {
+          window.flashMsg("DEV: Level not wired yet.");
+        }
+      };
 
       // ------ HOME BASE ------
       if (node.id === "home") {
@@ -279,37 +293,37 @@
         
       // Mission 1 – Level2
 if (node.id === "lvl2") {
-  startLevel("Level2");
+  startLevel("Level2", 2);
   return;
 }
 
 // Mission 2 – Level3
 if (node.id === "lvl3") {
-  startLevel("Level3");
+  startLevel("Level3", 3);
   return;
 }
 
 // Mission 3 – Level4
 if (node.id === "lvl4") {
-  startLevel("Level4");
+  startLevel("Level4", 4);
   return;
 }
 
 // Mission 4 – Level5
 if (node.id === "lvl5") {
-  startLevel("Level5");
+  startLevel("Level5", 5);
   return;
 }
 
 // Mission 5 – Level6
 if (node.id === "lvl6") {
-  startLevel("Level6");
+  startLevel("Level6", 6);
   return;
 }
 
    // ------ FUTURE NODES: TEMP → Level2 ------
       if (["lvl7", "lvl8", "lvl9", "lvl10", "lvl11", "secret"].includes(node.id)) {
-        startLevel("Level2");
+        startLevel("Level2", 2);
         return;
       }
 

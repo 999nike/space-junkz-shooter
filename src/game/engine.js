@@ -166,11 +166,6 @@ window.resetGameState = function resetGameState() {
 // =========================================================
 window.addEventListener("load", () => {
   requestAnimationFrame(() => {
-    if (window.EngineCore && typeof window.EngineCore.init === "function") {
-      window.EngineCore.init();
-      window.EngineCore.ensureLoop();
-    } else {
-      window.initEngine();
     window.initEngine();
     window.initStars();
     window.setupInput();
@@ -215,14 +210,6 @@ window.addEventListener("load", () => {
     }
   });
 
-  if (window.GameState && window.GameState.startBtn) {
-    window.GameState.startBtn.addEventListener("click", () => {
-      if (window.EngineCore) {
-        window.EngineCore.startIntro();
-      }
-    });
-  }
-
   window.flashMsg("Press START to play");
 });
 
@@ -230,7 +217,14 @@ window.addEventListener("load", () => {
 //  MAIN LOOP
 // =========================================================
 window.gameLoop = function gameLoop(timestamp) {
-  if (window.EngineCore && typeof window.EngineCore.gameLoop === "function") {
-    return window.EngineCore.gameLoop(timestamp);
+  const S = window.GameState;
+  const dt = (timestamp - S.lastTime) / 1000 || 0;
+  S.lastTime = timestamp;
+
+  if (S.running) {
+    window.updateGame(dt);
   }
+
+  window.drawGame();
+  requestAnimationFrame(window.gameLoop);
 };
