@@ -1,395 +1,64 @@
-// =========================================================
-//  LOGIC CORE – CLEAN REBUILD
-//  Stars, enemies, bosses, WizzCoin, updateGame()
-// =========================================================
+// Core gameplay utilities and runtime loop used by EngineCore/LevelManager
+(function () {
+  const S = (window.GameState = window.GameState || {});
 
-// ---------- STARS ----------
-window.initStars = function initStars() {
-  const S = window.GameState;
-  S.stars = [];
-  for (let i = 0; i < 80; i++) {
-    S.stars.push({
-      x: rand(0, S.W + 60),
-      y: rand(-60, S.H),
-      speed: rand(40, 120),
-      size: Math.random() * 2 + 0.5,
-      color:
-        Math.random() < 0.4
-          ? "#4df0ff"
-          : Math.random() < 0.7
-          ? "#ff83e6"
-          : "#f9f871"
-    });
-  }
-};
-
-window.updateStars = function updateStars(dt) {
-  const S = window.GameState;
-
-  // 30° tilt from vertical, moving top-right → bottom-left
-  const angle = (30 * Math.PI) / 180;
-  const dirX = -Math.sin(angle); // ~ -0.5
-  const dirY =  Math.cos(angle); // ~ 0.866
-
-  for (const s of S.stars) {
-    s.x += dirX * s.speed * dt;
-    s.y += dirY * s.speed * dt;
-
-    // Respawn when off-screen (bottom-left)
-    if (s.y > S.H + 40 || s.x < -40) {
-      s.x = rand(S.W * 0.6, S.W + 80);
-      s.y = rand(-80, S.H * 0.4);
-      s.speed = rand(40, 120);
-    }
-  }
-};
-
-// ---------- POWER-UPS ----------
-window.spawnPowerUp = function spawnPowerUp(x, y) {
-  const S = window.GameState;
-  S.powerUps.push({
-    x,
-    y,
-    radius: 10,
-    speedY: 50,
-    type: "weapon"
-  });
-};
-
-// ---------- EXPLOSIONS (SPRITE SHEET) ----------
-window.spawnExplosion = function spawnExplosion(x, y, colour) {
-  const S = window.GameState;
-
-  // pick row based on colour tint
-  let row = 0; // default yellow
-  if (colour === "#6bffb2") row = 1;        // green enemies
-  else if (colour === "#9bf3ff") row = 2;   // cyan bullets/explosions
-  else if (colour === "#4db9ff") row = 3;   // deep blue (if needed)
-
-  S.particles.push({
-    x,
-    y,
-    row,
-    frame: 0,
-    frameCount: 4,    // 4 frames per row (Explo01.png is 4x4)
-    frameSpeed: 0.08, // animation speed
-    frameTimer: 0,
-    done: false,
-    // Big blast scale (row 2 = cyan/green row)
-    scale: row === 2 ? 2.2 : 1.0
-  });
-};
-
-// =========================================================
-//  ENEMY SPAWNING
-// =========================================================
-
-// Random spawn (normal wave enemies)
-window.spawnEnemy = function spawnEnemy() {
-  const S = window.GameState;
-  const roll = Math.random();
-  let e;
-
-  if (roll < 0.55) {
-    // GRUNT – small, fast, 1 HP
-    const size = rand(10, 16);
-    e = {
-      type: "grunt",
-      x: rand(size, S.W - size),
-      y: -size,
-      radius: size,
-      speedY: rand(120, 200),
-      hp: 1,
-      maxHp: 1,
-      hitFlash: 0,
-      colour: "#6bffb2",
-      score: 100,
-      dropChance: 0.05
-    };
-  } else if (roll < 0.85) {
-    // ZIGZAG – medium, wavy path, 2 HP
-    const size = rand(14, 20);
-    const baseX = rand(size, S.W - size);
-    e = {
-      type: "zigzag",
-      x: baseX,
-      y: -size,
-      baseX,
-      radius: size,
-      speedY: rand(80, 140),
-      hp: 2,
-      maxHp: 2,
-      colour: "#ff9bf5",
-      score: 200,
-      dropChance: 0.08,
-      phase: Math.random() * Math.PI * 2,
-      waveAmp: rand(18, 32),
-      waveSpeed: rand(3, 5),
-      hitFlash: 0
-    };
-  } else if (roll < 0.95) {
-    // SHOOTER – fires bullets downward
-    const size = rand(16, 24);
-    e = {
-      type: "shooter",
-      x: rand(size, S.W - size),
-      y: -size,
-      radius: size,
-      speedY: rand(70, 110),
-      hp: 2,
-      maxHp: 2,
-      hitFlash: 0,
-      colour: "#ffd36b",
-      score: 250,
-      dropChance: 0.08,
-      shootTimer: rand(1.0, 2.2)
-    };
-  } else {
-    // TANK – big, slow, 3 HP, better drop
-    const size = rand(22, 30);
-    e = {
-      type: "tank",
-      x: rand(size, S.W - size),
-      y: -size,
-      radius: size,
-      speedY: rand(40, 70),
-      hp: 3,
-      maxHp: 3,
-      hitFlash: 0,
-      colour: "#ff6b7b",
-      score: 350,
-      dropChance: 0.15
-    };
+  // ------------------------------------------------------
+  // Utility helpers
+  // ------------------------------------------------------
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
   }
 
-  S.enemies.push(e);
-};
-
-// Direct spawner for scripts / bosses
-window.spawnEnemyType = function spawnEnemyType(type, x, y) {
-  const S = window.GameState;
-  let e = null;
-
-  // Helper to keep enemies safely on-screen
-  function clampX(px, size) {
-    return clamp(px ?? rand(size, S.W - size), size, S.W - size);
+  function rand(min, max) {
+    return Math.random() * (max - min) + min;
   }
 
-  switch (type) {
-    // ---------------- GRUNT ----------------
-    case "grunt":
-    case "enemyGrunt": {
-      const size = rand(10, 16);
-      const ex = clampX(x, size);
-      const ey = y ?? -size;
+  function circleHit(a, b, pad = 0) {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    const dist = Math.hypot(dx, dy);
+    return dist <= (a.radius || 0) + (b.radius || 0) + pad;
+  }
 
-      e = {
-        type: "grunt",
-        x: ex,
-        y: ey,
-        radius: size,
-        speedY: rand(120, 200),
-        hp: 1,
-        maxHp: 1,
-        hitFlash: 0,
-        colour: "#6bffb2",
-        score: 100,
-        dropChance: 0.05
-      };
-      break;
+  window.clamp = clamp;
+  window.rand = rand;
+  window.circleHit = circleHit;
+
+  // ------------------------------------------------------
+  // State bootstrap
+  // ------------------------------------------------------
+  function allocateState() {
+    S.canvas = document.getElementById("game");
+    S.ctx = S.canvas ? S.canvas.getContext("2d") : null;
+    if (S.canvas) {
+      S.canvas.width = window.innerWidth;
+      S.canvas.height = window.innerHeight;
+      S.W = S.canvas.width;
+      S.H = S.canvas.height;
     }
 
-    // ---------------- ZIGZAG (ESCORT) ----------------
-    case "zigzag":
-    case "enemyZigzag": {
-      const size = rand(14, 20);
-      const baseX = clampX(x, size);
-      const ey = y ?? -size;
+    S.enemies = [];
+    S.bullets = [];
+    S.enemyBullets = [];
+    S.powerUps = [];
+    S.particles = [];
+    S.thrustParticles = [];
+    S.sidekicks = [];
+    S.rockets = [];
+    S.stars = [];
 
-      e = {
-        type: "zigzag",
-        x: baseX,
-        y: ey,
-        baseX,
-        radius: size,
-        speedY: rand(80, 140),
-        hp: 2,
-        maxHp: 2,
-        colour: "#ff9bf5",
-        score: 200,
-        dropChance: 0.08,
-        phase: Math.random() * Math.PI * 2,
-        waveAmp: rand(18, 32),
-        waveSpeed: rand(3, 5),
-        hitFlash: 0
-      };
-      break;
-    }
-
-    // ---------------- SHOOTER ----------------
-    case "shooter":
-    case "enemyShooter": {
-      const size = rand(16, 24);
-      const ex = clampX(x, size);
-      const ey = y ?? -size;
-
-      e = {
-        type: "shooter",
-        x: ex,
-        y: ey,
-        radius: size,
-        speedY: rand(70, 110),
-        hp: 2,
-        maxHp: 2,
-        hitFlash: 0,
-        colour: "#ffd36b",
-        score: 250,
-        dropChance: 0.08,
-        shootTimer: rand(1.0, 2.2)
-      };
-      break;
-    }
-
-    // ---------------- TANK ----------------
-    case "tank":
-    case "enemyTank": {
-      const size = rand(22, 30);
-      const ex = clampX(x, size);
-      const ey = y ?? -size;
-
-      e = {
-        type: "tank",
-        x: ex,
-        y: ey,
-        radius: size,
-        speedY: rand(40, 70),
-        hp: 3,
-        maxHp: 3,
-        hitFlash: 0,
-        colour: "#ff6b7b",
-        score: 350,
-        dropChance: 0.15
-      };
-      break;
-    }
-
-    default:
-      return;
-  }
-
-  if (e) {
-    S.enemies.push(e);
-  }
-};
-
-// =========================================================
-//  BOSS SPAWNERS
-// =========================================================
-
-window.spawnScorpionBoss = function spawnScorpionBoss() {
-  const S = window.GameState;
-
-  const boss = {
-    type: "scorpionBoss",
-    x: S.W * 0.5,
-    y: -220,          // enters from above screen
-    radius: 80,       // big collision bodyT
-    hp: 500,
-    maxHp: 500,
-    dropChance: 0.6,
-
-    // entry + attack state
-    enterComplete: false,
-    attackTimer: 0,
-    clawTimer: 0,
-    laserTimer: 0,
-    laserActive: false,
-    laserCharging: false,
-    laserX: 0
-  };
-
-  S.enemies.push(boss);
-};
-
-window.spawnGeminiBoss = function spawnGeminiBoss() {
-  const S = window.GameState;
-
-  const boss = {
-    type: "geminiBoss",
-    x: S.W * 0.5,
-    y: -260,          // comes in from above
-    radius: 110,
-    hp: 700,
-    maxHp: 700,
-    dropChance: 0.8,
-
-    enterComplete: false,
-    phase: 1,
-    attackTimer: 0,
-    spawnTimer: 0,
-    orbitAngle: 0
-  };
-
-  S.enemies.push(boss);
-};
-
-// =========================================================
-//  BOSS LOGIC
-// =========================================================
-
-// Scorpion – hover, claws, tail laser
-window.updateBossScorpion = function updateBossScorpion(e, dt) {
-  const S = window.GameState;
-  const player = S.player;
-
-  // Entry phase
-  if (!e.enterComplete) {
-    e.y += 40 * dt;
-    if (e.y >= 180) e.enterComplete = true;
-    return;
-  }
-
-  // Hover
-  e.attackTimer = (e.attackTimer || 0) + dt;
-  e.x = S.W * 0.5 + Math.sin(e.attackTimer * 0.5) * 80;
-
-  // ---------- CLAW BULLETS ----------
-  e.clawTimer = (e.clawTimer || 0) - dt;
-  if (e.clawTimer <= 0) {
-    e.clawTimer = 0.7;
-
-    const baseY = e.y + 10;
-    const leftX = e.x - 40;
-    const rightX = e.x + 40;
-
-    const dy = player.y - baseY;
-    const dxL = player.x - leftX;
-    const dxR = player.x - rightX;
-
-    const lenL = Math.hypot(dxL, dy) || 1;
-    const lenR = Math.hypot(dxR, dy) || 1;
-
-    const speed = 260;
-
-    S.enemyBullets.push(
+    S.keys = S.keys || {};
+    S.player = Object.assign(
       {
-        x: leftX,
-        y: baseY,
-        vx: (dxL / lenL) * speed,
-        vy: (dy / lenL) * speed,
-        radius: 6,
-        colour: "#9bf3ff",
-        type: "bossClaw"
+        x: (S.W || 800) / 2,
+        y: (S.H || 600) - 80,
+        angle: -Math.PI / 2,
+        speed: 260,
+        bank: 0,
+        weaponLevel: 1,
+        invuln: 0,
       },
-      {
-        x: rightX,
-        y: baseY,
-        vx: (dxR / lenR) * speed,
-        vy: (dy / lenR) * speed,
-        radius: 6,
-        colour: "#9bf3ff",
-        type: "bossClaw"
-      }
+      S.player || {}
     );
   }
 
@@ -941,209 +610,118 @@ if (GS.killsSinceShieldDrop >= 50) {
     GS.killsSinceShieldDrop = 0; // reset counter
 }
         }
-        break;
       }
-    }
+    },
 
-    if (hit) continue;
-  }
+    updatePlayer(dt) {
+      const p = S.player;
+      const k = S.keys || {};
+      const accel = S.speedBoost || 1;
 
-  // ----- Enemy bullets -----
-  for (let i = S.enemyBullets.length - 1; i >= 0; i--) {
-    const b = S.enemyBullets[i];
+      const up = k["w"] || k["arrowup"];
+      const down = k["s"] || k["arrowdown"];
+      const left = k["a"] || k["arrowleft"];
+      const right = k["d"] || k["arrowright"];
 
-    // Two styles: vx/vy (boss) and vy-only (grunts/shooters)
-    b.y += b.vy ? b.vy * dt : (b.speed || 220) * dt;
-    if (b.vx) b.x += b.vx * dt;
+      if (up) p.y -= p.speed * accel * dt;
+      if (down) p.y += p.speed * accel * dt;
+      if (left) p.x -= p.speed * accel * dt;
+      if (right) p.x += p.speed * accel * dt;
 
-    if (b.y > S.H + 40 || b.x < -40 || b.x > S.W + 40) {
-      S.enemyBullets.splice(i, 1);
-      continue;
-    }
+      p.x = clamp(p.x, 30, (S.W || 800) - 30);
+      p.y = clamp(p.y, 30, (S.H || 600) - 30);
 
-    if (player.invuln <= 0 && circleHit(b, player)) {
-      S.enemyBullets.splice(i, 1);
-      window.spawnExplosion(player.x, player.y + 10, "#ff9977");
-      window.damagePlayer();
-    }
-  }
+      if (p.invuln > 0) p.invuln -= dt;
 
-  // -------- ROCKETS --------
-  for (let i = S.rockets.length - 1; i >= 0; i--) {
-    const r = S.rockets[i];
-
-    // HOMING MODE
-    if (r.homing) {
-      let nearest = null;
-      let dist = 99999;
-
-      for (const e of S.enemies) {
-        if (e.type === "scorpionBoss") continue; // don't home on scorpion if you like
-        const dx = e.x - r.x;
-        const dy = e.y - r.y;
-        const d = dx * dx + dy * dy;
-        if (d < dist) {
-          dist = d;
-          nearest = e;
-        }
-      }
-
-      if (nearest) {
-        const ang = Math.atan2(nearest.y - r.y, nearest.x - r.x);
-        r.vx = Math.cos(ang) * 300;
-        r.vy = Math.sin(ang) * 300;
-      }
-    }
-
-    // Move
-    r.x += r.vx * dt;
-    r.y += r.vy * dt;
-
-    // Off screen
-    if (r.y < -40 || r.x < -40 || r.x > S.W + 40) {
-      S.rockets.splice(i, 1);
-      continue;
-    }
-
-    // Collision
-    for (let j = S.enemies.length - 1; j >= 0; j--) {
-      const e = S.enemies[j];
-      if (circleHit(r, e)) {
-        S.rockets.splice(i, 1);
-        e.hp -= 2; // stronger than bullets
-        window.spawnExplosion(r.x, r.y, e.colour);
-        if (e.hp <= 0) {
-          S.enemies.splice(j, 1);
-          window.handleEnemyDeath(e);
-        }
-        break;
-      }
-    }
-  }
-
- // ----- Power-ups -----
-  for (let i = S.powerUps.length - 1; i >= 0; i--) {
-    const p = S.powerUps[i];
-    p.y += p.speedY * dt;
-
-    if (p.y > S.H + 20) {
-      S.powerUps.splice(i, 1);
-      continue;
-    }
-
-      // Pickup
-    if (circleHit(player, p)) {
-      S.powerUps.splice(i, 1);
-
-      // ---- SHIELD PART PICKUP ----
-      if (p.type === "shieldA") {
-      S.hasShieldA = true;
-      window.flashMsg("🛡️ SHIELD PART A COLLECTED");
-      continue;
-      }
-
-       if (p.type === "shieldB") {
-       S.hasShieldB = true;
-       window.flashMsg("🛡️ SHIELD PART B COLLECTED");
-       continue;
-      }
-      
-// ---- AUTO-CRAFT SHIELD ----
-    if (!S.shieldUnlocked && S.hasShieldA && S.hasShieldB) {
-        S.shieldUnlocked = true;
-        S.shield = S.maxShield || 100;
-        window.flashMsg("⚡ SHIELD ACTIVATED!");
-    }
-
-      // COIN PICKUP
-      if (p.type === "coin") {
-        S.wizzCoins += p.amount;
-        if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
-        window.flashMsg("+" + p.amount + " WIZZCOIN");
-        continue;
-      }
-
-      // SHIELD PICKUP  (fills S.shield up to S.maxShield)
-      if (p.type === "shield") {
-        const maxShield = S.maxShield || 100;
-        const gain      = p.amount || 20;
-        S.shield = Math.min(maxShield, (S.shield || 0) + gain);
-        window.flashMsg("+" + gain + " SHIELD");
-        continue;
-      }
-
-      // HEALTH PICKUP  (heals lives up to maxLives)
-      if (p.type === "health") {
-        const maxLives = S.maxLives || S.lives || 100;
-        const gain     = p.amount || 20;
-        S.lives = Math.min(maxLives, (S.lives || 0) + gain);
-        if (S.livesEl) S.livesEl.textContent = S.lives;
-        window.flashMsg("+" + gain + " HULL");
-        continue;
-      }
-
-      // SHIELD PART A PICKUP
-      if (p.type === "shieldA") {
-        S.partsA = (S.partsA || 0) + 1;
-        window.flashMsg("⚡ SHIELD PART A COLLECTED (" + S.partsA + ")");
-        continue;
-      }
-
-      // SHIELD PART B PICKUP
-      if (p.type === "shieldB") {
-        S.partsB = (S.partsB || 0) + 1;
-        window.flashMsg("⚡ SHIELD PART B COLLECTED (" + S.partsB + ")");
-        continue;
-      }
-
-     // WEAPON PICKUP
-      if (player.weaponLevel < 5) {
-        player.weaponLevel++;
-
-        // LEVEL 4 → first ally ship (left)
-        if (player.weaponLevel === 4) {
-          S.sidekicks.push({
-            offsetX: -50,
-            yOff: -40,
-            fireTimer: 0
-          });
-          window.flashMsg("ALLY SHIP DEPLOYED!");
-        }
-
-        // LEVEL 5 → second ally ship (right)
-        else if (player.weaponLevel === 5) {
-          S.sidekicks.push({
-            offsetX: 50,
-            yOff: -40,
-            fireTimer: 0
-          });
-          window.flashMsg("ALLY SHIP 2 DEPLOYED!");
-        }
+      if (S.firing || k[" "] || k["space"] || k["spacebar"]) {
+        this.handleShooting(dt);
       } else {
-        window.flashMsg("MAX POWER");
+        S.shootCooldown = Math.max(0, (S.shootCooldown || 0) - dt);
+      }
+    },
+
+    handleShooting(dt) {
+      S.shootCooldown = (S.shootCooldown || 0) - dt;
+      if (S.shootCooldown > 0) return;
+      const spread = S.player.weaponLevel;
+      const bulletSpeed = 520;
+      const angle = typeof S.player.angle === "number" ? S.player.angle : -Math.PI / 2;
+
+      const spawnBullet = (offset, colour) => {
+        const a = angle + offset;
+        S.bullets.push({
+          x: S.player.x,
+          y: S.player.y,
+          radius: 6,
+          colour,
+          vx: Math.cos(a) * bulletSpeed,
+          vy: Math.sin(a) * bulletSpeed,
+        });
+      };
+
+      if (spread === 1) {
+        spawnBullet(0, "#a8ffff");
+      } else if (spread === 2) {
+        spawnBullet(-0.08, "#a8ffff");
+        spawnBullet(0.08, "#a8ffff");
+      } else {
+        spawnBullet(0, "#a8ffff");
+        spawnBullet(-0.18, "#ff8ad4");
+        spawnBullet(0.18, "#fffd8b");
+      }
+
+      S.shootCooldown = 0.16;
+    },
+
+    drawParticles(ctx) {
+      if (!S.particles) return;
+      for (const p of S.particles) {
+        ctx.save();
+        ctx.globalAlpha = clamp(1 - p.life, 0, 1);
+        ctx.fillStyle = p.colour || "#fff";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size || 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    },
+  };
+
+  // ------------------------------------------------------
+  // Hooks for collisions + levels
+  // ------------------------------------------------------
+  window.GameRuntime = GameRuntime;
+
+  window.spawnPowerUp = function spawnPowerUp(x, y) {
+    S.powerUps.push({ x, y, radius: 10, speedY: 50, type: "weapon" });
+  };
+
+  window.spawnExplosion = function spawnExplosion(x, y, colour = "#fff") {
+    S.particles.push({ x, y, life: 0, size: 10, colour, decay: 0.9 });
+  };
+
+  window.handleEnemyDeath = function handleEnemyDeath(enemy) {
+    S.score = (S.score || 0) + (enemy.score || 100);
+    if (Math.random() < (enemy.dropChance || 0)) {
+      window.spawnPowerUp(enemy.x, enemy.y);
+    }
+  };
+
+  window.damagePlayer = function damagePlayer(amount = 10) {
+    S.lives = (S.lives ?? 100) - amount;
+    S.player.invuln = 1.2;
+    if (S.livesEl) S.livesEl.textContent = S.lives;
+    if (S.lives <= 0) {
+      S.running = false;
+      if (window.EngineCore) {
+        window.EngineCore.setMode("world");
       }
     }
-  }
+  };
 
-  // ----- Explosions (sprite animation) -----
-  for (let i = S.particles.length - 1; i >= 0; i--) {
-    const e = S.particles[i];
-
-    e.frameTimer += dt;
-    if (e.frameTimer >= e.frameSpeed) {
-      e.frameTimer = 0;
-      e.frame++;
-
-      if (e.frame >= e.frameCount) {
-        S.particles.splice(i, 1);
-        continue;
-      }
+  window.finishLevel = function finishLevel() {
+    if (window.LevelManager) {
+      window.LevelManager.finishLevel();
     }
-  }
-
-  // ---------- Lose condition ----------
-  if (S.lives <= 0) {
-    S.running = false;
-    window.flashMsg("GAME OVER — TAP START");
-  }
-};
+  };
+})();

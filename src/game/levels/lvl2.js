@@ -6,7 +6,7 @@
 // =============================================================
 
 (function () {
-  const S = window.GameState;
+  const S = () => window.GameState;
 
   const Level2 = {
     active: false,
@@ -153,6 +153,7 @@
             });
           }
         }
+        this.boss.cooldown = 1.0;
       }
     },
 
@@ -196,6 +197,10 @@
       }, 1200);
     },
   };
+
+  if (window.LevelManager) {
+    window.LevelManager.register("Level2", Level2);
+  }
 
   window.Level2 = Level2;
 })();
