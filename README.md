@@ -35,6 +35,12 @@ This document defines the stable architecture, rules Codex must follow, and the 
 
 ---
 
+Deployment Environment
+
+- Set the `DATABASE_URL` environment variable in Vercel so `/api` routes (see `api/db.js`) can connect to Neon/Postgres.
+
+---
+
 Core Principles
 
 1. One Engine Rules All Levels
