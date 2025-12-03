@@ -40,6 +40,11 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
     S.canvas = document.getElementById("game");
     S.ctx = S.canvas.getContext("2d");
 
+    // Boot the state machine so GameRuntime and InputManager initialise properly
+    if (window.EngineCore && typeof window.EngineCore.init === 'function') {
+      window.EngineCore.init();
+    }
+
     // --- FIX: Ensure arrays exist before renderer touches them ---
     S.enemies      = [];
     S.bullets      = [];
