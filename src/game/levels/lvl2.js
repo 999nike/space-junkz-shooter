@@ -79,9 +79,7 @@
       this.checkForCompletion();
 
       // Run core shooter systems
-      if (typeof window.updateGame === "function") {
-        window.updateGame(dt);
-      }
+      updateGame(dt);
     },
 
     draw(ctx) {
