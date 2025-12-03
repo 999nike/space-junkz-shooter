@@ -290,18 +290,18 @@ window.syncStats = async function (name, coins, score, xp = 0) {
 
   // ⭐ PATCH SECTION 4 (Synced)
   function setActivePlayer(name) {
-  // Restore stats from DB (read-only)
-  const pid = localStorage.getItem("sj_player_id");
-  if (pid && window.loadPlayerStats) {
-    window.loadPlayerStats(pid);
+    // Restore stats from DB (read-only)
+    const pid = localStorage.getItem("sj_player_id");
+    if (pid && window.loadPlayerStats) {
+      window.loadPlayerStats(pid);
+    }
+
+    // Set active player locally
+    localStorage.setItem("sj_active_player", name);
+
+    // Hide selector
+    selectBox.style.display = "none";
   }
-
-  // Set active player locally
-  localStorage.setItem("sj_active_player", name);
-
-  // Hide selector
-  selectBox.style.display = "none";
-}
 
   function renderPlayers() {
     list.innerHTML = "";
@@ -323,6 +323,8 @@ window.syncStats = async function (name, coins, score, xp = 0) {
       list.appendChild(btn);
     });
   }
+
+  window.renderPlayers = renderPlayers;
 
   addBtn.onclick = () => {
     nameBox.style.display = "block";
@@ -369,11 +371,21 @@ saveBtn.onclick = async () => {
 };
 
   window.showPlayerSelect = function () {
+    const selectBox = document.getElementById("playerSelect");
+    const players = JSON.parse(localStorage.getItem("sj_players") || "[]");
     const active = localStorage.getItem("sj_active_player");
 
+    // Auto-select if only one player exists
+    if (!active && players.length === 1) {
+      localStorage.setItem("sj_active_player", players[0]);
+      selectBox.style.display = "none";
+      return;
+    }
+
+    // No active player → show selector
     if (!active) {
       selectBox.style.display = "block";
-      renderPlayers();
+      if (typeof renderPlayers === "function") renderPlayers();
     } else {
       selectBox.style.display = "none";
     }
@@ -386,11 +398,22 @@ saveBtn.onclick = async () => {
 
 window.showPlayerSelect = window.showPlayerSelect || function () {
   const selectBox = document.getElementById("playerSelect");
+  const players = JSON.parse(localStorage.getItem("sj_players") || "[]");
+  const active = localStorage.getItem("sj_active_player");
+
   if (!selectBox) return;
 
-  const active = localStorage.getItem("sj_active_player");
+  // Auto-select if only one player exists
+  if (!active && players.length === 1) {
+    localStorage.setItem("sj_active_player", players[0]);
+    selectBox.style.display = "none";
+    return;
+  }
+
+  // No active player → show selector
   if (!active) {
     selectBox.style.display = "block";
+    if (typeof window.renderPlayers === "function") window.renderPlayers();
   } else {
     selectBox.style.display = "none";
   }
