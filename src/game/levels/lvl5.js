@@ -170,33 +170,5 @@
     },
   };
 
-  // ------------------------------------------------------
-  // EXTEND ENGINE: custom enemy behaviour
-  // ------------------------------------------------------
-  const orig = window.updateGame;
-
-  window.updateGame = function patched(dt) {
-    orig(dt);
-
-    const S = window.GameState;
-
-    for (const e of S.enemies) {
-      if (e.type === "voidGhost") {
-        e.alpha = Math.min(1, e.alpha + dt);     // fade in
-        e.y += 60 * dt;
-        e.x += Math.sin(e.y * 0.02) * 60 * dt;
-      }
-
-      if (e.type === "voidSpit") {
-        e.y += e.vy * dt;
-      }
-
-      if (e.type === "voidSide") {
-        e.x += e.dir * e.speed * dt;
-        e.y += Math.sin(e.x * 0.02) * 40 * dt;
-      }
-    }
-  };
-
   window.Level5 = Level5;
 })();

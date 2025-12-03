@@ -130,16 +130,5 @@
     }
   };
 
-  // Patch updateGame to move meteors downwards
-  const origUpdateGame = window.updateGame;
-  window.updateGame = function patchedUpdateGame(dt) {
-    origUpdateGame(dt);
-    for (const e of S.enemies) {
-      if (e.type === "meteor") {
-        e.y += e.vy * dt;
-      }
-    }
-  };
-
   window.Level6 = Level6;
 })();
