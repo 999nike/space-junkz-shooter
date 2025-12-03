@@ -411,6 +411,11 @@ window.drawGame = function drawGame() {
   const S = window.GameState;
   const ctx = S.ctx;
 
+  if (window.LevelManager && window.LevelManager.hasActiveLevel()) {
+    window.LevelManager.draw(ctx);
+    return;
+  }
+
   // HOME BASE MODE
   if (window.HomeBase && window.HomeBase.active) {
     window.HomeBase.draw(ctx);
