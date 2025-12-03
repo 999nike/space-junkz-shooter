@@ -381,11 +381,6 @@ window.updateGame = function updateGame(dt) {
 
   if (player.invuln > 0) player.invuln -= dt;
 
-  // Shared starfield background
-  if (window.updateStars) {
-    updateStars(dt);
-  }
-
   // -------- SIDEKICKS (FOLLOW + ROCKET FIRE) --------
   for (const s of S.sidekicks) {
     // Follow player
