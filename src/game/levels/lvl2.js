@@ -1,127 +1,200 @@
-// Mission 1 – standalone level using the modular engine
+// =============================================================
+// LEVEL 2 — MISSION 1 (STANDALONE)
+// • 20s of simple enemy waves
+// • Unique single boss (no intro assets or Level 1 references)
+// • No engine hijacking; keeps updateGame bound to Level2.update
+// =============================================================
+
 (function () {
   const S = () => window.GameState;
 
   const Level2 = {
-    clock: 0,
-    waveTimer: 0,
-    boss: null,
+    active: false,
+    timer: 0,
+    spawnTimer: 0,
     bossSpawned: false,
+    bossDefeated: false,
+    bg: null,
+    bgLoaded: false,
+    _updateBinding: null,
+    _previousUpdate: null,
+    _finishing: false,
 
+    // ---------------------------------------------------------
+    // ENTER
+    // ---------------------------------------------------------
     enter() {
-      this.clock = 0;
-      this.waveTimer = 0;
-      this.boss = null;
+      console.log("🚀 ENTERING LEVEL 2 — MISSION 1 (STANDALONE)");
+
+      this.active = true;
+      this.timer = 0;
+      this.spawnTimer = 0.5;
       this.bossSpawned = false;
+      this.bossDefeated = false;
+      this._finishing = false;
 
-      window.GameRuntime?.resetFrameState();
-      window.updateGame = this.update.bind(this);
+      // Persist our update binding for the entire mission
+      this._updateBinding = (dt) => Level2.update(dt);
+      this._previousUpdate = window.updateGame;
+      window.updateGame = this._updateBinding;
 
-      const state = S();
-      state.currentLevel = "Level2";
+      // Reset playfield
+      if (window.resetGameState) resetGameState();
+      S.running = true;
+      S.currentLevel = 2;
+      if (S.player) S.player.invuln = 1.0;
+
+      // Visuals
+      this.bg = new Image();
+      this.bgLoaded = false;
+      this.bg.src = "./src/game/assets/mission1_bg.png";
+      this.bg.onload = () => (this.bgLoaded = true);
+
+      // Disable map/home modes during the mission
+      if (window.WorldMap) WorldMap.active = false;
+      if (window.HomeBase) HomeBase.active = false;
+      if (window.initStars) initStars();
+
+      window.flashMsg("MISSION 1 — DRAX OUTSKIRTS");
+      setTimeout(() => window.flashMsg("ENEMY PATROL DETECTED"), 1200);
     },
 
-    spawnWave(dt) {
-      this.waveTimer -= dt;
-      if (this.waveTimer > 0) return;
-      const state = S();
-      const count = 6;
-      for (let i = 0; i < count; i++) {
-        state.enemies.push({
-          type: "grunt",
-          x: 40 + (i / count) * (state.W - 80),
-          y: -30 - i * 18,
-          radius: 14,
-          speedY: 140,
-          hp: 1,
-          maxHp: 1,
-          colour: "#6bffb2",
-          score: 100,
-          dropChance: 0.05,
-        });
+    // ---------------------------------------------------------
+    // UPDATE
+    // ---------------------------------------------------------
+    update(dt) {
+      if (!this.active || !S.running) return;
+
+      // Enforce our update binding so engine/logic cannot overwrite it mid-mission
+      if (window.updateGame !== this._updateBinding) {
+        window.updateGame = this._updateBinding;
       }
-      this.waveTimer = 2.8;
+
+      this.timer += dt;
+      this.spawnTimer -= dt;
+
+      // 20 seconds of simple waves
+      if (this.timer < 20) {
+        if (this.spawnTimer <= 0) {
+          this.spawnWave();
+          this.spawnTimer = Math.random() * 0.6 + 0.6;
+        }
+      } else if (!this.bossSpawned) {
+        this.spawnBoss();
+        this.bossSpawned = true;
+      }
+
+      // Boss behavior and completion
+      this.updateBoss(dt);
+      this.checkForCompletion();
+
+      // Run core shooter systems
+      if (window.updateGameCore) updateGameCore(dt);
     },
 
+    // ---------------------------------------------------------
+    // WAVES
+    // ---------------------------------------------------------
+    spawnWave() {
+      const roll = Math.random();
+
+      if (roll < 0.45) {
+        spawnEnemyType("zigzag");
+        spawnEnemyType("zigzag");
+      } else if (roll < 0.8) {
+        spawnEnemyType("shooter");
+        spawnEnemyType("zigzag");
+      } else {
+        spawnEnemyType("tank");
+      }
+    },
+
+    // ---------------------------------------------------------
+    // BOSS
+    // ---------------------------------------------------------
     spawnBoss() {
-      const state = S();
-      this.boss = {
-        type: "riftSentinel",
-        x: state.W / 2,
-        y: 140,
-        radius: 48,
-        hp: 160,
-        maxHp: 160,
-        cooldown: 1.2,
-        phase: 0,
-        manualUpdate: true,
-        update: (dt) => this.updateBoss(dt),
-      };
-      state.enemies.push(this.boss);
-      this.bossSpawned = true;
+      window.flashMsg("⚠ RIFT SENTINEL APPROACHING");
+
+      S.enemies.push({
+        type: "lvl2RiftSentinel",
+        x: S.W / 2,
+        y: -160,
+        radius: 90,
+        hp: 950,
+        maxHp: 950,
+        timer: 0,
+        enterComplete: false,
+      });
     },
 
     updateBoss(dt) {
-      if (!this.boss) return;
-      const state = S();
-      this.boss.phase += dt;
-      this.boss.x = state.W / 2 + Math.sin(this.boss.phase * 1.5) * 180;
-      this.boss.y = 140 + Math.cos(this.boss.phase) * 30;
+      for (const enemy of S.enemies) {
+        if (enemy.type !== "lvl2RiftSentinel") continue;
 
-      this.boss.cooldown -= dt;
-      if (this.boss.cooldown <= 0) {
-        for (let i = -1; i <= 1; i++) {
-          state.enemyBullets.push({
-            x: this.boss.x + i * 18,
-            y: this.boss.y + 10,
-            vx: i * 90,
-            vy: 260,
-            radius: 6,
-            colour: "#fba4ff",
-          });
+        if (!enemy.enterComplete) {
+          enemy.y += 70 * dt;
+          if (enemy.y >= 200) enemy.enterComplete = true;
+          continue;
+        }
+
+        enemy.timer += dt;
+        enemy.x = S.W / 2 + Math.sin(enemy.timer * 0.8) * 140;
+
+        // Fire paired shots every 1.6s
+        if (enemy.timer % 1.6 < dt) {
+          for (let i = -1; i <= 1; i += 2) {
+            S.enemyBullets.push({
+              x: enemy.x + i * 30,
+              y: enemy.y + 20,
+              vx: i * 80,
+              vy: 240,
+              radius: 10,
+              colour: "#8ef",
+            });
+          }
         }
         this.boss.cooldown = 1.0;
       }
+    },
 
-      if (this.boss.hp <= 0) {
-        window.finishLevel();
+    checkForCompletion() {
+      if (this._finishing) return;
+
+      const bossAlive = S.enemies.some(
+        (e) => e.type === "lvl2RiftSentinel" && e.hp > 0
+      );
+
+      if (this.bossSpawned && !bossAlive) {
+        this.finishLevel();
       }
     },
 
-    update(dt) {
-      this.clock += dt;
-      window.GameRuntime?.updateCore(dt);
+    // ---------------------------------------------------------
+    // FINISH
+    // ---------------------------------------------------------
+    finishLevel() {
+      if (this._finishing) return;
+      this._finishing = true;
 
-      if (this.clock < 20) {
-        this.spawnWave(dt);
-      } else if (!this.bossSpawned) {
-        this.spawnBoss();
-      }
-    },
+      window.flashMsg("LEVEL 2 COMPLETE!");
+      this.active = false;
+      this.bossDefeated = true;
+      S.running = false;
+      S.currentLevel = null;
 
-    draw(ctx) {
-      window.GameRuntime?.drawCore(ctx);
-      if (ctx && this.boss) {
-        ctx.save();
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText("RIFT SENTINEL", 20, 40);
-        const pct = Math.max(0, this.boss.hp) / this.boss.maxHp;
-        ctx.fillStyle = "#ff69b4";
-        ctx.fillRect(20, 50, pct * 240, 12);
-        ctx.restore();
-      }
-    },
+      if (window.unlockNextLevel) unlockNextLevel(2);
 
-    cleanup() {
-      if (window.updateGame === this.update) {
-        window.updateGame = null;
-      }
-    },
+      setTimeout(() => {
+        // Restore default update handling now that the mission is done
+        if (this._previousUpdate) {
+          window.updateGame = this._previousUpdate;
+          this._previousUpdate = null;
+        }
 
-    finish() {
-      const state = S();
-      state.enemies = [];
-      this.boss = null;
+        if (window.WorldMap && window.WorldMap.enter) {
+          WorldMap.enter();
+        }
+      }, 1200);
     },
   };
 
