@@ -71,7 +71,7 @@
         this.spawnTimer = 0.4 + Math.random() * 0.5;
       }
 
-      if (window.updateGameCore) updateGameCore(dt);
+      if (window.updateGame) updateGame(dt);
     },
 
     draw(ctx) {
@@ -127,6 +127,10 @@
       setTimeout(() => {
         if (window.WorldMap) WorldMap.enter();
       }, 1200);
+    },
+
+    finish() {
+      this.complete();
     }
   };
 

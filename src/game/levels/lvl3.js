@@ -90,7 +90,7 @@
       }
 
       // Core engine
-      if (window.updateGameCore) updateGameCore(dt);
+      if (window.updateGame) updateGame(dt);
 
       // Level completion
       for (const e of S.enemies) {
@@ -188,6 +188,10 @@
       setTimeout(() => {
         if (window.WorldMap) WorldMap.enter();
       }, 1200);
+    },
+
+    finish() {
+      this.finishLevel();
     },
   };
 })();
