@@ -407,64 +407,88 @@ window.initStars = function initStars() {
 
 
 // ---------- MAIN GAME DRAW ----------
-window.drawGame = function drawGame() {
+window.drawGameCore = function drawGameCore(ctx) {
   const S = window.GameState;
-  const ctx = S.ctx;
+  const context = ctx || S?.ctx;
+  if (!S || !context) return;
 
   if (window.LevelManager && window.LevelManager.hasActiveLevel()) {
-    window.LevelManager.draw(ctx);
+    window.LevelManager.draw(context);
     return;
   }
 
   // HOME BASE MODE
   if (window.HomeBase && window.HomeBase.active) {
-    window.HomeBase.draw(ctx);
+    window.HomeBase.draw(context);
     return;
   }
 
   // WORLD MAP MODE
   if (window.WorldMap && window.WorldMap.active) {
-    window.WorldMap.draw(ctx);
+    window.WorldMap.draw(context);
     return;
   }
 
-  ctx.clearRect(0, 0, S.W, S.H);
+  context.clearRect(0, 0, S.W, S.H);
 
   // Background first
-  window.drawRunway(ctx);
+  window.drawRunway(context);
   // Stars
-  drawStars(ctx);
+  drawStars(context);
   // Enemies
-  window.drawEnemies(ctx);
+  window.drawEnemies(context);
 
   // Boss
-  window.drawScorpionBoss(ctx);
-  window.drawGeminiBoss(ctx);   // PATCH 5B
+  window.drawScorpionBoss(context);
+  window.drawGeminiBoss(context);   // PATCH 5B
 
   // Sidekick ships
-  window.drawSidekicks(ctx);
+  window.drawSidekicks(context);
 
   // Rockets
-  window.drawRockets(ctx);
+  window.drawRockets(context);
 
   // Bullets
-  drawBullets(ctx);
+  drawBullets(context);
 
   // Enemy bullets
-  window.drawEnemyBullets(ctx);
+  window.drawEnemyBullets(context);
 
   // Power-ups
-  window.drawPowerUps(ctx);
+  window.drawPowerUps(context);
 
   // Particles
-window.drawParticles(ctx);
+  window.drawParticles(context);
 
-// Player
-window.drawPlayer(ctx);
+  // Player
+  window.drawPlayer(context);
 
-// ------- PLAYER HEALTH + SHIELD BARS (N5) -------
-if (window.drawPlayerBars && S) {
-  window.drawPlayerBars(ctx, S);
-}
+  // ------- PLAYER HEALTH + SHIELD BARS (N5) -------
+  if (window.drawPlayerBars && S) {
+    window.drawPlayerBars(context, S);
+  }
+};
+
+// Wrapper to grab the current context and forward to the core renderer
+window.drawGame = function drawGame() {
+  const S = window.GameState || {};
+
+  if (!S.canvas) {
+    S.canvas = document.getElementById("game") || null;
+  }
+
+  if (!S.ctx && S.canvas) {
+    S.ctx = S.canvas.getContext("2d");
+  }
+
+  if (!S.canvas || !S.ctx) return;
+
+  // Ensure dimensions are synced (especially after refactors)
+  S.W = S.canvas.width || window.innerWidth;
+  S.H = S.canvas.height || window.innerHeight;
+
+  if (typeof window.drawGameCore === "function") {
+    window.drawGameCore(S.ctx);
+  }
 };
 
