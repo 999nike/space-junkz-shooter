@@ -6,7 +6,7 @@
 // =============================================================
 
 (function () {
-  const S = () => window.GameState;
+  const S = window.GameState;
 
   const Level2 = {
     active: false,
@@ -32,11 +32,6 @@
       this.bossSpawned = false;
       this.bossDefeated = false;
       this._finishing = false;
-
-      // Persist our update binding for the entire mission
-      this._updateBinding = (dt) => Level2.update(dt);
-      this._previousUpdate = window.updateGame;
-      window.updateGame = this._updateBinding;
 
       // Reset playfield
       if (window.resetGameState) resetGameState();
@@ -65,11 +60,6 @@
     update(dt) {
       if (!this.active || !S.running) return;
 
-      // Enforce our update binding so engine/logic cannot overwrite it mid-mission
-      if (window.updateGame !== this._updateBinding) {
-        window.updateGame = this._updateBinding;
-      }
-
       this.timer += dt;
       this.spawnTimer -= dt;
 
@@ -89,7 +79,9 @@
       this.checkForCompletion();
 
       // Run core shooter systems
-      if (window.updateGameCore) updateGameCore(dt);
+      if (typeof window.updateGame === "function") {
+        window.updateGame(dt);
+      }
     },
 
     // ---------------------------------------------------------
@@ -185,15 +177,7 @@
       if (window.unlockNextLevel) unlockNextLevel(2);
 
       setTimeout(() => {
-        // Restore default update handling now that the mission is done
-        if (this._previousUpdate) {
-          window.updateGame = this._previousUpdate;
-          this._previousUpdate = null;
-        }
-
-        if (window.WorldMap && window.WorldMap.enter) {
-          WorldMap.enter();
-        }
+        if (window.WorldMap?.enter) WorldMap.enter();
       }, 1200);
     },
   };
