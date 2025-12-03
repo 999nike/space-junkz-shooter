@@ -56,7 +56,11 @@
       this.lastTime = timestamp;
 
       this.update(dt);
-      this.draw();
+      // Always route drawing through the core renderer so the classic
+      // draw chain (gameLoop → drawGame → drawGameCore) stays intact.
+      if (typeof window.drawGame === "function") {
+        window.drawGame();
+      }
 
       requestAnimationFrame(this.gameLoop.bind(this));
     },
@@ -78,22 +82,7 @@
       }
     },
 
-    draw() {
-      const ctx = window.GameState?.ctx;
-      if (this.mode === "level" && window.LevelManager?.hasActiveLevel()) {
-        window.LevelManager.draw(ctx);
-        return;
-      }
-
-      if (this.mode === "world" && window.WorldMap?.draw) {
-        window.WorldMap.draw(ctx);
-        return;
-      }
-
-      if (this.mode === "intro" && window.Intro?.draw) {
-        window.Intro.draw(ctx);
-      }
-    },
+    // (Draw pipeline handled directly in gameLoop via window.drawGame)
   };
 
   window.EngineCore = EngineCore;
