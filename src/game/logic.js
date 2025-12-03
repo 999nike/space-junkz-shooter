@@ -710,12 +710,14 @@ window.updateGame = function updateGame(dt) {
   if (!S.running) return;
 
   const player = S.player;
-  // ----- Boss spawn timer -----
-  if (!S.bossSpawned) {
-    S.bossTimer = (S.bossTimer || 0) + dt;
-    if (S.bossTimer >= 60) { // ~1 min
-      window.spawnScorpionBoss();
-      S.bossSpawned = true;
+  // ----- Boss spawn timer (intro only) -----
+  if (!S.currentLevel || S.currentLevel === 1) {
+    if (!S.bossSpawned) {
+      S.bossTimer = (S.bossTimer || 0) + dt;
+      if (S.bossTimer >= 60) { // ~1 min
+        window.spawnScorpionBoss();
+        S.bossSpawned = true;
+      }
     }
   }
 
@@ -789,11 +791,13 @@ window.updateGame = function updateGame(dt) {
     }
   }
 
-  // ----- Spawn enemies -----
-  S.spawnTimer -= dt;
-  if (S.spawnTimer <= 0) {
-    window.spawnEnemy();
-    S.spawnTimer = rand(0.4, 1.0);
+  // ----- Spawn enemies (intro only; levels handle their own waves) -----
+  if (!S.currentLevel || S.currentLevel === 1) {
+    S.spawnTimer -= dt;
+    if (S.spawnTimer <= 0) {
+      window.spawnEnemy();
+      S.spawnTimer = rand(0.4, 1.0);
+    }
   }
 
   // ----- HOLD-TO-FIRE (shared for desktop + mobile) -----
