@@ -1,3 +1,17 @@
+// GLOBAL FLASH MESSAGE SYSTEM
+window.flashMsg = function flashMsg(text, duration = 1200) {
+  const el = document.getElementById("flashMsg");
+  if (!el) return;
+
+  el.textContent = text;
+  el.style.opacity = 1;
+
+  clearTimeout(window._flashTimer);
+  window._flashTimer = setTimeout(() => {
+    el.style.opacity = 0;
+  }, duration);
+};
+
 // Entry surface that boots the EngineCore lifecycle
 (function () {
   function bindStartButton() {
