@@ -62,48 +62,61 @@
     );
   }
 
-  // ---------- TAIL LASER ----------
-  e.laserTimer = (e.laserTimer || 0) + dt;
-  const cycle = 6.0;
-  const t = e.laserTimer % cycle;
+  const GameRuntime = {
+    init() {
+      allocateState();
+      S.spawnTimer = 0;
+      S.shootTimer = 0;
+      S.running = false;
+      S.lastTime = performance.now();
+    },
+  };
 
-  e.laserCharging = false;
-  e.laserActive = false;
+  window.updateBossScorpion = function updateBossScorpion(e, dt) {
+    const player = S.player;
 
-  e.laserX = typeof e.laserX === "number" ? e.laserX : e.x;
+    // ---------- TAIL LASER ----------
+    e.laserTimer = (e.laserTimer || 0) + dt;
+    const cycle = 6.0;
+    const t = e.laserTimer % cycle;
 
-  const bossScale = 0.30;
-  const bossSprite = S.sprites.bossScorpion;
-  const bossH = bossSprite ? bossSprite.height * bossScale : 160;
+    e.laserCharging = false;
+    e.laserActive = false;
 
-  // CHARGE
-  if (t > 2.0 && t <= 2.8) {
-    e.laserCharging = true;
-    e.laserX = e.x;
+    e.laserX = typeof e.laserX === "number" ? e.laserX : e.x;
 
-  // ACTIVE
-  } else if (t > 2.8 && t <= 4.2) {
-    e.laserActive = true;
-    const followSpeed = 6.5;
-    e.laserX += (player.x - e.laserX) * followSpeed * dt;
+    const bossScale = 0.3;
+    const bossSprite = S.sprites.bossScorpion;
+    const bossH = bossSprite ? bossSprite.height * bossScale : 160;
 
-    const topY = e.y + bossH * 0.32;
-    const bottomY = S.H + 40;
-    const halfWidth = 28;
+    // CHARGE
+    if (t > 2.0 && t <= 2.8) {
+      e.laserCharging = true;
+      e.laserX = e.x;
 
-    if (
-      player.invuln <= 0 &&
-      player.x > e.laserX - halfWidth &&
-      player.x < e.laserX + halfWidth &&
-      player.y > topY &&
-      player.y < bottomY
-    ) {
-      window.damagePlayer();
-      player.invuln = 1.0;
-      window.spawnExplosion(player.x, player.y + 10, "#ff9977");
+      // ACTIVE
+    } else if (t > 2.8 && t <= 4.2) {
+      e.laserActive = true;
+      const followSpeed = 6.5;
+      e.laserX += (player.x - e.laserX) * followSpeed * dt;
+
+      const topY = e.y + bossH * 0.32;
+      const bottomY = S.H + 40;
+      const halfWidth = 28;
+
+      if (
+        player.invuln <= 0 &&
+        player.x > e.laserX - halfWidth &&
+        player.x < e.laserX + halfWidth &&
+        player.y > topY &&
+        player.y < bottomY
+      ) {
+        window.damagePlayer();
+        player.invuln = 1.0;
+        window.spawnExplosion(player.x, player.y + 10, "#ff9977");
+      }
     }
-  }
-};
+  };
 
 // Gemini – orbit + spread + rage
 window.updateBossGemini = function updateBossGemini(e, dt) {
@@ -353,9 +366,12 @@ window.updateGameCore = function updateGameCore(dt) {
     window.updateGame(dt);
 };
 
-if (!window.drawGameCore) {
-  window.drawGameCore = function drawGameCore(ctx) {
-      window.drawGame(ctx);
+// Ensure drawGame always forwards to drawGameCore (render pipeline)
+if (!window.drawGame) {
+  window.drawGame = function drawGame(ctx) {
+    if (typeof window.drawGameCore === "function") {
+      window.drawGameCore(ctx);
+    }
   };
 }
 
@@ -558,135 +574,134 @@ if (e.shootTimer <= 0) {
       S.enemies.splice(i, 1);
       window.spawnExplosion(e.x, e.y, "#ff9977");
       window.damagePlayer();
-    }
-  }
-
-  // ----- Player bullets -----
-  for (let i = S.bullets.length - 1; i >= 0; i--) {
-    const b = S.bullets[i];
-    b.y += b.vy * dt;
-    b.x += (b.vx || 0) * dt;
-
-    // Off-screen
-    if (b.y < -20 || b.x < -20 || b.x > S.W + 20) {
-      S.bullets.splice(i, 1);
-      continue;
+      }
     }
 
-    // Collision with enemies (including bosses)
-    let hit = false;
-    for (let j = S.enemies.length - 1; j >= 0; j--) {
-      const e = S.enemies[j];
-      if (circleHit(b, e)) {
-        hit = true;
+    // ----- Player bullets -----
+    for (let i = S.bullets.length - 1; i >= 0; i--) {
+      const b = S.bullets[i];
+      b.y += b.vy * dt;
+      b.x += (b.vx || 0) * dt;
+
+      // Off-screen
+      if (b.y < -20 || b.x < -20 || b.x > S.W + 20) {
         S.bullets.splice(i, 1);
+        continue;
+      }
 
-        e.hp -= 1;
-        e.hitFlash = 0.1;
+      // Collision with enemies (including bosses)
+      for (let j = S.enemies.length - 1; j >= 0; j--) {
+        const e = S.enemies[j];
+        if (circleHit(b, e)) {
+          S.bullets.splice(i, 1);
 
-        window.spawnExplosion(b.x, b.y, e.colour);
+          e.hp -= 1;
+          e.hitFlash = 0.1;
 
-        if (e.hp <= 0) {
-          S.enemies.splice(j, 1);
-          window.handleEnemyDeath(e);
-          
-          // === GUARANTEED SHIELD PART SYSTEM ===
-const GS = window.GameState;
-GS.killsSinceShieldDrop = (GS.killsSinceShieldDrop || 0) + 1;
+          window.spawnExplosion(b.x, b.y, e.colour);
 
-if (GS.killsSinceShieldDrop >= 50) {
+          if (e.hp <= 0) {
+            S.enemies.splice(j, 1);
+            window.handleEnemyDeath(e);
 
-    // 50% chance A or B
-    const partType = Math.random() < 0.5 ? "shieldA" : "shieldB";
+            // === GUARANTEED SHIELD PART SYSTEM ===
+            const GS = window.GameState;
+            GS.killsSinceShieldDrop = (GS.killsSinceShieldDrop || 0) + 1;
 
-    S.powerUps.push({
-        x: e.x,
-        y: e.y,
-        radius: 20,
-        speedY: 50,
-        type: partType
-    });
+            if (GS.killsSinceShieldDrop >= 50) {
+              // 50% chance A or B
+              const partType = Math.random() < 0.5 ? "shieldA" : "shieldB";
 
-    window.flashMsg("⚡ SHIELD PART DETECTED");
+              S.powerUps.push({
+                x: e.x,
+                y: e.y,
+                radius: 20,
+                speedY: 50,
+                type: partType,
+              });
 
-    GS.killsSinceShieldDrop = 0; // reset counter
-}
+              window.flashMsg("⚡ SHIELD PART DETECTED");
+
+              GS.killsSinceShieldDrop = 0; // reset counter
+            }
+          }
+          break;
         }
       }
-    },
+    }
+  };
 
-    updatePlayer(dt) {
-      const p = S.player;
-      const k = S.keys || {};
-      const accel = S.speedBoost || 1;
+  window.updatePlayer = function updatePlayer(dt) {
+    const p = S.player;
+    const k = S.keys || {};
+    const accel = S.speedBoost || 1;
 
-      const up = k["w"] || k["arrowup"];
-      const down = k["s"] || k["arrowdown"];
-      const left = k["a"] || k["arrowleft"];
-      const right = k["d"] || k["arrowright"];
+    const up = k["w"] || k["arrowup"];
+    const down = k["s"] || k["arrowdown"];
+    const left = k["a"] || k["arrowleft"];
+    const right = k["d"] || k["arrowright"];
 
-      if (up) p.y -= p.speed * accel * dt;
-      if (down) p.y += p.speed * accel * dt;
-      if (left) p.x -= p.speed * accel * dt;
-      if (right) p.x += p.speed * accel * dt;
+    if (up) p.y -= p.speed * accel * dt;
+    if (down) p.y += p.speed * accel * dt;
+    if (left) p.x -= p.speed * accel * dt;
+    if (right) p.x += p.speed * accel * dt;
 
-      p.x = clamp(p.x, 30, (S.W || 800) - 30);
-      p.y = clamp(p.y, 30, (S.H || 600) - 30);
+    p.x = clamp(p.x, 30, (S.W || 800) - 30);
+    p.y = clamp(p.y, 30, (S.H || 600) - 30);
 
-      if (p.invuln > 0) p.invuln -= dt;
+    if (p.invuln > 0) p.invuln -= dt;
 
-      if (S.firing || k[" "] || k["space"] || k["spacebar"]) {
-        this.handleShooting(dt);
-      } else {
-        S.shootCooldown = Math.max(0, (S.shootCooldown || 0) - dt);
-      }
-    },
+    if (S.firing || k[" "] || k["space"] || k["spacebar"]) {
+      window.handleShooting(dt);
+    } else {
+      S.shootCooldown = Math.max(0, (S.shootCooldown || 0) - dt);
+    }
+  };
 
-    handleShooting(dt) {
-      S.shootCooldown = (S.shootCooldown || 0) - dt;
-      if (S.shootCooldown > 0) return;
-      const spread = S.player.weaponLevel;
-      const bulletSpeed = 520;
-      const angle = typeof S.player.angle === "number" ? S.player.angle : -Math.PI / 2;
+  window.handleShooting = function handleShooting(dt) {
+    S.shootCooldown = (S.shootCooldown || 0) - dt;
+    if (S.shootCooldown > 0) return;
+    const spread = S.player.weaponLevel;
+    const bulletSpeed = 520;
+    const angle = typeof S.player.angle === "number" ? S.player.angle : -Math.PI / 2;
 
-      const spawnBullet = (offset, colour) => {
-        const a = angle + offset;
-        S.bullets.push({
-          x: S.player.x,
-          y: S.player.y,
-          radius: 6,
-          colour,
-          vx: Math.cos(a) * bulletSpeed,
-          vy: Math.sin(a) * bulletSpeed,
-        });
-      };
+    const spawnBullet = (offset, colour) => {
+      const a = angle + offset;
+      S.bullets.push({
+        x: S.player.x,
+        y: S.player.y,
+        radius: 6,
+        colour,
+        vx: Math.cos(a) * bulletSpeed,
+        vy: Math.sin(a) * bulletSpeed,
+      });
+    };
 
-      if (spread === 1) {
-        spawnBullet(0, "#a8ffff");
-      } else if (spread === 2) {
-        spawnBullet(-0.08, "#a8ffff");
-        spawnBullet(0.08, "#a8ffff");
-      } else {
-        spawnBullet(0, "#a8ffff");
-        spawnBullet(-0.18, "#ff8ad4");
-        spawnBullet(0.18, "#fffd8b");
-      }
+    if (spread === 1) {
+      spawnBullet(0, "#a8ffff");
+    } else if (spread === 2) {
+      spawnBullet(-0.08, "#a8ffff");
+      spawnBullet(0.08, "#a8ffff");
+    } else {
+      spawnBullet(0, "#a8ffff");
+      spawnBullet(-0.18, "#ff8ad4");
+      spawnBullet(0.18, "#fffd8b");
+    }
 
-      S.shootCooldown = 0.16;
-    },
+    S.shootCooldown = 0.16;
+  };
 
-    drawParticles(ctx) {
-      if (!S.particles) return;
-      for (const p of S.particles) {
-        ctx.save();
-        ctx.globalAlpha = clamp(1 - p.life, 0, 1);
-        ctx.fillStyle = p.colour || "#fff";
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size || 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    },
+  window.drawParticles = function drawParticles(ctx) {
+    if (!S.particles) return;
+    for (const p of S.particles) {
+      ctx.save();
+      ctx.globalAlpha = clamp(1 - p.life, 0, 1);
+      ctx.fillStyle = p.colour || "#fff";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size || 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
   };
 
   // ------------------------------------------------------
