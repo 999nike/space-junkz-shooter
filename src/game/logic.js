@@ -696,6 +696,16 @@ window.updateCoreGameplay = function updateCoreGameplay(dt, opts = {}) {
   const S = window.GameState;
   if (!S.running) return;
   const player = S.player;
+  // ----- Boss spawn timer (intro only) -----
+  if (!S.currentLevel || S.currentLevel === 1) {
+    if (!S.bossSpawned) {
+      S.bossTimer = (S.bossTimer || 0) + dt;
+      if (S.bossTimer >= 60) { // ~1 min
+        window.spawnScorpionBoss();
+        S.bossSpawned = true;
+      }
+    }
+  }
 
   // ----- Player movement (keyboard on top of pointer) -----
   let dx = 0;
@@ -745,6 +755,8 @@ window.updateCoreGameplay = function updateCoreGameplay(dt, opts = {}) {
   }
 
   if (opts.allowIntroWaves) {
+  // ----- Spawn enemies (intro only; levels handle their own waves) -----
+  if (!S.currentLevel || S.currentLevel === 1) {
     S.spawnTimer -= dt;
     if (S.spawnTimer <= 0) {
       window.spawnEnemy();
