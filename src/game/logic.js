@@ -353,9 +353,12 @@ window.updateGameCore = function updateGameCore(dt) {
     window.updateGame(dt);
 };
 
-if (!window.drawGameCore) {
-  window.drawGameCore = function drawGameCore(ctx) {
-      window.drawGame(ctx);
+// Ensure drawGame always forwards to drawGameCore (render pipeline)
+if (!window.drawGame) {
+  window.drawGame = function drawGame(ctx) {
+    if (typeof window.drawGameCore === "function") {
+      window.drawGameCore(ctx);
+    }
   };
 }
 
