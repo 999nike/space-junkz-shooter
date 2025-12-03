@@ -18,7 +18,7 @@ window.flashMsg = function flashMsg(text, duration = 1200) {
     const startBtn = document.getElementById("startBtn");
     if (!startBtn) return;
     startBtn.addEventListener("click", () => {
-      window.EngineCore?.startIntro();
+      window.EngineCore?.startLevel("Level1");
     });
   }
 
@@ -54,7 +54,7 @@ window.flashMsg = function flashMsg(text, duration = 1200) {
       window.syncStats(active, S.wizzCoins, S.score);
     }
 
-    window.resetGameState();
+    window.EngineCore?.startLevel("Level1");
     S.running = true;
     window.flashMsg("GOOD LUCK, COMMANDER");
 
