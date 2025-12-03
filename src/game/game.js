@@ -375,23 +375,22 @@ saveBtn.onclick = async () => {
 };
 
   window.showPlayerSelect = function () {
-    const selectBox = document.getElementById("playerSelect");
+    const box = document.getElementById("playerSelect");
     const players = JSON.parse(localStorage.getItem("sj_players") || "[]");
     const active = localStorage.getItem("sj_active_player");
 
-    // Auto-select if only one player exists
+    // Auto-login if only one player
     if (!active && players.length === 1) {
       localStorage.setItem("sj_active_player", players[0]);
-      selectBox.style.display = "none";
+      box.style.display = "none";
       return;
     }
 
-    // No active player → show selector
     if (!active) {
-      selectBox.style.display = "block";
-      if (typeof renderPlayers === "function") renderPlayers();
+      box.style.display = "block";
+      if (window.renderPlayers) window.renderPlayers();
     } else {
-      selectBox.style.display = "none";
+      box.style.display = "none";
     }
   };
 })();
@@ -401,25 +400,22 @@ saveBtn.onclick = async () => {
    ========================================================== */
 
 window.showPlayerSelect = window.showPlayerSelect || function () {
-  const selectBox = document.getElementById("playerSelect");
+  const box = document.getElementById("playerSelect");
   const players = JSON.parse(localStorage.getItem("sj_players") || "[]");
   const active = localStorage.getItem("sj_active_player");
 
-  if (!selectBox) return;
-
-  // Auto-select if only one player exists
+  // Auto-login if only one player
   if (!active && players.length === 1) {
     localStorage.setItem("sj_active_player", players[0]);
-    selectBox.style.display = "none";
+    box.style.display = "none";
     return;
   }
 
-  // No active player → show selector
   if (!active) {
-    selectBox.style.display = "block";
-    if (typeof window.renderPlayers === "function") window.renderPlayers();
+    box.style.display = "block";
+    if (window.renderPlayers) window.renderPlayers();
   } else {
-    selectBox.style.display = "none";
+    box.style.display = "none";
   }
 };
 
