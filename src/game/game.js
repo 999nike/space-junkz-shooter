@@ -1,3 +1,15 @@
+// Global flash message for on-screen notices
+window.flashMsg = function flashMsg(text, duration = 1200) {
+  const el = document.getElementById('flashMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.style.opacity = 1;
+  clearTimeout(window._flashTimer);
+  window._flashTimer = setTimeout(() => {
+    el.style.opacity = 0;
+  }, duration);
+};
+
 // =========================================================
 //  RESTORE PLAYER STATS FROM DB (REAL WORKING VERSION)
 // =========================================================
@@ -62,6 +74,11 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
     S.livesEl = document.getElementById("lives");
     S.msgEl = document.getElementById("msg");
     S.startBtn = document.getElementById("startBtn");
+
+    // Boot the engine so WorldMap/homebase are initialised
+    if (window.EngineCore && typeof window.EngineCore.init === 'function') {
+      window.EngineCore.init();
+    }
 
     // PLAYER SELECT INIT
     if (window.PlayerSystem) {
