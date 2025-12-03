@@ -199,6 +199,9 @@ if (closeLeaderBtn) {
 
 // ---- Create Player ----
 window.syncNewPlayer = async function (name) {
+  const existing = localStorage.getItem("sj_player_id");
+  if (existing) return { ok: true, playerId: existing };
+
   try {
     const res = await fetch("/api/create-player", {
       method: "POST",
@@ -368,6 +371,7 @@ saveBtn.onclick = async () => {
 
   // Auto-select the new player
   setActivePlayer(name);
+  selectBox.style.display = "none";
 };
 
   window.showPlayerSelect = function () {

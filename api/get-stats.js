@@ -1,34 +1,24 @@
-// ---- /api/get-stats.js --------------------------------
-// Fetches stats for a given player_id from Postgres.
-
-import { sql } from './db.js';
+import { sql } from "./db.js";
 
 export default async function handler(req, res) {
   try {
-    if (req.method !== 'GET') {
-      res.status(405).json({ error: 'Method not allowed' });
-      return;
+    const player_id = req.query.player_id;
+    if (!player_id) {
+      return res.status(400).json({ ok:false, error:"Missing player_id" });
     }
 
-    const playerId = req.query.player_id || req.query.playerId;
-
-    if (!playerId) {
-      res.status(400).json({ error: 'player_id missing' });
-      return;
-    }
-
-    const rows = await sql/*sql*/`
-      SELECT *
+    const rows = await sql`
+      SELECT coins, score, xp
       FROM stats
-      WHERE player_id = ${playerId}
+      WHERE player_id = ${player_id}
       LIMIT 1;
     `;
 
-    const stats = rows[0] || null;
-
-    res.status(200).json({ ok: true, stats });
+    return res.status(200).json({
+      ok: true,
+      stats: rows[0] || { coins: 0, score: 0, xp: 0 }
+    });
   } catch (err) {
-    console.error('get-stats error:', err);
-    res.status(500).json({ ok: false, error: 'Internal server error' });
+    return res.status(500).json({ ok:false, error:String(err) });
   }
 }
