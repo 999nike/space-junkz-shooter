@@ -53,9 +53,7 @@ const Level11 = {
     }
 
     // Core engine systems
-    if (typeof window.updateGame === "function") {
-      window.updateGame(dt);
-    }
+    updateGame(dt);
 
     // Detect boss defeat
     if (this.bossSpawned) {
