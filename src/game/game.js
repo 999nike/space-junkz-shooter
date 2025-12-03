@@ -365,12 +365,13 @@ saveBtn.onclick = async () => {
   // Refresh list (so Jeff now appears above)
   renderPlayers();
 
-  // Status message (quick feedback)
+  // Set active player locally and hide selector immediately
+  localStorage.setItem("sj_active_player", name);
+  document.getElementById("playerSelect").style.display = "none";
   window.flashMsg("Player added — logged in");
 
   // Auto-select the new player
   setActivePlayer(name);
-  selectBox.style.display = "none";
 };
 
   window.showPlayerSelect = function () {
