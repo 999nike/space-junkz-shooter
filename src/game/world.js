@@ -238,19 +238,13 @@
         // Helper: start a level safely using the level manager
         const startLevel = (levelName) => {
           this.active = false;
-          if (window.EngineCore && window.LevelManager) {
-            window.EngineCore.startLevel(levelName);
-            return;
-          }
-          if (window.LevelManager) {
-            if (window.LevelManager.loadLevel) {
-              window.LevelManager.loadLevel(levelName);
-              return;
-            }
-          }
-          const lvl = window[levelName];
-          if (lvl && typeof lvl.enter === "function") {
-            lvl.enter();
+          if (window.WorldMap) window.WorldMap.active = false;
+          if (window.HomeBase) window.HomeBase.active = false;
+          if (
+            window.LevelManager &&
+            typeof window.LevelManager.startLevel === "function"
+          ) {
+            window.LevelManager.startLevel(levelName);
             return;
           }
           this.active = true;
