@@ -1,7 +1,7 @@
 // ======================================================
 // LEVEL 4 – NEW SECTOR
 // A simple standalone mission with its own waves and boss.
-// • Uses the core engine (updateGameCore)
+// • Uses the core engine updateGame()
 // • Finishes after the boss is defeated and unlocks the next mission.
 // ======================================================
 
