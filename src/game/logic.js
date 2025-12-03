@@ -313,13 +313,6 @@ window.damagePlayer = function damagePlayer() {
   window.flashMsg("HIT!");
 };
 
-// ===========================================================
-//  LEVEL 2 CORE REDIRECTORS
-// ===========================================================
-window.updateGameCore = function updateGameCore(dt) {
-    window.updateGame(dt);
-};
-
 // Ensure drawGame always forwards to drawGameCore (render pipeline)
 if (!window.drawGame) {
   window.drawGame = function drawGame(ctx) {
