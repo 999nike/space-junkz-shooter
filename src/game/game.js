@@ -1,3 +1,15 @@
+// Global flash message for on-screen notices
+window.flashMsg = function flashMsg(text, duration = 1200) {
+  const el = document.getElementById('flashMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.style.opacity = 1;
+  clearTimeout(window._flashTimer);
+  window._flashTimer = setTimeout(() => {
+    el.style.opacity = 0;
+  }, duration);
+};
+
 // =========================================================
 //  RESTORE PLAYER STATS FROM DB (REAL WORKING VERSION)
 // =========================================================
