@@ -209,25 +209,24 @@ window.syncNewPlayer = async function (name) {
       body: JSON.stringify({ name })
     });
 
-   const data = await res.json();
+    const data = await res.json();
 
-// For your account only – debug feedback
-if (name === "999nike") {
-  console.log("[create-player]", data);
-}
+    // For your account only – debug feedback
+    if (name === "999nike") {
+      console.log("[create-player]", data);
+    }
 
-// ⭐ Store player_id locally for stats syncing
-if (data.playerId) {
-  localStorage.setItem("sj_player_id", data.playerId);
-}
+    // ⭐ Store player_id locally for stats syncing
+    if (data.playerId) {
+      localStorage.setItem("sj_player_id", data.playerId);
+    }
 
-if (!data.ok) {
-  console.warn("create-player failed:", data.error);
-}
+    if (!data.ok) {
+      console.warn("create-player failed:", data.error);
+    }
 
-// ⭐ FIX: Return the API data to the caller
-return data;
-
+    // ⭐ FIX: Return the API data to the caller
+    return data;
   } catch (err) {
     console.warn("syncNewPlayer error (offline?):", err);
   }
