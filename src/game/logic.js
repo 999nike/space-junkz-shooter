@@ -632,14 +632,16 @@ if (e.dropChance && Math.random() < e.dropChance) {
       window.unlockNextLevel(1);   // 1 → unlock lvl2
     }
 
-    // Stop shooter loop
-    S.running = false;
-
-    // Return to galaxy map
+    // Hand control to the starmap instead of restarting intro
     if (window.WorldMap && window.WorldMap.enter) {
       setTimeout(() => {
+        // Reactivate the update loop so WorldMap.update runs
+        S.running = true;
         window.WorldMap.enter();
       }, 1200);
+    } else {
+      // Fallback: keep shooter paused if map is missing
+      S.running = false;
     }
   }
 };
@@ -708,12 +710,14 @@ window.updateGame = function updateGame(dt) {
   if (!S.running) return;
 
   const player = S.player;
-  // ----- Boss spawn timer -----
-  if (!S.bossSpawned) {
-    S.bossTimer = (S.bossTimer || 0) + dt;
-    if (S.bossTimer >= 60) { // ~1 min
-      window.spawnScorpionBoss();
-      S.bossSpawned = true;
+  // ----- Boss spawn timer (intro only) -----
+  if (!S.currentLevel || S.currentLevel === 1) {
+    if (!S.bossSpawned) {
+      S.bossTimer = (S.bossTimer || 0) + dt;
+      if (S.bossTimer >= 60) { // ~1 min
+        window.spawnScorpionBoss();
+        S.bossSpawned = true;
+      }
     }
   }
 
@@ -787,11 +791,13 @@ window.updateGame = function updateGame(dt) {
     }
   }
 
-  // ----- Spawn enemies -----
-  S.spawnTimer -= dt;
-  if (S.spawnTimer <= 0) {
-    window.spawnEnemy();
-    S.spawnTimer = rand(0.4, 1.0);
+  // ----- Spawn enemies (intro only; levels handle their own waves) -----
+  if (!S.currentLevel || S.currentLevel === 1) {
+    S.spawnTimer -= dt;
+    if (S.spawnTimer <= 0) {
+      window.spawnEnemy();
+      S.spawnTimer = rand(0.4, 1.0);
+    }
   }
 
   // ----- HOLD-TO-FIRE (shared for desktop + mobile) -----

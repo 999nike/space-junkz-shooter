@@ -1,491 +1,200 @@
-// ===========================================================
-//   LEVEL 2  •  MISSION 1 – DRAX GAUNTLET (FOUR-BOSS VERSION)
-//   CLEAN REBUILD – NO ENGINE HIJACKING
-//   • Unique waves
-//   • 4 custom bosses
-//   • Uses updateGameCore (same as Level3/5)
-//   • Restores engine safely on exit
-// ===========================================================
+// =============================================================
+// LEVEL 2 — MISSION 1 (STANDALONE)
+// • 20s of simple enemy waves
+// • Unique single boss (no intro assets or Level 1 references)
+// • No engine hijacking; keeps updateGame bound to Level2.update
+// =============================================================
 
 (function () {
   const S = window.GameState;
 
   const Level2 = {
     active: false,
+    timer: 0,
+    spawnTimer: 0,
+    bossSpawned: false,
+    bossDefeated: false,
     bg: null,
     bgLoaded: false,
-
-    globalTimer: 0,
-    phaseTimer: 0,
-    spawnTimer: 0,
-
-    // PHASES:
-    // 0 = waves
-    // 1 = Boss 1 Aries
-    // 2 = waves
-    // 3 = Boss 2 Cancer
-    // 4 = waves
-    // 5 = Boss 3 Taurus
-    // 6 = waves
-    // 7 = Boss 4 Sagittarius
-    phase: 0,
-
-    currentBossId: null,
+    _updateBinding: null,
+    _previousUpdate: null,
     _finishing: false,
 
-    // -----------------------------------------------------------
-    // ENTER LEVEL
-    // -----------------------------------------------------------
+    // ---------------------------------------------------------
+    // ENTER
+    // ---------------------------------------------------------
     enter() {
-      console.log("🚀 ENTERING LEVEL 2 — DRAX GAUNTLET");
+      console.log("🚀 ENTERING LEVEL 2 — MISSION 1 (STANDALONE)");
 
       this.active = true;
-      this.globalTimer = 0;
-      this.phaseTimer = 0;
+      this.timer = 0;
       this.spawnTimer = 0.5;
-      this.phase = 0;
-      this.currentBossId = null;
+      this.bossSpawned = false;
+      this.bossDefeated = false;
       this._finishing = false;
 
-      // Mark mission for logic.js (disables intro waves)
-      S.currentLevel = 2;
+      // Persist our update binding for the entire mission
+      this._updateBinding = (dt) => Level2.update(dt);
+      this._previousUpdate = window.updateGame;
+      window.updateGame = this._updateBinding;
 
-      // Save original engine once
-      if (!S._oldUpdateGame) {
-        S._oldUpdateGame = window.updateGame;
-      }
-
-      // Core shooter engine stays the same
-      window.updateGameCore = function updateGameCore(dt) {
-        if (S._oldUpdateGame) S._oldUpdateGame(dt);
-      };
-
-      // Main level loop
-      window.updateGame = (dt) => {
-        Level2.update(dt);
-      };
-
-      // Reset shooter objects but keep score/coins
-      if (window.resetGameState) {
-        window.resetGameState();
-      } else {
-        S.enemies      = [];
-        S.bullets      = [];
-        S.enemyBullets = [];
-        S.rockets      = [];
-        S.particles    = [];
-        S.powerUps     = [];
-      }
-
+      // Reset playfield
+      if (window.resetGameState) resetGameState();
       S.running = true;
-      S.spawnTimer = 0.5;
-      S.shootTimer = 0;
+      S.currentLevel = 2;
+      if (S.player) S.player.invuln = 1.0;
 
-      if (S.player) S.player.invuln = 1.2;
-
-      // Background
+      // Visuals
       this.bg = new Image();
       this.bgLoaded = false;
       this.bg.src = "./src/game/assets/mission1_bg.png";
       this.bg.onload = () => (this.bgLoaded = true);
 
-      // Disable map/home
-      if (window.WorldMap) window.WorldMap.active = false;
-      if (window.HomeBase) window.HomeBase.active = false;
+      // Disable map/home modes during the mission
+      if (window.WorldMap) WorldMap.active = false;
+      if (window.HomeBase) HomeBase.active = false;
+      if (window.initStars) initStars();
 
-      if (window.initStars) window.initStars();
-
-      window.flashMsg("MISSION 1 — DRAX SYSTEM");
-      setTimeout(() => window.flashMsg("ENEMY SWARM INBOUND"), 1300);
+      window.flashMsg("MISSION 1 — DRAX OUTSKIRTS");
+      setTimeout(() => window.flashMsg("ENEMY PATROL DETECTED"), 1200);
     },
 
-    // -----------------------------------------------------------
-    // EXIT LEVEL
-    // -----------------------------------------------------------
-    exit() {
-      this.active = false;
-      S.running = false;
-      S.currentLevel = null;
+    // ---------------------------------------------------------
+    // UPDATE
+    // ---------------------------------------------------------
+    update(dt) {
+      if (!this.active || !S.running) return;
 
-      // Restore original engine
-      if (S._oldUpdateGame) {
-        window.updateGame = S._oldUpdateGame;
-        S._oldUpdateGame = null;
+      // Enforce our update binding so engine/logic cannot overwrite it mid-mission
+      if (window.updateGame !== this._updateBinding) {
+        window.updateGame = this._updateBinding;
       }
 
-      // Default redirect
-      window.updateGameCore = function (dt) {
-        window.updateGame(dt);
-      };
+      this.timer += dt;
+      this.spawnTimer -= dt;
 
-      if (window.WorldMap && window.WorldMap.enter) {
-        window.WorldMap.enter();
+      // 20 seconds of simple waves
+      if (this.timer < 20) {
+        if (this.spawnTimer <= 0) {
+          this.spawnWave();
+          this.spawnTimer = Math.random() * 0.6 + 0.6;
+        }
+      } else if (!this.bossSpawned) {
+        this.spawnBoss();
+        this.bossSpawned = true;
       }
+
+      // Boss behavior and completion
+      this.updateBoss(dt);
+      this.checkForCompletion();
+
+      // Run core shooter systems
+      if (window.updateGameCore) updateGameCore(dt);
     },
 
-    // -----------------------------------------------------------
-    // SPAWN WAVES
-    // -----------------------------------------------------------
-    spawnWave(pattern) {
-      const r = Math.random();
+    // ---------------------------------------------------------
+    // WAVES
+    // ---------------------------------------------------------
+    spawnWave() {
+      const roll = Math.random();
 
-      if (pattern === 0) {
-        // opening waves
-        if (r < 0.5) {
-          spawnEnemyType("zigzag");
-          spawnEnemyType("zigzag");
-        } else if (r < 0.8) {
-          spawnEnemyType("shooter");
-        } else {
-          spawnEnemyType("tank");
-        }
-      } else if (pattern === 1) {
-        // heavy mid waves
-        if (r < 0.4) {
-          spawnEnemyType("tank");
-          spawnEnemyType("shooter");
-        } else if (r < 0.7) {
-          spawnEnemyType("zigzag");
-          spawnEnemyType("zigzag");
-          spawnEnemyType("shooter");
-        } else {
-          spawnEnemyType("tank");
-          spawnEnemyType("tank");
-        }
-      } else if (pattern === 2) {
-        // fast zigzag assault
+      if (roll < 0.45) {
         spawnEnemyType("zigzag");
         spawnEnemyType("zigzag");
-        if (r < 0.6) spawnEnemyType("shooter");
-      } else {
-        // late-game chaos
-        spawnEnemyType("tank");
-        spawnEnemyType("zigzag");
+      } else if (roll < 0.8) {
         spawnEnemyType("shooter");
+        spawnEnemyType("zigzag");
+      } else {
+        spawnEnemyType("tank");
       }
     },
 
-    // -----------------------------------------------------------
-    // START BOSS PHASE
-    // -----------------------------------------------------------
-    startBossPhase(bossId) {
-      const names = {
-        1: "ARIES VANGUARD",
-        2: "CANCER SIEGECRAFT",
-        3: "TAURUS WAR BRUTE",
-        4: "SAGITTARIUS STAR LANCER",
-      };
+    // ---------------------------------------------------------
+    // BOSS
+    // ---------------------------------------------------------
+    spawnBoss() {
+      window.flashMsg("⚠ RIFT SENTINEL APPROACHING");
 
-      window.flashMsg("⚠ " + names[bossId] + " APPROACHING");
-
-      // Clear non-boss enemies
-      S.enemies = S.enemies.filter((e) => e.isLvl2Boss);
-
-      const boss = {
-        type: "lvl2Boss",
-        isLvl2Boss: true,
-        bossId,
+      S.enemies.push({
+        type: "lvl2RiftSentinel",
         x: S.W / 2,
-        y: -150,
-        radius: 80,
-        hp: 700 + bossId * 200,
-        maxHp: 700 + bossId * 200,
-        enterComplete: false,
+        y: -160,
+        radius: 90,
+        hp: 950,
+        maxHp: 950,
         timer: 0,
-      };
-
-      S.enemies.push(boss);
-      this.currentBossId = bossId;
-      this.phaseTimer = 0;
-
-      // Phase map
-      this.phase = {
-        1: 1,
-        2: 3,
-        3: 5,
-        4: 7,
-      }[bossId];
+        enterComplete: false,
+      });
     },
 
-    // -----------------------------------------------------------
-    // BOSS AI
-    // -----------------------------------------------------------
-    updateBossAI(dt) {
-      const p = S.player;
+    updateBoss(dt) {
+      for (const enemy of S.enemies) {
+        if (enemy.type !== "lvl2RiftSentinel") continue;
 
-      for (const e of S.enemies) {
-        if (!e.isLvl2Boss) continue;
-
-        // ENTRY
-        if (!e.enterComplete) {
-          e.y += 50 * dt;
-          if (e.y >= S.H * 0.23) {
-            e.y = S.H * 0.23;
-            e.enterComplete = true;
-            e.timer = 0;
-          }
+        if (!enemy.enterComplete) {
+          enemy.y += 70 * dt;
+          if (enemy.y >= 200) enemy.enterComplete = true;
           continue;
         }
 
-        e.timer += dt;
+        enemy.timer += dt;
+        enemy.x = S.W / 2 + Math.sin(enemy.timer * 0.8) * 140;
 
-        // ------- ARIES -------
-        if (e.bossId === 1) {
-          e.x = S.W * 0.5 + Math.sin(e.timer) * 110;
-
-          if (!e._t) e._t = 0;
-          e._t -= dt;
-          if (e._t <= 0) {
-            e._t = 1.1;
-            const fan = [-0.22, 0, 0.22];
-            for (const a of fan) {
-              const ang = a + Math.PI / 2;
-              S.enemyBullets.push({
-                x: e.x,
-                y: e.y + 40,
-                vx: Math.cos(ang) * 260,
-                vy: Math.sin(ang) * 260,
-                radius: 7,
-                colour: "#ffb36b",
-              });
-            }
-          }
-        }
-
-        // ------- CANCER -------
-        else if (e.bossId === 2) {
-          e.x = S.W * 0.5 + Math.sin(e.timer * 1.6) * 150;
-
-          if (!e._t) e._t = 0;
-          e._t -= dt;
-          if (e._t <= 0) {
-            e._t = 1.4;
-
-            const dx = p.x - e.x;
-            const dy = (p.y - 40) - e.y;
-            const baseAng = Math.atan2(dy, dx);
-            const spread = [-0.25, -0.12, 0, 0.12, 0.25];
-
-            for (const off of spread) {
-              const ang = baseAng + off;
-              S.enemyBullets.push({
-                x: e.x,
-                y: e.y + 30,
-                vx: Math.cos(ang) * 260,
-                vy: Math.sin(ang) * 260,
-                radius: 6,
-                colour: "#9bf3ff",
-              });
-            }
-          }
-        }
-
-        // ------- TAURUS -------
-        else if (e.bossId === 3) {
-          e.x = S.W * 0.5 + Math.sin(e.timer * 0.8) * 40;
-
-          if (!e._t) e._t = 0;
-          e._t -= dt;
-          if (e._t <= 0) {
-            e._t = 1.8;
-
-            const rings = 14;
-            for (let i = 0; i < rings; i++) {
-              const ang = (i / rings) * Math.PI * 2;
-              S.enemyBullets.push({
-                x: e.x,
-                y: e.y + 20,
-                vx: Math.cos(ang) * 210,
-                vy: Math.sin(ang) * 210,
-                radius: 5,
-                colour: "#ff6b9b",
-              });
-            }
-          }
-        }
-
-        // ------- SAGITTARIUS -------
-        else if (e.bossId === 4) {
-          e.x += (p.x - e.x) * 0.9 * dt;
-          e.y = S.H * 0.22 + Math.sin(e.timer * 1.4) * 24;
-
-          if (!e._spray) e._spray = 0;
-          if (!e._mega) e._mega = 0;
-
-          e._spray -= dt;
-          e._mega -= dt;
-
-          // spray
-          if (e._spray <= 0) {
-            e._spray = 0.7;
-            const fan = [-0.35, -0.18, 0, 0.18, 0.35];
-            for (const off of fan) {
-              const ang = off + Math.PI / 2;
-              S.enemyBullets.push({
-                x: e.x,
-                y: e.y + 36,
-                vx: Math.cos(ang) * 280,
-                vy: Math.sin(ang) * 280,
-                radius: 6,
-                colour: "#ffe66b",
-              });
-            }
-          }
-
-          // mega burst
-          if (e._mega <= 0) {
-            e._mega = 3.2;
-
-            const dx = p.x - e.x;
-            const dy = p.y - e.y;
-            const baseAng = Math.atan2(dy, dx);
-            const spread = [-0.4, -0.2, 0, 0.2, 0.4];
-
-            for (const off of spread) {
-              const ang = baseAng + off;
-              S.enemyBullets.push({
-                x: e.x,
-                y: e.y + 30,
-                vx: Math.cos(ang) * 340,
-                vy: Math.sin(ang) * 340,
-                radius: 8,
-                colour: "#ff0044",
-              });
-            }
-
-            window.flashMsg("⚡ SAGITTARIUS VOLLEY");
+        // Fire paired shots every 1.6s
+        if (enemy.timer % 1.6 < dt) {
+          for (let i = -1; i <= 1; i += 2) {
+            S.enemyBullets.push({
+              x: enemy.x + i * 30,
+              y: enemy.y + 20,
+              vx: i * 80,
+              vy: 240,
+              radius: 10,
+              colour: "#8ef",
+            });
           }
         }
       }
     },
 
-    // -----------------------------------------------------------
-    // CHECK BOSS STATES
-    // -----------------------------------------------------------
-    checkBossStates() {
-      if (!this.currentBossId) return;
+    checkForCompletion() {
+      if (this._finishing) return;
 
-      const alive = S.enemies.some(
-        (e) =>
-          e.isLvl2Boss &&
-          e.bossId === this.currentBossId &&
-          e.hp > 0
+      const bossAlive = S.enemies.some(
+        (e) => e.type === "lvl2RiftSentinel" && e.hp > 0
       );
 
-      if (alive) return;
-
-      const id = this.currentBossId;
-      this.currentBossId = null;
-      this.phaseTimer = 0;
-      this.spawnTimer = 0.5;
-
-      window.flashMsg("BOSS " + id + " DESTROYED");
-
-      if (id === 1) this.phase = 2;
-      else if (id === 2) this.phase = 4;
-      else if (id === 3) this.phase = 6;
-      else if (id === 4) this.finishLevel();
+      if (this.bossSpawned && !bossAlive) {
+        this.finishLevel();
+      }
     },
 
-    // -----------------------------------------------------------
-    // FINISH LEVEL
-    // -----------------------------------------------------------
+    // ---------------------------------------------------------
+    // FINISH
+    // ---------------------------------------------------------
     finishLevel() {
       if (this._finishing) return;
       this._finishing = true;
 
-      window.flashMsg("MISSION 1 COMPLETE!");
+      window.flashMsg("LEVEL 2 COMPLETE!");
+      this.active = false;
+      this.bossDefeated = true;
+      S.running = false;
+      S.currentLevel = null;
+
       if (window.unlockNextLevel) unlockNextLevel(2);
 
-      const self = this;
       setTimeout(() => {
-        self.exit();
+        // Restore default update handling now that the mission is done
+        if (this._previousUpdate) {
+          window.updateGame = this._previousUpdate;
+          this._previousUpdate = null;
+        }
+
+        if (window.WorldMap && window.WorldMap.enter) {
+          WorldMap.enter();
+        }
       }, 1200);
     },
-
-    // -----------------------------------------------------------
-    // UPDATE LOOP
-    // -----------------------------------------------------------
-    update(dt) {
-      if (!this.active || !S.running) return;
-
-      this.globalTimer += dt;
-      this.phaseTimer += dt;
-      this.spawnTimer -= dt;
-
-      // ---- PHASE CONTROL ----
-      switch (this.phase) {
-        case 0:
-          if (this.spawnTimer <= 0) {
-            this.spawnWave(0);
-            this.spawnTimer = rand(0.45, 0.9);
-          }
-          if (this.phaseTimer > 20) this.startBossPhase(1);
-          break;
-
-        case 1:
-          break;
-
-        case 2:
-          if (this.spawnTimer <= 0) {
-            this.spawnWave(1);
-            this.spawnTimer = rand(0.4, 0.8);
-          }
-          if (this.phaseTimer > 18) this.startBossPhase(2);
-          break;
-
-        case 3:
-          break;
-
-        case 4:
-          if (this.spawnTimer <= 0) {
-            this.spawnWave(2);
-            this.spawnTimer = rand(0.35, 0.7);
-          }
-          if (this.phaseTimer > 18) this.startBossPhase(3);
-          break;
-
-        case 5:
-          break;
-
-        case 6:
-          if (this.spawnTimer <= 0) {
-            this.spawnWave(3);
-            this.spawnTimer = rand(0.35, 0.7);
-          }
-          if (this.phaseTimer > 16) this.startBossPhase(4);
-          break;
-
-        case 7:
-          break;
-      }
-
-      // Core engine: movement/collisions/etc
-      if (window.updateGameCore) updateGameCore(dt);
-
-      // Boss logic
-      this.updateBossAI(dt);
-
-      // Boss death checks
-      this.checkBossStates();
-    },
-
-    // -----------------------------------------------------------
-    // DRAW
-    // -----------------------------------------------------------
-    draw(ctx) {
-      if (!this.active) return;
-
-      if (this.bgLoaded) {
-        ctx.drawImage(this.bg, 0, 0, S.W, S.H);
-      } else {
-        ctx.fillStyle = "#05010a";
-        ctx.fillRect(0, 0, S.W, S.H);
-      }
-
-      if (window.drawRunway) window.drawRunway(ctx);
-      if (window.drawGameCore) window.drawGameCore(ctx);
-    }
   };
 
   window.Level2 = Level2;
