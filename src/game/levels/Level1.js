@@ -116,11 +116,11 @@
 
       if (window.unlockNextLevel) unlockNextLevel(1);
 
-      setTimeout(() => {
+      window.BlackHole.start(() => {
         if (window.WorldMap && window.WorldMap.enter) {
           WorldMap.enter();
         }
-      }, 1200);
+      });
     },
   };
 

@@ -78,3 +78,18 @@
     }
   };
 })();
+
+// Simple warp helper exposed for levels
+window.BlackHole = {
+  start(callback) {
+    if (window.LevelExit && typeof window.LevelExit.start === "function") {
+      window.LevelExit.start();
+    }
+
+    setTimeout(() => {
+      if (typeof callback === "function") {
+        callback();
+      }
+    }, 1200);
+  }
+};

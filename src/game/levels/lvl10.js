@@ -46,5 +46,10 @@ window.Level10 = {
   finish() {
     this.active = false;
     window.GameState.running = false;
+    window.BlackHole.start(() => {
+      if (window.WorldMap?.enter) {
+        WorldMap.enter();
+      }
+    });
   }
 };

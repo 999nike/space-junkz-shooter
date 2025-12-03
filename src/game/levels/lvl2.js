@@ -186,9 +186,9 @@
 
       if (window.unlockNextLevel) unlockNextLevel(2);
 
-      setTimeout(() => {
+      window.BlackHole.start(() => {
         if (window.WorldMap?.enter) WorldMap.enter();
-      }, 1200);
+      });
     },
 
     finish() {
