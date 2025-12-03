@@ -80,28 +80,26 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
     S.msgEl = document.getElementById("msg");
     S.startBtn = document.getElementById("startBtn");
 
-    // Start button: save stats if necessary and launch Level1
+    // Start button: save stats if necessary and launch Mission 1 (Level2)
     if (S.startBtn) {
       S.startBtn.addEventListener('click', () => {
         const active = localStorage.getItem('sj_active_player');
-        if (
-          active &&
-          (S.score > 0 || S.wizzCoins > 0) &&
-          typeof window.syncStats === 'function'
-        ) {
+        if (active && (S.score > 0 || S.wizzCoins > 0) && typeof window.syncStats === 'function') {
           window.syncStats(active, S.wizzCoins, S.score);
         }
-        // Launch intro mission
-        window.EngineCore.startLevel('Level1');
+
+        if (window.WorldMap) window.WorldMap.active = false;
+        if (window.HomeBase) window.HomeBase.active = false;
+
+        if (window.EngineCore?.startLevel) {
+          window.EngineCore.startLevel('Level2');
+        }
+
         S.running = true;
         window.flashMsg('GOOD LUCK, COMMANDER');
+
         const bgm = document.getElementById('bgm');
-        if (bgm) {
-          bgm.volume = 0.35;
-          bgm.play().catch(() => {
-            console.warn('Music blocked until user interacts again.');
-          });
-        }
+        if (bgm) bgm.play().catch(() => {});
       });
     }
 
