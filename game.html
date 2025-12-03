@@ -114,5 +114,21 @@
   <!-- Eruda console ALWAYS enabled (remove later if you want) -->
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
   <script>eruda.init();</script>
+
+  <div id="flashMsg" 
+     style="
+       position: fixed;
+       top: 40px;
+       left: 0;
+       width: 100%;
+       text-align: center;
+       font-size: 28px;
+       color: #a8ffff;
+       pointer-events: none;
+       opacity: 0;
+       transition: opacity 0.5s;
+       z-index: 9999;
+     ">
+  </div>
 </body>
 </html>
