@@ -632,14 +632,16 @@ if (e.dropChance && Math.random() < e.dropChance) {
       window.unlockNextLevel(1);   // 1 → unlock lvl2
     }
 
-    // Stop shooter loop
-    S.running = false;
-
-    // Return to galaxy map
+    // Hand control to the starmap instead of restarting intro
     if (window.WorldMap && window.WorldMap.enter) {
       setTimeout(() => {
+        // Reactivate the update loop so WorldMap.update runs
+        S.running = true;
         window.WorldMap.enter();
       }, 1200);
+    } else {
+      // Fallback: keep shooter paused if map is missing
+      S.running = false;
     }
   }
 };
@@ -676,46 +678,24 @@ window.damagePlayer = function damagePlayer() {
 };
 
 // ===========================================================
-//  LEVEL 2 CORE REDIRECTORS
+//  LEVEL LIFECYCLE HELPERS
 // ===========================================================
 window.updateGameCore = function updateGameCore(dt) {
-    window.updateGame(dt);
+  window.updateIntro(dt);
 };
 
 window.drawGameCore = function drawGameCore(ctx) {
-    window.drawGame(ctx);
+  window.drawGame(ctx);
 };
 
 // =========================================================
-//  MAIN UPDATE – called from engine.js → updateGame(dt)
+//  INTRO + SHARED GAMEPLAY PIPELINES
 // =========================================================
 
-window.updateGame = function updateGame(dt) {
+window.updateCoreGameplay = function updateCoreGameplay(dt, opts = {}) {
   const S = window.GameState;
-
-  // HOME BASE MODE – Alien–Egyptian chamber
-  if (window.HomeBase && window.HomeBase.active) {
-    window.HomeBase.update(dt);
-    return;
-  }
-
-  // WORLD MAP MODE: hand off to WorldMap when active
-  if (window.WorldMap && window.WorldMap.active) {
-    window.WorldMap.update(dt);
-    return;
-  }
-
   if (!S.running) return;
-
   const player = S.player;
-  // ----- Boss spawn timer -----
-  if (!S.bossSpawned) {
-    S.bossTimer = (S.bossTimer || 0) + dt;
-    if (S.bossTimer >= 60) { // ~1 min
-      window.spawnScorpionBoss();
-      S.bossSpawned = true;
-    }
-  }
 
   // ----- Player movement (keyboard on top of pointer) -----
   let dx = 0;
@@ -735,388 +715,55 @@ window.updateGame = function updateGame(dt) {
     player.y += dy * player.speed * dt;
   }
 
-  // Mobile analog movement
   if (S.moveX || S.moveY) {
     player.x += (S.moveX || 0) * player.speed * dt;
     player.y += (S.moveY || 0) * player.speed * dt;
   }
 
-  // Full-screen movement with a small safe border
   player.x = clamp(player.x, 24, S.W - 24);
   player.y = clamp(player.y, 24, S.H - 24);
 
   if (player.invuln > 0) player.invuln -= dt;
-
-  // Stars
   window.updateStars(dt);
 
-  // -------- SIDEKICKS (FOLLOW + ROCKET FIRE) --------
   for (const s of S.sidekicks) {
-    // Follow player
     s.x = S.player.x + s.offsetX;
     s.y = S.player.y + s.yOff;
 
-    // Fire rockets
     s.fireTimer -= dt;
     if (s.fireTimer <= 0) {
-      // Level 4 → straight rockets
       if (S.player.weaponLevel === 4) {
-        S.rockets.push({
-          x: s.x,
-          y: s.y,
-          vx: 0,
-          vy: -200,
-          radius: 8,
-          homing: false
-        });
+        S.rockets.push({ x: s.x, y: s.y, vx: 0, vy: -200, radius: 8, homing: false });
       }
 
-      // Level 5 → homing rockets
       if (S.player.weaponLevel >= 5) {
-        S.rockets.push({
-          x: s.x,
-          y: s.y,
-          vx: 0,
-          vy: -200,
-          radius: 8,
-          homing: true
-        });
+        S.rockets.push({ x: s.x, y: s.y, vx: 0, vy: -200, radius: 8, homing: true });
       }
 
-      s.fireTimer = 0.65; // balanced rate
+      s.fireTimer = 0.65;
     }
   }
 
-  // ----- Spawn enemies -----
-  S.spawnTimer -= dt;
-  if (S.spawnTimer <= 0) {
-    window.spawnEnemy();
-    S.spawnTimer = rand(0.4, 1.0);
+  if (opts.allowIntroWaves) {
+    S.spawnTimer -= dt;
+    if (S.spawnTimer <= 0) {
+      window.spawnEnemy();
+      S.spawnTimer = rand(0.4, 1.0);
+    }
   }
 
-  // ----- HOLD-TO-FIRE (shared for desktop + mobile) -----
   S.shootTimer -= dt;
   if (S.firing && S.shootTimer <= 0) {
     window.shoot();
-    S.shootTimer = 0.22; // fire rate
+    S.shootTimer = 0.22;
   }
 
-  // ----- Update enemies -----
-  for (let i = S.enemies.length - 1; i >= 0; i--) {
-    const e = S.enemies[i];
-
-    // Bosses handled in their own functions
-    if (e.type === "scorpionBoss") {
-      window.updateBossScorpion(e, dt);
-      continue;
-    }
-    if (e.type === "geminiBoss") {
-      window.updateBossGemini(e, dt);
-      continue;
-    }
-
-        // ==========================================================
-        //   NEW ENEMY AI – TRACK / CHASE / ATTACK THE PLAYER
-        // ============================================================
-        const px = S.player.x;
-        const py = S.player.y;
-
-        // Distance vector to player
-        const dx = px - e.x;
-        const dy = py - e.y;
-
-        // Normalised (homing) direction
-        const len = Math.hypot(dx, dy) || 1;
-        const nx = dx / len;
-        const ny = dy / len;
-
-        // Base chase speed
-        const chaseSpeed = e.speedY * 1.1;
-
-        // HOMING MOVEMENT
-        e.x += nx * chaseSpeed * dt;
-        e.y += ny * chaseSpeed * dt;
-
-        // ------- ZIGZAG VARIANT -------
-        if (e.type === "zigzag") {
-            e.phase += e.waveSpeed * dt;
-            e.x += Math.sin(e.phase) * e.waveAmp * dt;
-        }
-
-        // ------- ALL ENEMIES SHOOT -------
-e.shootTimer -= dt;
-if (e.shootTimer <= 0) {
-
-    S.enemyBullets.push({
-        x: e.x,
-        y: e.y + e.radius,
-        vy: 260,             // fast downward
-        vx: 0,               // straight
-        radius: 3,           // small bullet
-        colour: "#61d6ff"    // cyan-blue
-    });
-
-    e.shootTimer = 2.0;      // shoot every 2 seconds
-}
-
-        // Reset when off screen
-        if (e.y > S.H + 120) {
-            e.x = rand(40, S.W - 40);
-            e.y = rand(-180, -40);
-            e.speedY = rand(40, 90);
-            e.hp = rand(1, 3);
-        }
-
-    // Flash fade
-    if (e.hitFlash > 0) e.hitFlash -= dt;
-
-    // Off-screen
-    if (e.y > S.H + 40) {
-      S.enemies.splice(i, 1);
-      continue;
-    }
-
-    // Collide with player
-    if (player.invuln <= 0 && circleHit(player, e, -4)) {
-      S.enemies.splice(i, 1);
-      window.spawnExplosion(e.x, e.y, "#ff9977");
-      window.damagePlayer();
-    }
-  }
-
-  // ----- Player bullets -----
-  for (let i = S.bullets.length - 1; i >= 0; i--) {
-    const b = S.bullets[i];
-    b.y += b.vy * dt;
-    b.x += (b.vx || 0) * dt;
-
-    // Off-screen
-    if (b.y < -20 || b.x < -20 || b.x > S.W + 20) {
-      S.bullets.splice(i, 1);
-      continue;
-    }
-
-    // Collision with enemies (including bosses)
-    let hit = false;
-    for (let j = S.enemies.length - 1; j >= 0; j--) {
-      const e = S.enemies[j];
-      if (circleHit(b, e)) {
-        hit = true;
-        S.bullets.splice(i, 1);
-
-        e.hp -= 1;
-        e.hitFlash = 0.1;
-
-        window.spawnExplosion(b.x, b.y, e.colour);
-
-        if (e.hp <= 0) {
-          S.enemies.splice(j, 1);
-          window.handleEnemyDeath(e);
-          
-          // === GUARANTEED SHIELD PART SYSTEM ===
-const GS = window.GameState;
-GS.killsSinceShieldDrop = (GS.killsSinceShieldDrop || 0) + 1;
-
-if (GS.killsSinceShieldDrop >= 50) {
-
-    // 50% chance A or B
-    const partType = Math.random() < 0.5 ? "shieldA" : "shieldB";
-
-    S.powerUps.push({
-        x: e.x,
-        y: e.y,
-        radius: 20,
-        speedY: 50,
-        type: partType
-    });
-
-    window.flashMsg("⚡ SHIELD PART DETECTED");
-
-    GS.killsSinceShieldDrop = 0; // reset counter
-}
-        }
-        break;
-      }
-    }
-
-    if (hit) continue;
-  }
-
-  // ----- Enemy bullets -----
-  for (let i = S.enemyBullets.length - 1; i >= 0; i--) {
-    const b = S.enemyBullets[i];
-
-    // Two styles: vx/vy (boss) and vy-only (grunts/shooters)
-    b.y += b.vy ? b.vy * dt : (b.speed || 220) * dt;
-    if (b.vx) b.x += b.vx * dt;
-
-    if (b.y > S.H + 40 || b.x < -40 || b.x > S.W + 40) {
-      S.enemyBullets.splice(i, 1);
-      continue;
-    }
-
-    if (player.invuln <= 0 && circleHit(b, player)) {
-      S.enemyBullets.splice(i, 1);
-      window.spawnExplosion(player.x, player.y + 10, "#ff9977");
-      window.damagePlayer();
-    }
-  }
-
-  // -------- ROCKETS --------
-  for (let i = S.rockets.length - 1; i >= 0; i--) {
-    const r = S.rockets[i];
-
-    // HOMING MODE
-    if (r.homing) {
-      let nearest = null;
-      let dist = 99999;
-
-      for (const e of S.enemies) {
-        if (e.type === "scorpionBoss") continue; // don't home on scorpion if you like
-        const dx = e.x - r.x;
-        const dy = e.y - r.y;
-        const d = dx * dx + dy * dy;
-        if (d < dist) {
-          dist = d;
-          nearest = e;
-        }
-      }
-
-      if (nearest) {
-        const ang = Math.atan2(nearest.y - r.y, nearest.x - r.x);
-        r.vx = Math.cos(ang) * 300;
-        r.vy = Math.sin(ang) * 300;
-      }
-    }
-
-    // Move
-    r.x += r.vx * dt;
-    r.y += r.vy * dt;
-
-    // Off screen
-    if (r.y < -40 || r.x < -40 || r.x > S.W + 40) {
-      S.rockets.splice(i, 1);
-      continue;
-    }
-
-    // Collision
-    for (let j = S.enemies.length - 1; j >= 0; j--) {
-      const e = S.enemies[j];
-      if (circleHit(r, e)) {
-        S.rockets.splice(i, 1);
-        e.hp -= 2; // stronger than bullets
-        window.spawnExplosion(r.x, r.y, e.colour);
-        if (e.hp <= 0) {
-          S.enemies.splice(j, 1);
-          window.handleEnemyDeath(e);
-        }
-        break;
-      }
-    }
-  }
-
- // ----- Power-ups -----
-  for (let i = S.powerUps.length - 1; i >= 0; i--) {
-    const p = S.powerUps[i];
-    p.y += p.speedY * dt;
-
-    if (p.y > S.H + 20) {
-      S.powerUps.splice(i, 1);
-      continue;
-    }
-
-      // Pickup
-    if (circleHit(player, p)) {
-      S.powerUps.splice(i, 1);
-
-      // ---- SHIELD PART PICKUP ----
-      if (p.type === "shieldA") {
-      S.hasShieldA = true;
-      window.flashMsg("🛡️ SHIELD PART A COLLECTED");
-      continue;
-      }
-
-       if (p.type === "shieldB") {
-       S.hasShieldB = true;
-       window.flashMsg("🛡️ SHIELD PART B COLLECTED");
-       continue;
-      }
-      
-// ---- AUTO-CRAFT SHIELD ----
-    if (!S.shieldUnlocked && S.hasShieldA && S.hasShieldB) {
-        S.shieldUnlocked = true;
-        S.shield = S.maxShield || 100;
-        window.flashMsg("⚡ SHIELD ACTIVATED!");
-    }
-
-      // COIN PICKUP
-      if (p.type === "coin") {
-        S.wizzCoins += p.amount;
-        if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
-        window.flashMsg("+" + p.amount + " WIZZCOIN");
-        continue;
-      }
-
-      // SHIELD PICKUP  (fills S.shield up to S.maxShield)
-      if (p.type === "shield") {
-        const maxShield = S.maxShield || 100;
-        const gain      = p.amount || 20;
-        S.shield = Math.min(maxShield, (S.shield || 0) + gain);
-        window.flashMsg("+" + gain + " SHIELD");
-        continue;
-      }
-
-      // HEALTH PICKUP  (heals lives up to maxLives)
-      if (p.type === "health") {
-        const maxLives = S.maxLives || S.lives || 100;
-        const gain     = p.amount || 20;
-        S.lives = Math.min(maxLives, (S.lives || 0) + gain);
-        if (S.livesEl) S.livesEl.textContent = S.lives;
-        window.flashMsg("+" + gain + " HULL");
-        continue;
-      }
-
-      // SHIELD PART A PICKUP
-      if (p.type === "shieldA") {
-        S.partsA = (S.partsA || 0) + 1;
-        window.flashMsg("⚡ SHIELD PART A COLLECTED (" + S.partsA + ")");
-        continue;
-      }
-
-      // SHIELD PART B PICKUP
-      if (p.type === "shieldB") {
-        S.partsB = (S.partsB || 0) + 1;
-        window.flashMsg("⚡ SHIELD PART B COLLECTED (" + S.partsB + ")");
-        continue;
-      }
-
-     // WEAPON PICKUP
-      if (player.weaponLevel < 5) {
-        player.weaponLevel++;
-
-        // LEVEL 4 → first ally ship (left)
-        if (player.weaponLevel === 4) {
-          S.sidekicks.push({
-            offsetX: -50,
-            yOff: -40,
-            fireTimer: 0
-          });
-          window.flashMsg("ALLY SHIP DEPLOYED!");
-        }
-
-        // LEVEL 5 → second ally ship (right)
-        else if (player.weaponLevel === 5) {
-          S.sidekicks.push({
-            offsetX: 50,
-            yOff: -40,
-            fireTimer: 0
-          });
-          window.flashMsg("ALLY SHIP 2 DEPLOYED!");
-        }
-      } else {
-        window.flashMsg("MAX POWER");
-      }
-    }
+  if (window.Collisions) {
+    window.Collisions.updateEnemies(dt);
+    window.Collisions.updatePlayerBullets(dt);
+    window.Collisions.updateEnemyBullets(dt);
+    window.Collisions.updateRockets(dt);
+    window.Collisions.updatePowerUps(dt);
   }
 
   // ----- Explosions (sprite animation) -----
@@ -1141,3 +788,21 @@ if (GS.killsSinceShieldDrop >= 50) {
     window.flashMsg("GAME OVER — TAP START");
   }
 };
+
+window.updateIntro = function updateIntro(dt) {
+  const S = window.GameState;
+  if (!S.running) return;
+
+  if (!S.bossSpawned) {
+    S.bossTimer = (S.bossTimer || 0) + dt;
+    if (S.bossTimer >= 60) {
+      window.spawnScorpionBoss();
+      S.bossSpawned = true;
+    }
+  }
+
+  window.updateCoreGameplay(dt, { allowIntroWaves: true });
+};
+
+// Legacy alias for older levels
+window.updateGame = window.updateIntro;

@@ -137,9 +137,13 @@ if (closeLeaderBtn) {
   });
 }
     
-    // Start game loop
-    S.lastTime = performance.now();
-    requestAnimationFrame(window.gameLoop);
+    // Start game loop through the engine state machine
+    if (window.EngineCore && typeof window.EngineCore.ensureLoop === "function") {
+      window.EngineCore.ensureLoop();
+    } else {
+      S.lastTime = performance.now();
+      requestAnimationFrame(window.gameLoop);
+    }
   };
 
   if (document.readyState === "loading") {

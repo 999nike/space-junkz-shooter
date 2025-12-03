@@ -166,48 +166,21 @@ window.resetGameState = function resetGameState() {
 // =========================================================
 window.addEventListener("load", () => {
   requestAnimationFrame(() => {
-    window.initEngine();
-    window.initStars();
-    window.setupInput();
-  });
-
-  // --- FIXED START BUTTON (STARTS INTRO ONLY) ---
-  window.GameState.startBtn.addEventListener("click", () => {
-    const S = window.GameState;
-
-    // 🛑 If ANY level is active → ignore the Start button
-    if (
-      (window.Level2 && window.Level2.active) ||
-      (window.Level3 && window.Level3.active) ||
-      (window.Level4 && window.Level4.active)
-    ) {
-      console.log("Start ignored — level already active.");
-      return;
-    }
-
-    // ✅ Only runs when NO level is active → proper intro start
-    const active = localStorage.getItem("sj_active_player");
-
-    if (
-      active &&
-      (S.score > 0 || S.wizzCoins > 0) &&
-      typeof window.syncStats === "function"
-    ) {
-      window.syncStats(active, S.wizzCoins, S.score);
-    }
-
-    window.resetGameState();
-    S.running = true;
-    window.flashMsg("GOOD LUCK, COMMANDER");
-
-    const bgm = document.getElementById("bgm");
-    if (bgm) {
-      bgm.volume = 0.35;
-      bgm.play().catch(() => {
-        console.warn("Music blocked until user interacts again.");
-      });
+    if (window.EngineCore && typeof window.EngineCore.init === "function") {
+      window.EngineCore.init();
+      window.EngineCore.ensureLoop();
+    } else {
+      window.initEngine();
     }
   });
+
+  if (window.GameState && window.GameState.startBtn) {
+    window.GameState.startBtn.addEventListener("click", () => {
+      if (window.EngineCore) {
+        window.EngineCore.startIntro();
+      }
+    });
+  }
 
   window.flashMsg("Press START to play");
 });
@@ -216,14 +189,7 @@ window.addEventListener("load", () => {
 //  MAIN LOOP
 // =========================================================
 window.gameLoop = function gameLoop(timestamp) {
-  const S = window.GameState;
-  const dt = (timestamp - S.lastTime) / 1000 || 0;
-  S.lastTime = timestamp;
-
-  if (S.running) {
-    window.updateGame(dt);
+  if (window.EngineCore && typeof window.EngineCore.gameLoop === "function") {
+    return window.EngineCore.gameLoop(timestamp);
   }
-
-  window.drawGame();
-  requestAnimationFrame(window.gameLoop);
 };
