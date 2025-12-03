@@ -119,3 +119,16 @@ switch (e.type) {
 
   ctx.restore();
 };
+
+(function () {
+  const originalHandleEnemyDeath = window.handleEnemyDeath;
+
+  window.handleEnemyDeath = function handleEnemyDeath(enemy) {
+    if (typeof originalHandleEnemyDeath === "function") {
+      originalHandleEnemyDeath(enemy);
+    }
+
+    const loot = window.rollLoot ? window.rollLoot() : null;
+    if (loot && window.spawnLoot) spawnLoot(enemy.x, enemy.y, loot);
+  };
+})();
