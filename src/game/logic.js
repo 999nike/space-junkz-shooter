@@ -213,8 +213,8 @@ window.updateBossGemini = function updateBossGemini(e, dt) {
 //  ENEMY DEATH + WIZZCOIN patch11
 // =========================================================
 
-window.handleEnemyDeath = function handleEnemyDeath(e) {
-  const S = window.GameState;
+  window.handleEnemyDeath = function handleEnemyDeath(e) {
+    const S = window.GameState;
 
   // SAFE SCORE GAIN
   const gainedScore = Number(e.score) || 0;
@@ -261,28 +261,6 @@ if (e.dropChance && Math.random() < e.dropChance) {
     window.flashMsg("+" + coinGain + " WIZZCOIN");
   }
 
-  // --- BOSS SPECIALS ---
-
-  // Scorpion → Gemini chain
-  if (e.type === "scorpionBoss" && !S.geminiBossSpawned) {
-    S.geminiBossSpawned = true;
-
-    window.flashMsg("BOSS DEFEATED!");
-
-    setTimeout(() => {
-      setTimeout(
-        () => window.flashMsg("⚠ WARNING: GEMINI WARSHIP APPROACHING ⚠"),
-        200
-      );
-      window.spawnGeminiBoss();
-    }, 1500);
-
-    // Power-up drop chance on boss kill
-    if (Math.random() < (e.dropChance || 0)) {
-      window.spawnPowerUp(e.x, e.y);
-    }
-  }
-
   // LEVEL 2 – HYDRA DRAX BOSS (MISSION 1)
   // On kill: unlock Level 3 and return to starmap.
   if (e.type === "mission1Boss") {
@@ -302,30 +280,6 @@ if (e.dropChance && Math.random() < e.dropChance) {
     }
   }
 
-// ======================================================
-  //   INTRO GEMINI BOSS → UNLOCK DRAX SYSTEM (lvl2)
-  // ======================================================
-  if (e.type === "geminiBoss") {
-
-    window.flashMsg("LEVEL 1 COMPLETE!");
-
-    // Unlock the lvl2 map node (DRAX SYSTEM)
-    if (window.unlockNextLevel) {
-      window.unlockNextLevel(1);   // 1 → unlock lvl2
-    }
-
-    // Hand control to the starmap instead of restarting intro
-    if (window.WorldMap && window.WorldMap.enter) {
-      setTimeout(() => {
-        // Reactivate the update loop so WorldMap.update runs
-        S.running = true;
-        window.WorldMap.enter();
-      }, 1200);
-    } else {
-      // Fallback: keep shooter paused if map is missing
-      S.running = false;
-    }
-  }
 };
 
 // =========================================================
@@ -397,17 +351,6 @@ window.updateGame = function updateGame(dt) {
   if (!S.running) return;
 
   const player = S.player;
-  // ----- Boss spawn timer (intro only) -----
-  if (!S.currentLevel || S.currentLevel === 1) {
-    if (!S.bossSpawned) {
-      S.bossTimer = (S.bossTimer || 0) + dt;
-      if (S.bossTimer >= 60) { // ~1 min
-        window.spawnScorpionBoss();
-        S.bossSpawned = true;
-      }
-    }
-  }
-
   // ----- Player movement (keyboard on top of pointer) -----
   let dx = 0;
   let dy = 0;
@@ -438,8 +381,10 @@ window.updateGame = function updateGame(dt) {
 
   if (player.invuln > 0) player.invuln -= dt;
 
-  // Stars
-  window.updateStars(dt);
+  // Shared starfield background
+  if (window.updateStars) {
+    updateStars(dt);
+  }
 
   // -------- SIDEKICKS (FOLLOW + ROCKET FIRE) --------
   for (const s of S.sidekicks) {
@@ -478,15 +423,6 @@ window.updateGame = function updateGame(dt) {
     }
   }
 
-  // ----- Spawn enemies (intro only; levels handle their own waves) -----
-  if (!S.currentLevel || S.currentLevel === 1) {
-    S.spawnTimer -= dt;
-    if (S.spawnTimer <= 0) {
-      window.spawnEnemy();
-      S.spawnTimer = rand(0.4, 1.0);
-    }
-  }
-
   // ----- HOLD-TO-FIRE (shared for desktop + mobile) -----
   S.shootTimer -= dt;
   if (S.firing && S.shootTimer <= 0) {
@@ -498,13 +434,8 @@ window.updateGame = function updateGame(dt) {
   for (let i = S.enemies.length - 1; i >= 0; i--) {
     const e = S.enemies[i];
 
-    // Bosses handled in their own functions
-    if (e.type === "scorpionBoss") {
-      window.updateBossScorpion(e, dt);
-      continue;
-    }
-    if (e.type === "geminiBoss") {
-      window.updateBossGemini(e, dt);
+    // Boss updates handled by dedicated levels
+    if (e.type === "scorpionBoss" || e.type === "geminiBoss") {
       continue;
     }
 
