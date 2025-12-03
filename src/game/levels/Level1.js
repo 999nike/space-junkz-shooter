@@ -82,7 +82,7 @@
 
       if (window.updateStars) updateStars(dt);
 
-      if (window.updateGameCore) updateGameCore(dt);
+      if (window.updateGame) updateGame(dt);
 
       if (this.geminiSpawned) {
         const geminiAlive = state.enemies.some((e) => e.type === "geminiBoss");
@@ -100,19 +100,7 @@
       if (!context) return;
 
       context.clearRect(0, 0, state.W, state.H);
-      if (window.drawRunway) drawRunway(context);
-      if (window.drawStars) drawStars(context);
-      if (window.drawEnemies) drawEnemies(context);
-      if (window.drawScorpionBoss) drawScorpionBoss(context);
-      if (window.drawGeminiBoss) drawGeminiBoss(context);
-      if (window.drawSidekicks) drawSidekicks(context);
-      if (window.drawRockets) drawRockets(context);
-      if (window.drawBullets) drawBullets(context);
-      if (window.drawEnemyBullets) drawEnemyBullets(context);
-      if (window.drawPowerUps) drawPowerUps(context);
-      if (window.drawParticles) drawParticles(context);
-      if (window.drawPlayer) drawPlayer(context);
-      if (window.drawPlayerBars) drawPlayerBars(context, state);
+      if (window.drawGameCore) drawGameCore(context);
     },
 
     finish() {

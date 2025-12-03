@@ -84,6 +84,16 @@
       }
     },
 
+    draw(ctx) {
+      if (!this.active) return;
+      const context = ctx || S.ctx;
+      if (!context) return;
+
+      if (window.drawGameCore) {
+        window.drawGameCore(context);
+      }
+    },
+
     // ---------------------------------------------------------
     // WAVES
     // ---------------------------------------------------------
@@ -179,6 +189,10 @@
       setTimeout(() => {
         if (window.WorldMap?.enter) WorldMap.enter();
       }, 1200);
+    },
+
+    finish() {
+      this.finishLevel();
     },
   };
 
