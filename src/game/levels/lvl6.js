@@ -124,9 +124,9 @@
       S.running = false;
       window.flashMsg("METEOR STORM SURVIVED!");
       if (window.unlockNextLevel) unlockNextLevel(6);
-      setTimeout(() => {
+      window.BlackHole.start(() => {
         if (window.WorldMap) WorldMap.enter();
-      }, 1200);
+      });
     },
 
     finish() {

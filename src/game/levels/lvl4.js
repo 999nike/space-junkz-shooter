@@ -128,9 +128,9 @@
       S.running = false;
       window.flashMsg("MISSION 3 COMPLETE!");
       if (window.unlockNextLevel) unlockNextLevel(4);
-      setTimeout(() => {
+      window.BlackHole.start(() => {
         if (window.WorldMap) WorldMap.enter();
-      }, 1200);
+      });
     },
 
     finish() {
