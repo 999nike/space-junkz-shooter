@@ -128,6 +128,10 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
     S.shipImage = new Image();
     S.shipImage.src = "./src/game/AlphaFighter.png";
 
+    // Ensure sprite atlas container exists (player.js expects S.sprites.thrusterFrames)
+    S.sprites = S.sprites || {};
+    S.sprites.thrusterFrames = S.sprites.thrusterFrames || [];
+
     // HUD
     S.scoreEl = document.getElementById("score");
     S.livesEl = document.getElementById("lives");
