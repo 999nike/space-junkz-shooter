@@ -8,6 +8,20 @@
   <style>
     #game { width:100vw; height:100vh; touch-action:none; }
   </style>
+  <script>
+    // Simple runtime error + promise rejection catcher to help debug load/start failures
+    window.addEventListener('error', function (evt) {
+      try {
+        console.error('Uncaught error:', evt.error || evt.message, evt.filename + ':' + evt.lineno + ':' + evt.colno);
+      } catch (e) { /* ignore */ }
+    });
+    window.addEventListener('unhandledrejection', function (evt) {
+      try {
+        console.error('UnhandledPromiseRejection:', evt.reason);
+      } catch (e) { /* ignore */ }
+    });
+    console.log('Debug logging enabled: errors and unhandled rejections will appear here.');
+  </script>
 </head>
 <body>
   <!-- HUD -->
