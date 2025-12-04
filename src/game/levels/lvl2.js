@@ -50,8 +50,8 @@
       if (window.HomeBase) HomeBase.active = false;
       if (window.initStars) initStars();
 
-      window.flashMsg("MISSION 1 — DRAX OUTSKIRTS");
-      setTimeout(() => window.flashMsg("ENEMY PATROL DETECTED"), 1200);
+      window.flashMessage("MISSION 1 — DRAX OUTSKIRTS");
+      setTimeout(() => window.flashMessage("ENEMY PATROL DETECTED"), 1200);
     },
 
     // ---------------------------------------------------------
@@ -113,7 +113,7 @@
     // BOSS
     // ---------------------------------------------------------
     spawnBoss() {
-      window.flashMsg("⚠ RIFT SENTINEL APPROACHING");
+      window.flashMessage("⚠ RIFT SENTINEL APPROACHING");
 
       S.enemies.push({
         type: "lvl2RiftSentinel",
@@ -176,7 +176,7 @@
       if (this._finishing) return;
       this._finishing = true;
 
-      window.flashMsg("LEVEL 2 COMPLETE!");
+      window.flashMessage("LEVEL 2 COMPLETE!");
       this.active = false;
       this.bossDefeated = true;
       S.running = false;

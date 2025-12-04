@@ -49,8 +49,8 @@
         });
       }
 
-      window.flashMsg("MISSION 5 – METEOR STORM");
-      setTimeout(() => window.flashMsg("SURVIVE 60 SECONDS"), 1200);
+      window.flashMessage("MISSION 5 – METEOR STORM");
+      setTimeout(() => window.flashMessage("SURVIVE 60 SECONDS"), 1200);
     },
 
     update(dt) {
@@ -122,7 +122,7 @@
     complete() {
       this.active = false;
       S.running = false;
-      window.flashMsg("METEOR STORM SURVIVED!");
+      window.flashMessage("METEOR STORM SURVIVED!");
       if (window.unlockNextLevel) unlockNextLevel(6);
       window.BlackHole.start(() => {
         if (window.WorldMap) WorldMap.enter();

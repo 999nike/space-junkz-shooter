@@ -50,8 +50,8 @@
 
       if (window.initStars) initStars();
 
-      window.flashMsg("MISSION 2 – DRAX SYSTEM");
-      setTimeout(() => window.flashMsg("ENEMY FLEET INBOUND"), 1400);
+      window.flashMessage("MISSION 2 – DRAX SYSTEM");
+      setTimeout(() => window.flashMessage("ENEMY FLEET INBOUND"), 1400);
 
       // Attach safe boss logic once
       if (!this.bossLogicAttached) {
@@ -139,7 +139,7 @@
     // MID BOSS
     // -----------------------------
     spawnMidBoss() {
-      window.flashMsg("⚠ DRAX GUNSHIP DETECTED");
+      window.flashMessage("⚠ DRAX GUNSHIP DETECTED");
 
       S.enemies.push({
         type: "draxGunship",
@@ -157,7 +157,7 @@
     // FINAL BOSS
     // -----------------------------
     spawnFinalBoss() {
-      window.flashMsg("⚠⚠ DRAX OVERSEER ARRIVING ⚠⚠");
+      window.flashMessage("⚠⚠ DRAX OVERSEER ARRIVING ⚠⚠");
 
       S.enemies.push({
         type: "draxFinalBoss",
@@ -179,7 +179,7 @@
       if (this._finishing) return;
       this._finishing = true;
 
-      window.flashMsg("LEVEL 3 COMPLETE!");
+      window.flashMessage("LEVEL 3 COMPLETE!");
       this.active = false;
       S.running = false;
 

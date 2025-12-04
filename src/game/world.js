@@ -248,7 +248,7 @@
             return;
           }
           this.active = true;
-          if (window.flashMsg) window.flashMsg("DEV: Level not wired yet.");
+          if (window.flashMessage) window.flashMessage("DEV: Level not wired yet.");
         };
 
       // ------ HOME BASE ------

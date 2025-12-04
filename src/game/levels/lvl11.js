@@ -21,7 +21,7 @@ const Level11 = {
     if (window.resetGameState) resetGameState();
     S.running = true;
     S.currentLevel = 11;
-    if (window.flashMsg) flashMsg("LEVEL 11 — DARK NEBULA RAID");
+    if (window.flashMessage) window.flashMessage("LEVEL 11 — DARK NEBULA RAID");
     if (window.WorldMap) WorldMap.active = false;
     if (window.HomeBase) HomeBase.active = false;
   },
@@ -78,7 +78,7 @@ const Level11 = {
   finish() {
     if (this.finishing) return;
     this.finishing = true;
-    if (window.flashMsg) flashMsg("LEVEL 11 COMPLETE!");
+    if (window.flashMessage) window.flashMessage("LEVEL 11 COMPLETE!");
 
     setTimeout(() => {
       if (window.BlackHole?.start) {
