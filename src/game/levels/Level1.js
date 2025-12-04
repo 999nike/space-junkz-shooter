@@ -34,7 +34,7 @@
       if (window.HomeBase) HomeBase.active = false;
       if (window.initStars) initStars();
 
-      if (window.flashMsg) flashMsg("LEVEL 1 — DEFEND THE RUNWAY");
+      if (window.flashMessage) window.flashMessage("LEVEL 1 — DEFEND THE RUNWAY");
     },
 
     update(dt) {
@@ -67,11 +67,11 @@
         const scorpionAlive = state.enemies.some((e) => e.type === "scorpionBoss");
         if (!scorpionAlive) {
           this.scorpionDefeated = true;
-          if (window.flashMsg) flashMsg("BOSS DEFEATED!");
+          if (window.flashMessage) window.flashMessage("BOSS DEFEATED!");
 
           setTimeout(() => {
             if (this.finishing || this.geminiSpawned) return;
-            if (window.flashMsg) flashMsg("⚠ WARNING: GEMINI WARSHIP APPROACHING ⚠");
+            if (window.flashMessage) window.flashMessage("⚠ WARNING: GEMINI WARSHIP APPROACHING ⚠");
             if (window.spawnGeminiBoss) {
               spawnGeminiBoss();
               this.geminiSpawned = true;
@@ -107,7 +107,7 @@
       if (this.finishing) return;
       this.finishing = true;
 
-      if (window.flashMsg) flashMsg("LEVEL 1 COMPLETE!");
+      if (window.flashMessage) window.flashMessage("LEVEL 1 COMPLETE!");
 
       this.active = false;
       const state = S();

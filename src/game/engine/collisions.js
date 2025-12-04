@@ -219,26 +219,26 @@
 
         if (p.type === "shieldA") {
           S.hasShieldA = true;
-          window.flashMsg("🛡️ SHIELD PART A COLLECTED");
+          window.flashMessage("🛡️ SHIELD PART A COLLECTED");
           continue;
         }
 
         if (p.type === "shieldB") {
           S.hasShieldB = true;
-          window.flashMsg("🛡️ SHIELD PART B COLLECTED");
+          window.flashMessage("🛡️ SHIELD PART B COLLECTED");
           continue;
         }
 
         if (!S.shieldUnlocked && S.hasShieldA && S.hasShieldB) {
           S.shieldUnlocked = true;
           S.shield = S.maxShield || 100;
-          window.flashMsg("⚡ SHIELD ACTIVATED!");
+          window.flashMessage("⚡ SHIELD ACTIVATED!");
         }
 
         if (p.type === "coin") {
           S.wizzCoins += p.amount;
           if (S.coinsEl) S.coinsEl.textContent = S.wizzCoins;
-          window.flashMsg("+" + p.amount + " WIZZCOIN");
+          window.flashMessage("+" + p.amount + " WIZZCOIN");
           continue;
         }
 
@@ -246,7 +246,7 @@
           const maxShield = S.maxShield || 100;
           const gain = p.amount || 20;
           S.shield = Math.min(maxShield, (S.shield || 0) + gain);
-          window.flashMsg("+" + gain + " SHIELD");
+          window.flashMessage("+" + gain + " SHIELD");
           continue;
         }
 
@@ -255,13 +255,13 @@
           const gain = p.amount || 20;
           S.lives = Math.min(maxLives, (S.lives || 0) + gain);
           if (S.livesEl) S.livesEl.textContent = S.lives;
-          window.flashMsg("+" + gain + " HULL");
+          window.flashMessage("+" + gain + " HULL");
           continue;
         }
 
         // Default weapon pickup
         S.player.weaponLevel = Math.min(5, (S.player.weaponLevel || 1) + 1);
-        window.flashMsg("WEAPON POWER-UP!");
+        window.flashMessage("WEAPON POWER-UP!");
       }
     },
   };

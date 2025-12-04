@@ -1,14 +1,66 @@
-// Global flash message for on-screen notices
-window.flashMsg = function flashMsg(text, duration = 1200) {
-  const el = document.getElementById('flashMsg');
-  if (!el) return;
-  el.textContent = text;
-  el.style.opacity = 1;
-  clearTimeout(window._flashTimer);
-  window._flashTimer = setTimeout(() => {
-    el.style.opacity = 0;
-  }, duration);
-};
+// Global flash messaging queue (handles overlap + fade)
+(function () {
+  const DEFAULT_BG = "#0b203a";
+  const DEFAULT_DURATION = 1200;
+  const FADE_MS = 500; // matches CSS transition
+
+  const queue = [];
+  let showing = false;
+  let flashEl = null;
+
+  function getFlashEl() {
+    if (!flashEl) {
+      flashEl = document.getElementById("flashMsg");
+    }
+    return flashEl;
+  }
+
+  function drainNext() {
+    if (showing || queue.length === 0) return;
+
+    const { message, duration, backgroundColor } = queue.shift();
+    const el = getFlashEl();
+    const waitMs = typeof duration === "number" ? duration : DEFAULT_DURATION;
+
+    showing = true;
+
+    if (!el) {
+      // Element missing: just delay then try the next queued item.
+      setTimeout(() => {
+        showing = false;
+        drainNext();
+      }, waitMs);
+      return;
+    }
+
+    el.textContent = message;
+    el.style.backgroundColor = backgroundColor || DEFAULT_BG;
+    el.style.opacity = 1;
+
+    setTimeout(() => {
+      el.style.opacity = 0;
+    }, waitMs);
+
+    setTimeout(() => {
+      el.style.backgroundColor = DEFAULT_BG;
+      showing = false;
+      drainNext();
+    }, waitMs + FADE_MS);
+  }
+
+  window.flashMessage = function flashMessage(message, options = {}) {
+    queue.push({
+      message,
+      duration: options.duration ?? DEFAULT_DURATION,
+      backgroundColor: options.backgroundColor,
+    });
+
+    drainNext();
+  };
+
+  // Backward compatibility for older scripts
+  window.flashMsg = window.flashMessage;
+})();
 
 // =========================================================
 //  RESTORE PLAYER STATS FROM DB (REAL WORKING VERSION)
@@ -96,7 +148,7 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
         }
 
         S.running = true;
-        window.flashMsg('GOOD LUCK, COMMANDER');
+        window.flashMessage('GOOD LUCK, COMMANDER');
 
         const bgm = document.getElementById('bgm');
         if (bgm) bgm.play().catch(() => {});
@@ -111,7 +163,7 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
     // BASIC ENGINE INIT
     window.initStars();
     window.setupInput();
-    window.flashMsg("Press START to play");
+    window.flashMessage("Press START to play");
 
     // PLAYER SELECT UI
     window.showPlayerSelect();
@@ -368,7 +420,7 @@ saveBtn.onclick = async () => {
   // Set active player locally and hide selector immediately
   localStorage.setItem("sj_active_player", name);
   document.getElementById("playerSelect").style.display = "none";
-  window.flashMsg("Player added — logged in");
+  window.flashMessage("Player added — logged in");
 
   // Auto-select the new player
   setActivePlayer(name);

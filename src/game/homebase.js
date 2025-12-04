@@ -57,7 +57,7 @@
       // Turn off other modes
       if (window.WorldMap) window.WorldMap.active = false;
 
-      window.flashMsg("WELCOME TO THE ANKH CHAMBER");
+      window.flashMessage("WELCOME TO THE ANKH CHAMBER");
     },
 
     exit() {
@@ -66,7 +66,7 @@
 
       // Hand control back to galaxy map
       if (window.WorldMap) window.WorldMap.active = true;
-      window.flashMsg("RETURNING TO STARMAP…");
+      window.flashMessage("RETURNING TO STARMAP…");
     },
 
     // ---------------- INPUT ----------------

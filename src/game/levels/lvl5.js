@@ -51,8 +51,8 @@
         });
       }
 
-      window.flashMsg("MISSION 5 — THE VOID");
-      setTimeout(() => window.flashMsg("SURVIVE 45 SECONDS"), 1200);
+      window.flashMessage("MISSION 5 — THE VOID");
+      setTimeout(() => window.flashMessage("SURVIVE 45 SECONDS"), 1200);
     },
 
     update(dt) {
@@ -160,7 +160,7 @@
       this.active = false;
       S.running = false;
 
-      window.flashMsg("LEVEL 5 COMPLETE!");
+      window.flashMessage("LEVEL 5 COMPLETE!");
 
       if (window.unlockNextLevel) unlockNextLevel(5);
 

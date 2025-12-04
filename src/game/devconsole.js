@@ -85,7 +85,7 @@
             fn();
           } catch (err) {
             console.error("DevConsole button error:", err);
-            if (window.flashMsg) window.flashMsg("DEV ERR: " + err.message);
+            if (window.flashMessage) window.flashMessage("DEV ERR: " + err.message);
           }
         };
         btnWrap.appendChild(b);
@@ -96,14 +96,14 @@
       makeBtn("Spawn Scorpion Boss", () => {
         if (window.spawnScorpionBoss) {
           window.spawnScorpionBoss();
-          if (window.flashMsg) window.flashMsg("DEV: Scorpion Boss spawned");
+          if (window.flashMessage) window.flashMessage("DEV: Scorpion Boss spawned");
         }
       });
 
       makeBtn("Spawn Gemini Boss", () => {
         if (window.spawnGeminiBoss) {
           window.spawnGeminiBoss();
-          if (window.flashMsg) window.flashMsg("DEV: Gemini Boss spawned");
+          if (window.flashMessage) window.flashMessage("DEV: Gemini Boss spawned");
         }
       });
 
@@ -113,7 +113,7 @@
         S.enemies = [];
         S.enemyBullets = [];
         S.particles = [];
-        if (window.flashMsg) window.flashMsg("DEV: Enemies cleared");
+        if (window.flashMessage) window.flashMessage("DEV: Enemies cleared");
       });
 
       makeBtn("+100,000 Score", () => {
@@ -121,7 +121,7 @@
         if (!S) return;
         S.score = (S.score || 0) + 100000;
         if (S.scoreEl) S.scoreEl.textContent = S.score;
-        if (window.flashMsg) window.flashMsg("DEV: Score +100k");
+        if (window.flashMessage) window.flashMessage("DEV: Score +100k");
       });
 
       // ------------------------------------------------------
@@ -138,7 +138,7 @@ makeBtn("MAX POWER LVL 5", () => {
     S.warpLevel = 5;
     S.sidekickLevel = 5;
 
-    window.flashMsg("DEV: ALL POWERS SET TO LEVEL 5");
+    window.flashMessage("DEV: ALL POWERS SET TO LEVEL 5");
 });
 
 // ------------------------------------------------------
@@ -147,9 +147,9 @@ makeBtn("MAX POWER LVL 5", () => {
 makeBtn("LOAD LEVEL 2 NOW", () => {
     if (window.Level2 && window.Level2.enter) {
         window.Level2.enter();
-        window.flashMsg("DEV: LOADING LEVEL 2");
+        window.flashMessage("DEV: LOADING LEVEL 2");
     } else {
-        window.flashMsg("ERROR: Level2 not loaded");
+        window.flashMessage("ERROR: Level2 not loaded");
     }
 });
 
@@ -157,22 +157,22 @@ makeBtn("LOAD LEVEL 2 NOW", () => {
         const S = window.GameState;
         S.devGodMode = !S.devGodMode;
         this.godBtn.textContent = S.devGodMode ? "God Mode: ON" : "God Mode: OFF";
-        if (window.flashMsg) {
-          window.flashMsg(S.devGodMode ? "DEV: GOD MODE ENABLED" : "DEV: God mode off");
+        if (window.flashMessage) {
+          window.flashMessage(S.devGodMode ? "DEV: GOD MODE ENABLED" : "DEV: God mode off");
         }
       });
 
       makeBtn("Go to World Map", () => {
         if (window.WorldMap && window.WorldMap.enter) {
           window.WorldMap.enter();
-          if (window.flashMsg) window.flashMsg("DEV: World Map");
+          if (window.flashMessage) window.flashMessage("DEV: World Map");
         }
       });
 
       makeBtn("Enter Home Base", () => {
         if (window.HomeBase && window.HomeBase.enter) {
           window.HomeBase.enter();
-          if (window.flashMsg) window.flashMsg("DEV: Home Base");
+          if (window.flashMessage) window.flashMessage("DEV: Home Base");
         }
       });
 
@@ -187,7 +187,7 @@ makeBtn("LOAD LEVEL 2 NOW", () => {
     const lvl = S.currentLevel;
 
     // Tell player
-    window.flashMsg("DEV: LEVEL FORCE-COMPLETE");
+    window.flashMessage("DEV: LEVEL FORCE-COMPLETE");
 
     // Unlock next level (lvl -> lvl+1)
     if (window.unlockNextLevel && lvl) {

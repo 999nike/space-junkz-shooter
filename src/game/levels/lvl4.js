@@ -46,8 +46,8 @@
 
       if (window.initStars) initStars();
 
-      window.flashMsg("MISSION 3 – NEW SECTOR");
-      setTimeout(() => window.flashMsg("HOSTILE FLEET DETECTED"), 1000);
+      window.flashMessage("MISSION 3 – NEW SECTOR");
+      setTimeout(() => window.flashMessage("HOSTILE FLEET DETECTED"), 1000);
     },
 
     update(dt) {
@@ -120,13 +120,13 @@
         timer: 0
       };
       S.enemies.push(boss);
-      window.flashMsg("⚠ LEVEL 4 BOSS APPROACHING ⚠");
+      window.flashMessage("⚠ LEVEL 4 BOSS APPROACHING ⚠");
     },
 
     finishLevel() {
       this.active = false;
       S.running = false;
-      window.flashMsg("MISSION 3 COMPLETE!");
+      window.flashMessage("MISSION 3 COMPLETE!");
       if (window.unlockNextLevel) unlockNextLevel(4);
       window.BlackHole.start(() => {
         if (window.WorldMap) WorldMap.enter();
