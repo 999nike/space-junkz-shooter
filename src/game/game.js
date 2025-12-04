@@ -160,13 +160,9 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
       window.PlayerSystem.init();
     }
 
-    // BASIC ENGINE INIT
-    window.initStars();
-    window.setupInput();
-    window.flashMessage("Press START to play");
-
-    // PLAYER SELECT UI
-    window.showPlayerSelect();
+    // BASIC ENGINE INIT (new engine handles stars + input automatically)
+      window.flashMessage("Press START to play");
+      window.showPlayerSelect();
     
 
 // ----- MUTE BUTTON -----
