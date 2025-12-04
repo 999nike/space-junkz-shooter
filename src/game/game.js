@@ -177,9 +177,9 @@ window.loadPlayerStats = async function loadPlayerStats(player_id) {
     }
 
     // PLAYER SELECT INIT
-    if (window.PlayerSystem) {
-      window.PlayerSystem.init();
-    }
+if (window.PlayerSystem) {
+  window.PlayerSystem.init();
+}
 
     // BASIC ENGINE INIT (new engine handles stars + input automatically)
       window.flashMessage("Press START to play");
