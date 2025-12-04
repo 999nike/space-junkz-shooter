@@ -108,6 +108,14 @@
   <script src="./src/game/engine/input.js"></script>
   <script src="./src/game/engine/renderer.js"></script>
   <script src="./src/game/engine/levelManager.js"></script>
+  <script src="./src/game/player.js"></script>
+  <script src="./src/game/input.js"></script>
+  <script src="./src/game/enemies/enemyTemplates.js"></script>
+  <script src="./src/game/enemies/enemyFamily_spectres.js"></script>
+  <script src="./src/game/enemies/bossTemplates.js"></script>
+  <script src="./src/game/enemies/bossFamily_anubis.js"></script>
+  <script src="./src/game/loot/lootTable.js"></script>
+  <script src="./src/game/loot/lootDrop.js"></script>
   <script src="./src/game/world.js"></script>
   <script src="./src/game/homebase.js"></script>
   <script src="./src/game/levels/Level1.js"></script>
@@ -121,6 +129,192 @@
   <script src="./src/game/levels/lvl9.js"></script>
   <script src="./src/game/levels/lvl10.js"></script>
   <script src="./src/game/levels/lvl11.js"></script>
+  <script>
+    (function () {
+      const S = window.GameState;
+      const ensureArrays = () => {
+        S.enemies = S.enemies || [];
+        S.bullets = S.bullets || [];
+        S.enemyBullets = S.enemyBullets || [];
+        S.rockets = S.rockets || [];
+        S.particles = S.particles || [];
+        S.powerUps = S.powerUps || [];
+        S.sidekicks = S.sidekicks || [];
+        S.thrustParticles = S.thrustParticles || [];
+      };
+
+      window.resetGameState = function resetGameState() {
+        ensureArrays();
+        S.score = 0;
+        S.lives = 3;
+        S.moveX = 0;
+        S.moveY = 0;
+        S.enemies.length = 0;
+        S.bullets.length = 0;
+        S.enemyBullets.length = 0;
+        S.rockets.length = 0;
+        S.particles.length = 0;
+        S.powerUps.length = 0;
+        S.sidekicks.length = 0;
+
+        const radius = 28;
+        S.player = {
+          x: S.W / 2,
+          y: S.H - 160,
+          vx: 0,
+          vy: 0,
+          radius,
+          hp: 100,
+          invuln: 0,
+          bank: 0,
+        };
+      };
+
+      const EnemyTypes = (window.EnemyTypes = window.EnemyTypes || {});
+      if (!EnemyTypes.zigzag) {
+        EnemyTypes.zigzag = {
+          hp: 25,
+          speedY: 70,
+          size: 20,
+          waveAmp: 40,
+          waveSpeed: 5,
+          spawn(x, y) {
+            spawnEnemy({
+              type: "zigzag",
+              x,
+              y,
+              hp: this.hp,
+              speedY: this.speedY,
+              size: this.size,
+              waveAmp: this.waveAmp,
+              waveSpeed: this.waveSpeed,
+            });
+          },
+        };
+      }
+      if (!EnemyTypes.shooter) {
+        EnemyTypes.shooter = {
+          hp: 30,
+          speedY: 60,
+          size: 22,
+          spawn(x, y) {
+            spawnEnemy({ type: "shooter", x, y, hp: this.hp, speedY: this.speedY, size: this.size });
+          },
+        };
+      }
+
+      window.spawnEnemy = function spawnEnemy(spec) {
+        ensureArrays();
+        const enemy = Object.assign(
+          {
+            x: Math.random() * S.W,
+            y: -30,
+            hp: 20,
+            radius: spec?.size || 18,
+            speedY: spec?.speedY || 60,
+            phase: 0,
+          },
+          spec || {}
+        );
+        S.enemies.push(enemy);
+        return enemy;
+      };
+
+      window.spawnEnemyType = function spawnEnemyType(type) {
+        const tpl = EnemyTypes[type];
+        if (!tpl) {
+          console.warn("Unknown enemy type", type);
+          return null;
+        }
+        const x = Math.random() * S.W;
+        const y = -30;
+        if (typeof tpl.spawn === "function") {
+          return tpl.spawn(x, y);
+        }
+        return spawnEnemy({ type, hp: tpl.hp, speedY: tpl.speed, size: tpl.size, x, y });
+      };
+
+      window.spawnBoss = function spawnBoss(spec) {
+        ensureArrays();
+        S.enemies.push(Object.assign({ radius: spec?.size || 80 }, spec));
+      };
+      window.spawnScorpionBoss = function spawnScorpionBoss() {
+        const fam = window.BossFamilies?.anubis;
+        fam?.guardian?.spawn?.(S.W / 2, -180);
+      };
+      window.spawnGeminiBoss = function spawnGeminiBoss() {
+        const fam = window.BossFamilies?.anubis;
+        fam?.titan?.spawn?.(S.W / 2, -200);
+      };
+
+      window.updateGame = function updateGame(dt) {
+        ensureArrays();
+        const p = S.player;
+        if (!p) return;
+
+        p.x += (S.moveX || 0) * 300 * dt;
+        p.y += (S.moveY || 0) * 300 * dt;
+        p.x = Math.max(p.radius, Math.min(S.W - p.radius, p.x));
+        p.y = Math.max(p.radius, Math.min(S.H - p.radius, p.y));
+
+        for (const e of S.enemies) {
+          e.y += (e.speedY || 60) * dt;
+          if (e.waveAmp) {
+            e.phase += (e.waveSpeed || 3) * dt;
+            e.x += Math.sin(e.phase) * e.waveAmp * dt;
+          }
+        }
+
+        for (const b of S.enemyBullets) {
+          b.x += (b.vx || 0) * dt;
+          b.y += (b.vy || 0) * dt;
+        }
+
+        S.enemies = S.enemies.filter((e) => e.y < S.H + 120 && e.hp > 0);
+        S.enemyBullets = S.enemyBullets.filter((b) => b.y < S.H + 120 && b.y > -120);
+      };
+
+      window.drawGameCore = function drawGameCore(ctx) {
+        const context = ctx || S.ctx;
+        if (!context || !S.player) return;
+
+        context.clearRect(0, 0, S.W, S.H);
+
+        for (const e of S.enemies) {
+          context.fillStyle = "#c33";
+          context.beginPath();
+          context.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+          context.fill();
+        }
+
+        if (window.drawPlayer) drawPlayer(context);
+      };
+
+      window.drawGame = function drawGame() {
+        window.drawGameCore(S.ctx);
+      };
+
+      const patchBg = (levelName) => {
+        const level = window.LevelManager?.registry?.[levelName];
+        if (!level || typeof level.enter !== "function") return;
+        const originalEnter = level.enter.bind(level);
+        level.enter = function patchedEnter(...args) {
+          originalEnter(...args);
+          const needsFallback = !this.bg || (this.bg.src && this.bg.src.includes("mission1_bg.png"));
+          if (needsFallback) {
+            const bgPath = "./src/game/assets/nebula_bg.png";
+            this.bg = new Image();
+            this.bgLoaded = false;
+            this.bg.src = bgPath;
+            this.bg.onload = () => (this.bgLoaded = true);
+          }
+        };
+      };
+
+      patchBg("Level2");
+      patchBg("Level3");
+    })();
+  </script>
   <script src="./src/game/game.js"></script>
   
 
