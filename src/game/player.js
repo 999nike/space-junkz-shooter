@@ -74,7 +74,7 @@ window.drawPlayer = function drawPlayer(ctx) {
 //   PNG THRUSTER FLAME (MAIN ENGINE)
 // ============================================================
 {
-  const frames = S.sprites.thrusterFrames;
+  const frames = S.sprites?.thrusterFrames || null;
   if (frames && frames.length === 3) {
 
     // Animation frame
@@ -107,7 +107,7 @@ window.drawPlayer = function drawPlayer(ctx) {
 //   SIDE THRUSTERS (A / D) – angled 30° outward
 // ============================================================
 {
-  const frames = S.sprites.thrusterFrames;
+  const frames = S.sprites?.thrusterFrames || null;
   if (frames && frames.length === 3) {
     const flame = frames[S.thrustFrame];
 
