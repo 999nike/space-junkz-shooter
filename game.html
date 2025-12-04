@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Smokey’s Runway</title>
+  <title>Smokey's Runway</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="./src/game/game.css" />
   <style>
@@ -121,7 +121,42 @@
   <script src="./src/game/levels/lvl10.js"></script>
   <script src="./src/game/levels/lvl11.js"></script>
   <script src="./src/game/game.js"></script>
-  <script src="./src/game/eruda-loader.js"></script>
+  
+
+<!-- === CONDITIONAL ERUDA LOADER (ADVANCED) === -->
+<script>
+(function () {
+  try {
+    var shouldLoad =
+      location.search.indexOf('eruda') !== -1 ||
+      localStorage.getItem('eruda') === '1';
+
+    if (!shouldLoad) return;
+
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/eruda';
+    s.async = true;
+
+    s.onload = function () {
+      try {
+        eruda.init();
+        console.log(
+          '%c✔ Eruda Console Active',
+          'color:#47b0ff;font-weight:bold;font-size:16px;'
+        );
+      } catch (e) {
+        console.warn('Eruda init failed:', e);
+      }
+    };
+
+    document.head.appendChild(s);
+  } catch (e) {
+    console.warn('Eruda loader failed:', e);
+  }
+})();
+</script>
+<!-- ============================================ -->
+
 
   <div id="flashMsg"
      style="
@@ -138,10 +173,5 @@
        z-index: 9999;
      ">
   </div>
-
- <!-- Dev console (single include) -->
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>try{eruda.init();console.log("%c📟 Eruda Console Active","color:#47b0ff;font-weight:bold;");}catch(_){}</script>
-
 </body>
 </html>
