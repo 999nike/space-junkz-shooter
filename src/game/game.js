@@ -1,24 +1,5 @@
 
-window.GameState = window.GameState || {
-  canvas: null,
-  ctx: null,
-  W: 0,
-  H: 0,
-  running: false,
-  score: 0,
-  wizzCoins: 0,
-  xp: 0,
-  lives: 3,
-  enemies: [],
-  bullets: [],
-  enemyBullets: [],
-  rockets: [],
-  particles: [],
-  powerUps: [],
-  sidekicks: [],
-  _snapshotLastScore: 0,
-  _snapshotLastCoins: 0,
-};
+
 // Global flash messaging queue (handles overlap + fade)
 (function () {
   const DEFAULT_BG = "#0b203a";
