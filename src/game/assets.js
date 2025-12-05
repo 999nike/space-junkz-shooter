@@ -143,7 +143,7 @@ window.loadSprites = function loadSprites() {
   sprites.enemyTank    = makeImage("./src/game/assets/cruiser.png");
 
   // Nebula background
-  sprites.nebulaBG = makeImage("./src/game/assets/Expedition to Star Cluster Pismis 24 (3).mp4");
+  sprites.nebulaBG = makeImage("./src/game/assets/nebula_bg.png");
 
   // ---- THRUSTER STRIP (3 FRAME PNG) ----
   const thrusterStrip = makeImage("./src/game/assets/thruster_strip.png");
