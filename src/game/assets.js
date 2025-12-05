@@ -142,8 +142,21 @@ window.loadSprites = function loadSprites() {
   sprites.enemyShooter = makeImage("./src/game/assets/oldTAURUS2.png");
   sprites.enemyTank    = makeImage("./src/game/assets/cruiser.png");
 
-  // Nebula background
-  sprites.nebulaBG = makeImage("./src/game/assets/nebula_bg.png");
+  // ---------- VIDEO BACKGROUND (MP4) ----------
+const vid = document.createElement("video");
+vid.src = "./src/game/assets/pismis24.mp4";
+vid.autoplay = true;
+vid.loop = true;
+vid.muted = true;         // REQUIRED for autoplay
+vid.playsInline = true;   // iOS + Android support
+vid.preload = "auto";
+
+vid.oncanplay = () => {
+  console.log("🎥 Background video ready");
+  vid.play().catch(() => {}); // ensure playback
+};
+
+sprites.nebulaBG = vid;
 
   // ---- THRUSTER STRIP (3 FRAME PNG) ----
   const thrusterStrip = makeImage("./src/game/assets/thruster_strip.png");
