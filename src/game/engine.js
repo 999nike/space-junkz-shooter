@@ -230,7 +230,36 @@ window.addEventListener("keydown", (e) => {
 //  MAIN LOOP
 // =========================================================
 window.gameLoop = function gameLoop(timestamp) {
+
+// ---------------------------------------------------
+  // MODE DISPATCH (engine gate)
+  // Ensures only ONE mode runs: Map, Home, or Levels
+  // ---------------------------------------------------
   const S = window.GameState;
+
+  // WORLD MAP TAKES PRIORITY
+  if (window.WorldMap && window.WorldMap.active) {
+    if (typeof window.WorldMap.update === "function") {
+      window.WorldMap.update(0); // minimal tick to keep map responsive
+    }
+    if (typeof window.WorldMap.draw === "function") {
+      window.WorldMap.draw(S.ctx);
+    }
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  // HOMEBASE (if active)
+  if (window.HomeBase && window.HomeBase.active) {
+    if (typeof window.HomeBase.update === "function") {
+      window.HomeBase.update(0);
+    }
+    if (typeof window.HomeBase.draw === "function") {
+      window.HomeBase.draw(S.ctx);
+    }
+    requestAnimationFrame(gameLoop);
+    return;
+  }
 
   // Calculate delta & FPS
   if (!S.lastTime) S.lastTime = timestamp;
