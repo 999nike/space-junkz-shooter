@@ -18,6 +18,8 @@ Object.assign(window.GameState, {
   })
 });
 
+window.GameState.showFPS = true;
+
 // =========================================================
 //  INIT ENGINE
 // =========================================================
@@ -210,6 +212,18 @@ window.addEventListener("load", () => {
   });
 
   window.flashMsg("Press START to play");
+});
+
+
+// =========================================================
+//  DEBUG INPUT: F3 TOGGLE FPS OVERLAY
+// =========================================================
+window.addEventListener("keydown", (e) => {
+  if (e.code === "F3") {
+    const S = window.GameState;
+    S.showFPS = !S.showFPS;
+    console.log("FPS Overlay:", S.showFPS ? "ON" : "OFF");
+  }
 });
 
 // =========================================================
