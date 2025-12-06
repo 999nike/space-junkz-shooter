@@ -165,6 +165,13 @@
 
     // ------ ENTER ------
     enter() {
+      // Hard switch into MAP mode: no level or homebase active
+      if (window.Level2) window.Level2.active = false;
+      if (window.Level3) window.Level3.active = false;
+      if (window.HomeBase) window.HomeBase.active = false;
+
+      if (S) S.running = false; // shooter loop off while on map
+
       this.init();
       this.active = true;
     },
