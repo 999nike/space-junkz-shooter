@@ -238,8 +238,14 @@ window.gameLoop = function gameLoop(timestamp) {
   const dt = frameTime / 1000;
   S.lastTime = timestamp;
 
-  // FPS smoothing
-  S.fps = S.fps ? (S.fps * 0.9 + (1000 / frameTime) * 0.1) : (1000 / frameTime);
+  // FPS smoothing (clamped to 60)
+const rawFPS = 1000 / frameTime;
+S.fps = S.fps
+  ? (S.fps * 0.9 + rawFPS * 0.1)
+  : rawFPS;
+
+// Clamp max FPS for stability
+if (!isFinite(S.fps) || S.fps > 60) S.fps = 60;
 
   // Run game update
   if (S.running) {
