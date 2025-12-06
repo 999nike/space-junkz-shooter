@@ -411,6 +411,27 @@ window.drawGame = function drawGame() {
   const S = window.GameState;
   const ctx = S.ctx;
 
+  // -----------------------------------------------------
+  // LEVEL DRAW DISPATCH (Patch 2)
+  // Prevent intro draw from rendering during mission levels.
+  // -----------------------------------------------------
+  if (window.Level2 && window.Level2.active) {
+    if (typeof window.Level2.draw === "function") {
+      return window.Level2.draw(ctx);
+    }
+  }
+
+  if (window.Level3 && window.Level3.active) {
+    if (typeof window.Level3.draw === "function") {
+      return window.Level3.draw(ctx);
+    }
+  }
+
+  // Future-level fallback
+  if (S.currentLevel && S.currentLevel > 3) {
+    return;
+  }
+
   // HOME BASE MODE
   if (window.HomeBase && window.HomeBase.active) {
     window.HomeBase.draw(ctx);
