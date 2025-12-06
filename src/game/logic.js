@@ -693,6 +693,28 @@ window.drawGameCore = function drawGameCore(ctx) {
 window.updateGame = function updateGame(dt) {
   const S = window.GameState;
 
+  // -----------------------------------------------------
+  // LEVEL DISPATCH GATE (Patch 1)
+  // If a mission level is active, skip ALL intro logic.
+  // -----------------------------------------------------
+  if (window.Level2 && window.Level2.active) {
+    if (typeof window.Level2.update === "function") {
+      return window.Level2.update(dt);
+    }
+  }
+
+  if (window.Level3 && window.Level3.active) {
+    if (typeof window.Level3.update === "function") {
+      return window.Level3.update(dt);
+    }
+  }
+
+  // Future levels (safe fallback)
+  if (S.currentLevel && S.currentLevel > 3) {
+    // Do not run intro logic for any mission past L1
+    return;
+  }
+
   // HOME BASE MODE – Alien–Egyptian chamber
   if (window.HomeBase && window.HomeBase.active) {
     window.HomeBase.update(dt);
