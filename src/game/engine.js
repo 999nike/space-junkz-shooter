@@ -217,13 +217,32 @@ window.addEventListener("load", () => {
 // =========================================================
 window.gameLoop = function gameLoop(timestamp) {
   const S = window.GameState;
-  const dt = (timestamp - S.lastTime) / 1000 || 0;
+
+  // Calculate delta & FPS
+  if (!S.lastTime) S.lastTime = timestamp;
+  const frameTime = timestamp - S.lastTime;
+  const dt = frameTime / 1000;
   S.lastTime = timestamp;
 
+  // FPS smoothing
+  S.fps = S.fps ? (S.fps * 0.9 + (1000 / frameTime) * 0.1) : (1000 / frameTime);
+
+  // Run game update
   if (S.running) {
     window.updateGame(dt);
   }
 
+  // Draw game normally
   window.drawGame();
+
+  // ---- FPS Overlay ----
+  const ctx = S.ctx;
+  ctx.save();
+  ctx.font = "16px monospace";
+  ctx.fillStyle = "rgba(0,255,255,0.85)";
+  ctx.fillText(`FPS: ${S.fps.toFixed(0)}`, 20, 30);
+  ctx.fillText(`Frame: ${frameTime.toFixed(2)} ms`, 20, 52);
+  ctx.restore();
+
   requestAnimationFrame(window.gameLoop);
 };
