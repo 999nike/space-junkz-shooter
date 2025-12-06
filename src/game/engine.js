@@ -244,8 +244,11 @@ S.fps = S.fps
   ? (S.fps * 0.9 + rawFPS * 0.1)
   : rawFPS;
 
-// Clamp max FPS for stability
+// Clamp max FPS for stability (allow 120Hz monitors)
 if (!isFinite(S.fps) || S.fps > 120) S.fps = 120;
+
+// Smoother at high refresh rates
+S.fps = Math.round(S.fps);
 
   // Run game update
   if (S.running) {
