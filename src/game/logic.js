@@ -692,7 +692,7 @@ window.updateGameCore = function updateGameCore(dt) {
   if (window.Level2) window.Level2.active = false;
   if (window.Level3) window.Level3.active = false;
   if (window.Level4) window.Level4.active = false;
-  S.currentLevel = null;
+  
 
 // Run shared shooter core safely (no intro logic)
       window.runCore(dt);
@@ -723,6 +723,42 @@ window.drawGameCore = function drawGameCore(ctx) {
   if (window.Level3) window.Level3.active = hadLevel3;
   if (window.Level4) window.Level4.active = hadLevel4;
   S.currentLevel = prevLevelIndex;
+};
+
+// =========================================================
+//  SHIELD PART HELPER – keeps intro & missions in sync
+// =========================================================
+window.collectShieldPart = function collectShieldPart(type) {
+  const S = window.GameState;
+  if (!S) return;
+
+  // normalise input – allow "A", "shieldA", "B", "shieldB"
+  const t =
+    type === "A" || type === "shieldA"
+      ? "A"
+      : type === "B" || type === "shieldB"
+      ? "B"
+      : null;
+
+  if (!t) return;
+
+  // track parts owned & flash messages
+  if (t === "A") {
+    S.hasShieldA = true;
+    S.partsA = (S.partsA || 0) + 1;
+    window.flashMsg?.(`🛡️ SHIELD PART A COLLECTED (${S.partsA})`);
+  } else if (t === "B") {
+    S.hasShieldB = true;
+    S.partsB = (S.partsB || 0) + 1;
+    window.flashMsg?.(`🛡️ SHIELD PART B COLLECTED (${S.partsB})`);
+  }
+
+  // auto‑assemble full shield when both parts are collected
+  if (!S.shieldUnlocked && S.hasShieldA && S.hasShieldB) {
+    S.shieldUnlocked = true;
+    S.shield = S.maxShield ?? 100;
+    window.flashMsg?.("⚡ SHIELD ACTIVATED!");
+  }
 };
 
 // =========================================================
