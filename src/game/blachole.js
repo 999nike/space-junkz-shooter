@@ -44,6 +44,13 @@ vid.onended = () => {
   // *** FIX: ensure the map is active before entering it ***
   if (window.WorldMap) window.WorldMap.active = true;
 
+  // --- WHEN VIDEO ENDS → LOAD WORLD MAP ---
+vid.onended = () => {
+  vid.remove();
+
+  // *** FIX: ensure the map is active before entering it ***
+  if (window.WorldMap) window.WorldMap.active = true;
+
   // Your existing world map entry
   if (window.WorldMap && typeof window.WorldMap.enter === "function") {
     window.WorldMap.enter();
