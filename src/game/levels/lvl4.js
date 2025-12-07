@@ -217,7 +217,8 @@
 
       // Run generic shooter core (player, bullets, collisions)
       if (typeof window.updateGameCore === "function") {
-        window.updateGameCore(dt);
+        // Reuse shared shooter core (no intro logic)
+window.runCore(dt);
       } else if (typeof window.updateGame === "function") {
         window.updateGame(dt);
       }
