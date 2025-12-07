@@ -37,18 +37,24 @@
       vid.onended = () => {
         vid.remove();
 
-        // Your existing world map entry
-        if (window.WorldMap && typeof window.WorldMap.enter === "function") {
-          window.WorldMap.enter();
-        }
-      };
+       // --- WHEN VIDEO ENDS → LOAD WORLD MAP ---
+vid.onended = () => {
+  vid.remove();
 
-      // Small message (optional)
-      if (window.flashMsg) {
-        window.flashMsg("WARPING…");
-      }
+  // *** FIX: ensure the map is active before entering it ***
+  if (window.WorldMap) window.WorldMap.active = true;
+
+  // Your existing world map entry
+  if (window.WorldMap && typeof window.WorldMap.enter === "function") {
+    window.WorldMap.enter();
+  }
+};
+
+// Small message (optional)
+if (window.flashMsg) {
+  window.flashMsg("WARPING…");
+}
     },
-
     // These are now empty—no more procedural warp
     update() {},
     draw() {}
