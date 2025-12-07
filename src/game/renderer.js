@@ -427,8 +427,14 @@ window.drawGame = function drawGame() {
     }
   }
 
+  if (window.Level4 && window.Level4.active) {
+    if (typeof window.Level4.draw === "function") {
+      return window.Level4.draw(ctx);
+    }
+  }
+
   // Future-level fallback
-  if (S.currentLevel && S.currentLevel > 3) {
+  if (S.currentLevel && S.currentLevel > 4) {
     return;
   }
 
