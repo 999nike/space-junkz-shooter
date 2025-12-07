@@ -1,80 +1,197 @@
-// ======================================================
-// LEVEL X – TEST ZONE OMEGA
-// A guaranteed-working test level with:
-// • Huge warning
-// • Obvious enemy behaviour
-// • Level2-style auto-start
-// ======================================================
-
+// ===========================================================
+//   LEVEL 4  •  MISSION 3 – CANCER WARSHIP
+//   • Uses Backblaze B2 sprite for the boss
+//   • Simple wave → boss → back to WorldMap
+// ===========================================================
 (function () {
   const S = window.GameState;
-
-  const LevelX = {
-    active: false,
-    timer: 0,
-    spawnTimer: 0,
-    bg: null,
-    bgLoaded: false,
-
-    // ------------------------------
-    // ENTER LEVEL
-    // ------------------------------
-    enter() {
-      console.log("🚨 ENTERING TEST ZONE OMEGA 🚨");
-
-      // ======================================================
-// LEVEL 4 - CLONE OF LEVEL 2 (TEST MODE)
-// ======================================================
-
-(function () {
-  const S = window.GameState;
+  const B2_ASSET_BASE =
+    "https://f003.backblazeb2.com/file/space-junkz-assets";
 
   const Level4 = {
     active: false,
-    bossSpawned: false,
-    timer: 0,
     bg: null,
     bgLoaded: false,
+
+    bossSprite: null,
+    bossSpriteLoaded: false,
+    _prevTankSprite: null,
+
+    timer: 0,
+    spawnTimer: 0,
+    bossSpawned: false,
+    _finishing: false,
 
     // -----------------------------
     // ENTER LEVEL
     // -----------------------------
     enter() {
-      console.log("💥 ENTERING LEVEL 4 (CLONE TEST) 💥");
+      console.log("💥 ENTERING LEVEL 4 – CANCER WARSHIP 💥");
 
       this.active = true;
-      this.bossSpawned = false;
       this.timer = 0;
+      this.spawnTimer = 0.6;
+      this.bossSpawned = false;
+      this._finishing = false;
 
-      // Reset state
+      // Reset shooter state but keep score/coins
+      if (typeof window.resetGameState === "function") {
+        window.resetGameState();
+      } else {
+        S.enemies = [];
+        S.bullets = [];
+        S.enemyBullets = [];
+        S.rockets = [];
+        S.particles = [];
+        S.powerUps = [];
+      }
+
+      // Core run flags
       S.running = true;
-      S.enemies = [];
-      S.bullets = [];
-      S.enemyBullets = [];
-      S.rockets = [];
-      S.particles = [];
-      S.powerUps = [];
-      S.sidekicks = S.sidekicks || [];
+      S.currentLevel = 4;
 
       // Player position
-      S.player.x = S.W / 2;
-      S.player.y = S.H - 80;
-      S.player.invuln = 1.0;
+      if (S.player) {
+        S.player.x = S.W / 2;
+        S.player.y = S.H - 90;
+        S.player.invuln = 1.2;
+      }
 
-      // Background
+      // Background – reuse mission1_bg for now
       this.bg = new Image();
-      this.bg.src = "./src/game/assets/mission1_bg.png"; 
-      this.bg.onload = () => (this.bgLoaded = true);
+      this.bgLoaded = false;
+      this.bg.src = "./src/game/assets/mission1_bg.png";
+      this.bg.onload = () => {
+        this.bgLoaded = true;
+      };
 
-      // Turn off map + home
+      // Disable map / home
       if (window.WorldMap) window.WorldMap.active = false;
       if (window.HomeBase) window.HomeBase.active = false;
 
-      if (window.initStars) window.initStars();
+      if (typeof window.initStars === "function") {
+        window.initStars();
+      }
 
-      // BIG WARNING SO YOU KNOW IT LOADED
-      window.flashMsg("⚠ LEVEL 4 TEST MODE ⚠");
-      setTimeout(() => window.flashMsg("💥 LEVEL 4 (CLONE) ACTIVE 💥"), 1000);
+      // --- Boss sprite from Backblaze B2 ---
+      this._prevTankSprite = S.sprites && S.sprites.enemyTank
+        ? S.sprites.enemyTank
+        : null;
+
+      this.bossSprite = new Image();
+      this.bossSpriteLoaded = false;
+      this.bossSprite.onload = () => {
+        this.bossSpriteLoaded = true;
+        if (S.sprites) {
+          // Temporarily use this sprite for all "tank" enemies
+          S.sprites.enemyTank = this.bossSprite;
+        }
+      };
+      this.bossSprite.src =
+        B2_ASSET_BASE + "/junkz-assets/oldCANCER2.png";
+
+      if (window.flashMsg) {
+        window.flashMsg("MISSION 3 – CANCER WARSHIP");
+        setTimeout(
+          () => window.flashMsg("ENEMY VANGUARD INBOUND"),
+          1400
+        );
+      }
+    },
+
+    // -----------------------------
+    // EXIT → BACK TO MAP
+    // -----------------------------
+    exit() {
+      this.active = false;
+      S.running = false;
+
+      // Restore original tank sprite if we replaced it
+      if (this._prevTankSprite && S.sprites) {
+        S.sprites.enemyTank = this._prevTankSprite;
+      }
+
+      if (window.WorldMap && typeof window.WorldMap.enter === "function") {
+        window.WorldMap.enter();
+      }
+    },
+
+    // -----------------------------
+    // SPAWN WAVES (PRE-BOSS)
+    // -----------------------------
+    spawnWave() {
+      const r = Math.random();
+
+      if (r < 0.3) {
+        window.spawnEnemyType("grunt");
+        window.spawnEnemyType("grunt");
+      } else if (r < 0.6) {
+        window.spawnEnemyType("zigzag");
+        window.spawnEnemyType("shooter");
+      } else if (r < 0.85) {
+        window.spawnEnemyType("tank");
+      } else {
+        // heavier mini-pack
+        window.spawnEnemyType("grunt");
+        window.spawnEnemyType("zigzag");
+        window.spawnEnemyType("tank");
+      }
+    },
+
+    // -----------------------------
+    // SPAWN BOSS (BIG TANK VARIANT)
+    // -----------------------------
+    spawnBoss() {
+      if (this.bossSpawned) return;
+
+      const S = window.GameState;
+      // Spawn as "tank" and tag it as Level4 boss
+      window.spawnEnemyType("tank", S.W / 2, -120);
+
+      const boss = S.enemies[S.enemies.length - 1];
+      if (boss) {
+        boss.hp = 40;
+        boss.maxHp = 40;
+        boss._isLevel4Boss = true;
+        boss.speedY = 35;
+        boss.score = 750;
+      }
+
+      this.bossSpawned = true;
+
+      if (window.flashMsg) {
+        window.flashMsg("⚠ CANCER WARSHIP APPROACHING ⚠");
+        setTimeout(
+          () => window.flashMsg("DESTROY THE FLAGSHIP"),
+          1600
+        );
+      }
+    },
+
+    // -----------------------------
+    // HANDLE BOSS DEATH
+    // -----------------------------
+    _checkBossDefeated() {
+      if (!this.bossSpawned || this._finishing) return;
+
+      const S = window.GameState;
+      const bossAlive = S.enemies.some((e) => e._isLevel4Boss);
+
+      if (!bossAlive) {
+        this._finishing = true;
+
+        if (window.flashMsg) {
+          window.flashMsg("MISSION 3 COMPLETE!");
+        }
+
+        // Optional: unlock lvl5 on map (node id "lvl5")
+        if (window.unlockNextLevel) {
+          window.unlockNextLevel(4); // 4 → unlock lvl5 node
+        }
+
+        S.running = false;
+        setTimeout(() => this.exit(), 1400);
+      }
     },
 
     // -----------------------------
@@ -85,20 +202,28 @@
 
       this.timer += dt;
 
-      // Same wave logic as Level 2
-      S.spawnTimer -= dt;
-      if (S.spawnTimer <= 0) {
-        this.spawnWave();
-        S.spawnTimer = rand(0.25, 0.7);
+      // Pre-boss waves for ~25 seconds
+      if (!this.bossSpawned) {
+        this.spawnTimer -= dt;
+        if (this.spawnTimer <= 0) {
+          this.spawnWave();
+          this.spawnTimer = rand(0.4, 1.0);
+        }
+
+        if (this.timer >= 25) {
+          this.spawnBoss();
+        }
       }
 
-      // Spawn boss after 45 sec (shorter for testing)
-      if (!this.bossSpawned && this.timer >= 45) {
-        this.spawnBoss();
-        this.bossSpawned = true;
+      // Run generic shooter core (player, bullets, collisions)
+      if (typeof window.updateGameCore === "function") {
+        window.updateGameCore(dt);
+      } else if (typeof window.updateGame === "function") {
+        window.updateGame(dt);
       }
 
-      if (window.updateGameCore) window.updateGameCore(dt);
+      // Check if boss died
+      this._checkBossDefeated();
     },
 
     // -----------------------------
@@ -107,50 +232,23 @@
     draw(ctx) {
       if (!this.active) return;
 
-      if (this.bgLoaded) {
+      // Background
+      if (this.bgLoaded && this.bg) {
         ctx.drawImage(this.bg, 0, 0, S.W, S.H);
       } else {
         ctx.fillStyle = "#05010a";
         ctx.fillRect(0, 0, S.W, S.H);
       }
 
-      // Render same as Level 2
-      if (window.drawRunway) window.drawRunway(ctx);
-      if (window.drawGameCore) window.drawGameCore(ctx);
-    },
-
-    // -----------------------------
-    // WAVES (copied from Level 2)
-    // -----------------------------
-    spawnWave() {
-      const roll = Math.random();
-      if (roll < 0.45) {
-        window.spawnEnemyType("zigzag");
-        window.spawnEnemyType("zigzag");
-      } else if (roll < 0.75) {
-        window.spawnEnemyType("shooter");
-      } else {
-        window.spawnEnemyType("tank");
-        window.spawnEnemyType("zigzag");
+      if (typeof window.drawRunway === "function") {
+        window.drawRunway(ctx);
       }
-    },
 
-    // -----------------------------
-    // BOSS (copied from Level 2)
-    // -----------------------------
-    spawnBoss() {
-      const boss = {
-        type: "lvl4Boss",
-        x: S.W / 2,
-        y: -120,
-        radius: 90,
-        hp: 400, // small for test
-        maxHp: 400,
-        enterComplete: false,
-        timer: 0
-      };
-      S.enemies.push(boss);
-      window.flashMsg("⚠ LEVEL 4 TEST BOSS SPAWNED ⚠");
+      if (typeof window.drawGameCore === "function") {
+        window.drawGameCore(ctx);
+      } else if (typeof window.drawGame === "function") {
+        window.drawGame(ctx);
+      }
     },
   };
 
