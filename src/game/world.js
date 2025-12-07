@@ -231,113 +231,98 @@
       return null;
     },
 
-   // --------------------------------------------------
+    // --------------------------------------------------
     // MOVE SHIP + ENTER LEVEL / HOME / MISSIONS
     // --------------------------------------------------
-    _moveShipToNode(node) {
-      const S = window.GameState;
-      if (!node) return;
-
-      // Move ship target for visual travel
-      this.ship.tx = node.x;
-      this.ship.ty = node.y - 60;
-
-      // Helper: start a level safely (with optional fallback)
-      const startLevel = (globalName, levelIndex, fallbackName) => {
-        const lvl = window[globalName];
-
-        // We are leaving the map now
-        this.active = false;
-
-        if (lvl && typeof lvl.enter === "function") {
-          if (S) S.currentLevel = levelIndex || null;
-          lvl.enter();
-          return;
-        }
-
-        // Optional fallback (eg. reuse Level2 for unimplemented)
-        if (fallbackName) {
-          const fb = window[fallbackName];
-          if (fb && typeof fb.enter === "function") {
-            console.warn(
-              `WorldMap: ${globalName} missing, using ${fallbackName} instead.`
-            );
-            if (S) S.currentLevel = levelIndex || null;
-            fb.enter();
-            return;
-          }
-        }
-
-        // Nothing to load → keep map alive so you don't get a freeze
-        console.warn(`WorldMap: No handler for ${globalName}. Staying on map.`);
-        this.active = true;
-        if (window.flashMsg) {
-          window.flashMsg("DEV: Level not wired yet.");
-        }
-      };
-
-      // ------ HOME BASE ------
-      if (node.id === "home") {
-        this.active = false;
-        if (window.HomeBase && window.HomeBase.enter) {
-          window.HomeBase.enter();
-        }
+   _moveShipToNode(node) {
+  const S = window.GameState;
+  if (!node) return;
+  // Move ship target for visual travel
+  this.ship.tx = node.x;
+  this.ship.ty = node.y - 60;
+  // Helper: start a level safely (with optional fallback)
+  const startLevel = (globalName, levelIndex, fallbackName) => {
+    const lvl = window[globalName];
+    // We are leaving the map now
+    this.active = false;
+    if (lvl && typeof lvl.enter === "function") {
+      if (S) S.currentLevel = levelIndex || null;
+      lvl.enter();
+      return;
+    }
+    // Optional fallback (eg. reuse Level2 for unimplemented)
+    if (fallbackName) {
+      const fb = window[fallbackName];
+      if (fb && typeof fb.enter === "function") {
+        console.warn(
+          `WorldMap: ${globalName} missing, using ${fallbackName} instead.`
+        );
+        if (S) S.currentLevel = levelIndex || null;
+        fb.enter();
         return;
       }
-
-      // ------ INTRO REPLAY (if you add a lvl1 node later) ------
-      if (node.id === "lvl1") {
-        this.active = false;
-        if (window.resetGameState) {
-          window.resetGameState(); // intro engine reset
-        }
-        if (S) {
-          S.running = true;
-          S.currentLevel = 1;
-        }
-        return;
-      }
-
-      // ------ MISSION 1  (lvl2.js → Level2) ------
-      if (node.id === "lvl2") {
-        startLevel("Level2", 2);
-        return;
-      }
-
-      // ------ MISSION 2  (lvl3.js → Level3) ------
-      if (node.id === "lvl3") {
-        startLevel("Level3", 3, "Level2");
-        return;
-      }
-
-      // ------ MISSION 3  (Level4 clone test) ------
-      if (node.id === "lvl4") {
-        startLevel("Level4", 4, "Level2");
-        return;
-      }
-
-      // ------ MISSION 4  (lvl5.js → Level5) ------
-      if (node.id === "lvl5") {
-        startLevel("Level5", 5, "Level2");
-        return;
-      }
-
-      // ------ MISSION 5  (TEMP: reuse Level5 – no Level6 yet) ------
-      if (node.id === "lvl6") {
-        // There is no window.Level6 in your files, so reuse Level5 for now
-        startLevel("Level5", 5, "Level2");
-        return;
-      }
-
-      // ------ FUTURE NODES: TEMP → Level2 ------
-      if (["lvl7", "lvl8", "lvl9", "lvl10", "lvl11", "secret"].includes(node.id)) {
-        startLevel("Level2", 2);
-        return;
-      }
-
-      // Unknown node id – do nothing but keep map active
-      console.warn("WorldMap: clicked unknown node id:", node.id);
-    },
+    }
+    // Nothing to load → keep map alive so you don't get a freeze
+    console.warn(`WorldMap: No handler for ${globalName}. Staying on map.`);
+    this.active = true;
+    if (window.flashMsg) {
+      window.flashMsg("DEV: Level not wired yet.");
+    }
+  };
+  // ------ HOME BASE ------
+  if (node.id === "home") {
+    this.active = false;
+    if (window.HomeBase && window.HomeBase.enter) {
+      window.HomeBase.enter();
+    }
+    return;
+  }
+  // ------ INTRO REPLAY (if you add a lvl1 node later) ------
+  if (node.id === "lvl1") {
+    this.active = false;
+    if (window.resetGameState) {
+      window.resetGameState(); // intro engine reset
+    }
+    if (S) {
+      S.running = true;
+      S.currentLevel = 1;
+    }
+    return;
+  }
+  // ------ MISSION 1  (lvl2.js → Level2) ------
+  if (node.id === "lvl2") {
+    startLevel("Level2", 2);
+    return;
+  }
+  // ------ MISSION 2  (lvl3.js → Level3) ------
+  if (node.id === "lvl3") {
+    startLevel("Level3", 3, "Level2");
+    return;
+  }
+  // ------ MISSION 3  (Level4 clone test) ------
+  if (node.id === "lvl4") {
+    startLevel("Level4", 4, "Level2");
+    return;
+  }
+  // ------ MISSION 4  (lvl5.js → Level5) ------
+  if (node.id === "lvl5") {
+    startLevel("Level5", 5, "Level2");
+    return;
+  }
+  // ------ MISSION 5  (TEMP: reuse Level5 – no Level6 yet) ------
+  if (node.id === "lvl6") {
+    // There is no window.Level6 in your files, so reuse Level5 for now
+    startLevel("Level5", 5, "Level2");
+    return;
+  }
+  // ------ FUTURE NODES: TEMP → Level2 ------
+  if (["lvl7", "lvl8", "lvl9", "lvl10", "lvl11", "secret"].includes(node.id)) {
+    startLevel("Level2", 2);
+    return;
+  }
+  // Unknown node id – do nothing but keep map active
+  console.warn("WorldMap: clicked unknown node id:", node.id);
+},
 
     // ------ UPDATE ------
     update(dt) {
