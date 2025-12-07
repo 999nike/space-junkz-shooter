@@ -679,30 +679,6 @@ window.damagePlayer = function damagePlayer() {
 //  LEVEL 2+ CORE REDIRECTORS (SAFE – NO RECURSION)
 // ===========================================================
 window.updateGameCore = function updateGameCore(dt) {
-  const S = window.GameState || {};
-
-  // Remember which mission levels were active
-  const hadLevel2 = !!(window.Level2 && window.Level2.active);
-  const hadLevel3 = !!(window.Level3 && window.Level3.active);
-  const hadLevel4 = !!(window.Level4 && window.Level4.active);
-  const prevLevelIndex = S.currentLevel;
-
-  // Temporarily turn off mission levels so updateGame()
-  // runs ONLY the shared shooter core, NOT Level2/3/4.update().
-  if (window.Level2) window.Level2.active = false;
-  if (window.Level3) window.Level3.active = false;
-  if (window.Level4) window.Level4.active = false;
-  S.currentLevel = null;
-
-  // Run normal intro core safely
-  window.updateGame(dt);
-
-  // Restore mission flags
-  if (window.Level2) window.Level2.active = hadLevel2;
-  if (window.Level3) window.Level3.active = hadLevel3;
-  if (window.Level4) window.Level4.active = hadLevel4;
-  S.currentLevel = prevLevelIndex;
-};
 
 window.drawGameCore = function drawGameCore(ctx) {
   const S = window.GameState || {};
