@@ -2,6 +2,7 @@
 //          LEVEL EXIT ENGINE (L1)
 //      Black Hole → Video Cutscene → Map
 // =========================================
+
 (function () {
   const S = window.GameState;
 
@@ -9,11 +10,12 @@
     active: false,
 
     start() {
+      // already running? do nothing
       if (this.active) return;
       this.active = true;
 
-      // Stop gameplay immediately
-      S.running = false;
+      // stop normal gameplay
+      if (S) S.running = false;
 
       // --- CREATE VIDEO ELEMENT ---
       const vid = document.createElement("video");
@@ -22,7 +24,7 @@
       vid.muted = true;
       vid.playsInline = true;
 
-      // FULLSCREEN LOOK
+      // fullscreen overlay
       vid.style.position = "absolute";
       vid.style.top = "0";
       vid.style.left = "0";
@@ -36,25 +38,22 @@
       // --- WHEN VIDEO ENDS → LOAD WORLD MAP ---
       vid.onended = () => {
         vid.remove();
+        this.active = false;
 
-  // *** FIX: ensure the map is active before entering it ***
-  if (window.WorldMap) window.WorldMap.active = true;
+        if (window.WorldMap) {
+          window.WorldMap.active = true;
+          if (typeof window.WorldMap.enter === "function") {
+            window.WorldMap.enter();
+          }
+        }
+      };
 
-
-  // *** FIX: ensure the map is active before entering it ***
-  if (window.WorldMap) window.WorldMap.active = true;
-
-  // Your existing world map entry
-  if (window.WorldMap && typeof window.WorldMap.enter === "function") {
-    window.WorldMap.enter();
-  }
-};
-
-// Small message (optional)
-if (window.flashMsg) {
-  window.flashMsg("WARPING…");
-}
+      // Small message (optional)
+      if (window.flashMsg) {
+        window.flashMsg("WARPING…");
+      }
     },
+
     // These are now empty—no more procedural warp
     update() {},
     draw() {}
