@@ -715,7 +715,7 @@ window.drawGameCore = function drawGameCore(ctx) {
   if (window.Level2) window.Level2.active = false;
   if (window.Level3) window.Level3.active = false;
   if (window.Level4) window.Level4.active = false;
-  S.currentLevel = null;
+  
 
   window.drawGame(ctx);
 
@@ -1080,11 +1080,16 @@ window.updateGame = function updateGame(dt) {
     }
   }
 
-  // Future levels (safe fallback)
-  if (S.currentLevel && S.currentLevel > 4) {
-    // Do not run intro logic for any mission past L1
-    return;
+  if ((!S.currentLevel || S.currentLevel === 1) && !S.bossSpawned) {
+    S.bossTimer = (S.bossTimer || 0) + dt;
+    if (S.bossTimer >= 60) {
+        window.spawnScorpionBoss();
+        S.bossSpawned = true;
+    }
   }
+
+    window.runCore(dt);
+   // NO RETURN HERE ANYMORE  
 
   // HOME BASE MODE – Alien–Egyptian chamber
   if (window.HomeBase && window.HomeBase.active) {
