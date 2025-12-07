@@ -694,8 +694,8 @@ window.updateGameCore = function updateGameCore(dt) {
   if (window.Level4) window.Level4.active = false;
   S.currentLevel = null;
 
-  // Run normal intro core safely
-  window.updateGame(dt);
+// Run shared shooter core safely (no intro logic)
+      window.runCore(dt);
 
   // Restore mission flags
   if (window.Level2) window.Level2.active = hadLevel2;
@@ -724,6 +724,296 @@ window.drawGameCore = function drawGameCore(ctx) {
   if (window.Level4) window.Level4.active = hadLevel4;
   S.currentLevel = prevLevelIndex;
 };
+
+// =========================================================
+    //  SHARED SHOOTER CORE – extracted from updateGame() for missions
+    //  Contains generic shooter logic: player movement, stars,
+    //  sidekicks, enemy spawning and updates, bullets, rockets,
+    //  power-ups, particles, collisions and lose condition.
+    //  It excludes any intro-specific logic such as Gemini/Scorpion
+    //  bosses or their spawn timers.
+    // =========================================================
+    window.runCore = function runCore(dt) {
+      const S = window.GameState;
+      if (!S.running) return;
+
+      const player = S.player;
+
+      // Player movement (keyboard on top of pointer)
+      let dx = 0;
+      let dy = 0;
+      const keys = S.keys || {};
+      if (keys["arrowleft"] || keys["a"]) dx -= 1;
+      if (keys["arrowright"] || keys["d"]) dx += 1;
+      if (keys["arrowup"] || keys["w"]) dy -= 1;
+      if (keys["arrowdown"] || keys["s"]) dy += 1;
+      if (dx || dy) {
+        const len = Math.hypot(dx, dy) || 1;
+        dx /= len;
+        dy /= len;
+        player.x += dx * player.speed * dt;
+        player.y += dy * player.speed * dt;
+      }
+      // Mobile analog movement
+      if (S.moveX || S.moveY) {
+        player.x += (S.moveX || 0) * player.speed * dt;
+        player.y += (S.moveY || 0) * player.speed * dt;
+      }
+      // Full-screen movement with a small safe border
+      player.x = clamp(player.x, 24, S.W - 24);
+      player.y = clamp(player.y, 24, S.H - 24);
+      if (player.invuln > 0) player.invuln -= dt;
+
+      // Stars
+      window.updateStars(dt);
+
+      // Sidekicks (follow + rocket fire)
+      for (const s of S.sidekicks) {
+        // Follow player
+        s.x = S.player.x + s.offsetX;
+        s.y = S.player.y + s.yOff;
+        // Fire rockets
+        s.fireTimer -= dt;
+        if (s.fireTimer <= 0) {
+          // Level 4 → straight rockets
+          if (S.player.weaponLevel === 4) {
+            S.rockets.push({
+              x: s.x,
+              y: s.y,
+              vx: 0,
+              vy: -200,
+              radius: 8,
+              homing: false
+            });
+          }
+          // Level 5 → homing rockets
+          if (S.player.weaponLevel >= 5) {
+            S.rockets.push({
+              x: s.x,
+              y: s.y,
+              vx: 0,
+              vy: -200,
+              radius: 8,
+              homing: true
+            });
+          }
+          s.fireTimer = 0.65;
+        }
+      }
+
+      // Spawn enemies
+      S.spawnTimer -= dt;
+      if (S.spawnTimer <= 0) {
+        window.spawnEnemy();
+        S.spawnTimer = rand(0.4, 1.0);
+      }
+
+      // Hold-to-fire (shared for desktop + mobile)
+      S.shootTimer -= dt;
+      if (S.firing && S.shootTimer <= 0) {
+        window.shoot();
+        S.shootTimer = 0.22;
+      }
+
+      // Update enemies (no intro bosses)
+      for (let i = S.enemies.length - 1; i >= 0; i--) {
+        const e = S.enemies[i];
+        if (e.type === "scorpionBoss" || e.type === "geminiBoss") {
+          // Skip intro bosses entirely in runCore
+          continue;
+        }
+        // Homing movement towards the player
+        const px = S.player.x;
+        const py = S.player.y;
+        const exdx = px - e.x;
+        const exdy = py - e.y;
+        const elen = Math.hypot(exdx, exdy) || 1;
+        const enx = exdx / elen;
+        const eny = exdy / elen;
+        const chaseSpeed = e.speedY * 1.1;
+        e.x += enx * chaseSpeed * dt;
+        e.y += eny * chaseSpeed * dt;
+        // Zigzag variant
+        if (e.type === "zigzag") {
+          e.phase += e.waveSpeed * dt;
+          e.x += Math.sin(e.phase) * e.waveAmp * dt;
+        }
+        // All enemies shoot
+        e.shootTimer -= dt;
+        if (e.shootTimer <= 0) {
+          S.enemyBullets.push({
+            x: e.x,
+            y: e.y + e.radius,
+            vy: 260,
+            vx: 0,
+            radius: 3,
+            colour: "#61d6ff"
+          });
+          e.shootTimer = 2.0;
+        }
+        // Reset off screen
+        if (e.y > S.H + 120) {
+          e.x = rand(40, S.W - 40);
+          e.y = rand(-180, -40);
+          e.speedY = rand(40, 90);
+          e.hp = rand(1, 3);
+        }
+        // Hit flash fade
+        if (e.hitFlash > 0) e.hitFlash -= dt;
+        // Remove off screen
+        if (e.y > S.H + 40) {
+          S.enemies.splice(i, 1);
+          continue;
+        }
+        // Collide with player
+        if (player.invuln <= 0 && circleHit(player, e, -4)) {
+          S.enemies.splice(i, 1);
+          window.spawnExplosion(e.x, e.y, "#ff9977");
+          window.damagePlayer();
+        }
+      }
+
+      // Player bullets
+      for (let i = S.bullets.length - 1; i >= 0; i--) {
+        const b = S.bullets[i];
+        b.y += b.vy * dt;
+        b.x += (b.vx || 0) * dt;
+        // Off-screen
+        if (b.y < -20 || b.x < -20 || b.x > S.W + 20) {
+          S.bullets.splice(i, 1);
+          continue;
+        }
+        // Collision with enemies
+        let hit = false;
+        for (let j = S.enemies.length - 1; j >= 0; j--) {
+          const e = S.enemies[j];
+          if (circleHit(b, e)) {
+            hit = true;
+            S.bullets.splice(i, 1);
+            e.hp -= 1;
+            e.hitFlash = 0.1;
+            window.spawnExplosion(b.x, b.y, e.colour);
+            if (e.hp <= 0) {
+              S.enemies.splice(j, 1);
+              window.handleEnemyDeath(e);
+              // Shield part drop logic
+              const GS = window.GameState;
+              GS.killsSinceShieldDrop = (GS.killsSinceShieldDrop || 0) + 1;
+              if (GS.killsSinceShieldDrop >= 50) {
+                const partType = Math.random() < 0.5 ? "shieldA" : "shieldB";
+                S.powerUps.push({
+                  x: e.x,
+                  y: e.y,
+                  radius: 20,
+                  speedY: 50,
+                  type: partType
+                });
+                window.flashMsg("⚡ SHIELD PART DETECTED");
+                GS.killsSinceShieldDrop = 0;
+              }
+            }
+            break;
+          }
+        }
+        if (hit) continue;
+      }
+
+      // Enemy bullets
+      for (let i = S.enemyBullets.length - 1; i >= 0; i--) {
+        const b = S.enemyBullets[i];
+        // Mixed style: vx/vy for bosses and vy-only for grunts
+        b.y += b.vy ? b.vy * dt : (b.speed || 220) * dt;
+        if (b.vx) b.x += b.vx * dt;
+        if (b.y > S.H + 40 || b.x < -40 || b.x > S.W + 40) {
+          S.enemyBullets.splice(i, 1);
+          continue;
+        }
+        if (player.invuln <= 0 && circleHit(b, player)) {
+          S.enemyBullets.splice(i, 1);
+          window.spawnExplosion(player.x, player.y + 10, "#ff9977");
+          window.damagePlayer();
+        }
+      }
+
+      // Rockets
+      for (let i = S.rockets.length - 1; i >= 0; i--) {
+        const r = S.rockets[i];
+        // Homing mode
+        if (r.homing) {
+          let nearest = null;
+          let dist = 99999;
+          for (const e of S.enemies) {
+            if (e.type === "scorpionBoss") continue;
+            const dx = e.x - r.x;
+            const dy = e.y - r.y;
+            const d = dx * dx + dy * dy;
+            if (d < dist) {
+              dist = d;
+              nearest = e;
+            }
+          }
+          if (nearest) {
+            const ang = Math.atan2(nearest.y - r.y, nearest.x - r.x);
+            const speed = 200;
+            r.vx = Math.cos(ang) * speed;
+            r.vy = Math.sin(ang) * speed;
+          }
+        }
+        r.x += r.vx * dt;
+        r.y += r.vy * dt;
+        // Off-screen removal
+        if (r.y < -50 || r.x < -50 || r.x > S.W + 50 || r.y > S.H + 50) {
+          S.rockets.splice(i, 1);
+        }
+      }
+
+      // Power-ups
+      for (let i = S.powerUps.length - 1; i >= 0; i--) {
+        const p = S.powerUps[i];
+        p.y += p.speedY * dt;
+        // Off-screen
+        if (p.y > S.H + 40) {
+          S.powerUps.splice(i, 1);
+          continue;
+        }
+        // Collision with player
+        if (circleHit(p, player)) {
+          S.powerUps.splice(i, 1);
+          if (p.type === "weapon") {
+            S.player.weaponLevel = Math.min(5, S.player.weaponLevel + 1);
+            window.flashMsg("⚡ WEAPON POWER-UP");
+          } else if (p.type === "health") {
+            window.restoreHealth();
+          } else if (p.type === "coins") {
+            S.player.coins = (S.player.coins || 0) + 25;
+            window.flashMsg("+25 WIZZCOINS");
+          } else if (p.type === "shieldA" || p.type === "shieldB") {
+            window.collectShieldPart(p.type);
+          }
+        }
+      }
+
+      // Particles
+      for (let i = S.particles.length - 1; i >= 0; i--) {
+        const p = S.particles[i];
+        p.frameTimer += dt;
+        if (p.frameTimer >= p.frameSpeed) {
+          p.frameTimer -= p.frameSpeed;
+          p.frame++;
+          if (p.frame >= p.frameCount) {
+            p.done = true;
+          }
+        }
+        if (p.done) {
+          S.particles.splice(i, 1);
+        }
+      }
+
+      // Lose condition
+      if (S.player.hp <= 0 && !S.lost) {
+        window.gameOver();
+      }
+    };
 
 // =========================================================
 //  MAIN UPDATE – called from engine.js → updateGame(dt)
@@ -775,14 +1065,18 @@ window.updateGame = function updateGame(dt) {
   if (!S.running) return;
 
   const player = S.player;
-  // ----- Boss spawn timer -----
-  if (!S.bossSpawned) {
-    S.bossTimer = (S.bossTimer || 0) + dt;
-    if (S.bossTimer >= 60) { // ~1 min
-      window.spawnScorpionBoss();
-      S.bossSpawned = true;
-    }
-  }
+      // ----- Intro boss spawn timer (intro only) -----
+      if ((!S.currentLevel || S.currentLevel === 1) && !S.bossSpawned) {
+        S.bossTimer = (S.bossTimer || 0) + dt;
+        if (S.bossTimer >= 60) { // ~1 min
+          window.spawnScorpionBoss();
+          S.bossSpawned = true;
+        }
+      }
+
+      // Run shared shooter core and skip the rest of intro core
+      window.runCore(dt);
+      return;
 
   // ----- Player movement (keyboard on top of pointer) -----
   let dx = 0;
