@@ -895,6 +895,13 @@ if (!S.currentLevel || S.currentLevel === 1) {
       continue;
     }
 
+    // Level 3 – Mission 2 multi-bosses use their own AI
+    // (handled in lvl3.js → attachBossLogic), so skip
+    // the generic homing / shooting logic here.
+    if (e.type === "mission2Boss" || e.isMission2Boss) {
+      continue;
+    }
+
         // ==========================================================
         //   NEW ENEMY AI – TRACK / CHASE / ATTACK THE PLAYER
         // ============================================================
