@@ -764,6 +764,8 @@ window.drawGameCore = function drawGameCore(ctx) {
 //  MAIN UPDATE – called from engine.js → updateGame(dt)
 // =========================================================
 
+window.updateGame = function updateGame(dt) {
+
   // -----------------------------------------------------
   // LEVEL DISPATCH GATE (Patch 2)
   // If a mission level is active, skip ALL intro logic.
