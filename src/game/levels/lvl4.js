@@ -1,257 +1,356 @@
-// ===========================================================
-//   LEVEL 4  •  MISSION 3 – CANCER WARSHIP
-//   • Uses Backblaze B2 sprite for the boss
-//   • Simple wave → boss → back to WorldMap
-// ===========================================================
-(function () {
-  const S = window.GameState;
-  const B2_ASSET_BASE =
-    "https://f003.backblazeb2.com/file/space-junkz-assets";
+/* ============================================================
+   MISSION 3 — SHATTERED ARMADA
+   Level 4 (index = 3)
+   Fully rebuilt — independent logic, no intro bleed-through
+   ============================================================ */
 
-  const Level4 = {
+window.Level4 = (function() {
+  const S = {
     active: false,
-    bg: null,
-    bgLoaded: false,
-
-    bossSprite: null,
-    bossSpriteLoaded: false,
-    _prevTankSprite: null,
-
-    timer: 0,
-    spawnTimer: 0,
-    bossSpawned: false,
-    _finishing: false,
-
-    // -----------------------------
-    // ENTER LEVEL
-    // -----------------------------
-    enter() {
-      console.log("💥 ENTERING LEVEL 4 – CANCER WARSHIP 💥");
-
-      this.active = true;
-      this.timer = 0;
-      this.spawnTimer = 0.6;
-      this.bossSpawned = false;
-      this._finishing = false;
-
-      // Reset shooter state but keep score/coins
-      if (typeof window.resetGameState === "function") {
-        window.resetGameState();
-      } else {
-        S.enemies = [];
-        S.bullets = [];
-        S.enemyBullets = [];
-        S.rockets = [];
-        S.particles = [];
-        S.powerUps = [];
-      }
-
-      // Core run flags
-      S.running = true;
-      S.currentLevel = 4;
-
-      // Player position
-      if (S.player) {
-        S.player.x = S.W / 2;
-        S.player.y = S.H - 90;
-        S.player.invuln = 1.2;
-      }
-
-      // Background – reuse mission1_bg for now
-      this.bg = new Image();
-      this.bgLoaded = false;
-      this.bg.src = "./src/game/assets/mission1_bg.png";
-      this.bg.onload = () => {
-        this.bgLoaded = true;
-      };
-
-      // Disable map / home
-      if (window.WorldMap) window.WorldMap.active = false;
-      if (window.HomeBase) window.HomeBase.active = false;
-
-      if (typeof window.initStars === "function") {
-        window.initStars();
-      }
-
-      // --- Boss sprite from Backblaze B2 ---
-      this._prevTankSprite = S.sprites && S.sprites.enemyTank
-        ? S.sprites.enemyTank
-        : null;
-
-      this.bossSprite = new Image();
-      this.bossSpriteLoaded = false;
-      this.bossSprite.onload = () => {
-        this.bossSpriteLoaded = true;
-        if (S.sprites) {
-          // Temporarily use this sprite for all "tank" enemies
-          S.sprites.enemyTank = this.bossSprite;
-        }
-      };
-      this.bossSprite.src =
-        B2_ASSET_BASE + "/junkz-assets/oldCANCER2.png";
-
-      if (window.flashMsg) {
-        window.flashMsg("MISSION 3 – CANCER WARSHIP");
-        setTimeout(
-          () => window.flashMsg("ENEMY VANGUARD INBOUND"),
-          1400
-        );
-      }
-    },
-
-    // -----------------------------
-    // EXIT → BACK TO MAP
-    // -----------------------------
-    exit() {
-      this.active = false;
-      S.running = false;
-
-      // Restore original tank sprite if we replaced it
-      if (this._prevTankSprite && S.sprites) {
-        S.sprites.enemyTank = this._prevTankSprite;
-      }
-
-      if (window.WorldMap && typeof window.WorldMap.enter === "function") {
-        window.WorldMap.enter();
-      }
-    },
-
-    // -----------------------------
-    // SPAWN WAVES (PRE-BOSS)
-    // -----------------------------
-    spawnWave() {
-      const r = Math.random();
-
-      if (r < 0.3) {
-        window.spawnEnemyType("grunt");
-        window.spawnEnemyType("grunt");
-      } else if (r < 0.6) {
-        window.spawnEnemyType("zigzag");
-        window.spawnEnemyType("shooter");
-      } else if (r < 0.85) {
-        window.spawnEnemyType("tank");
-      } else {
-        // heavier mini-pack
-        window.spawnEnemyType("grunt");
-        window.spawnEnemyType("zigzag");
-        window.spawnEnemyType("tank");
-      }
-    },
-
-    // -----------------------------
-    // SPAWN BOSS (BIG TANK VARIANT)
-    // -----------------------------
-    spawnBoss() {
-      if (this.bossSpawned) return;
-
-      const S = window.GameState;
-      // Spawn as "tank" and tag it as Level4 boss
-      window.spawnEnemyType("tank", S.W / 2, -120);
-
-      const boss = S.enemies[S.enemies.length - 1];
-      if (boss) {
-        boss.hp = 40;
-        boss.maxHp = 40;
-        boss._isLevel4Boss = true;
-        boss.speedY = 35;
-        boss.score = 750;
-      }
-
-      this.bossSpawned = true;
-
-      if (window.flashMsg) {
-        window.flashMsg("⚠ CANCER WARSHIP APPROACHING ⚠");
-        setTimeout(
-          () => window.flashMsg("DESTROY THE FLAGSHIP"),
-          1600
-        );
-      }
-    },
-
-    // -----------------------------
-    // HANDLE BOSS DEATH
-    // -----------------------------
-    _checkBossDefeated() {
-      if (!this.bossSpawned || this._finishing) return;
-
-      const S = window.GameState;
-      const bossAlive = S.enemies.some((e) => e._isLevel4Boss);
-
-      if (!bossAlive) {
-        this._finishing = true;
-
-        if (window.flashMsg) {
-          window.flashMsg("MISSION 3 COMPLETE!");
-        }
-
-        // Optional: unlock lvl5 on map (node id "lvl5")
-        if (window.unlockNextLevel) {
-          window.unlockNextLevel(4); // 4 → unlock lvl5 node
-        }
-
-        S.running = false;
-        setTimeout(() => this.exit(), 1400);
-      }
-    },
-
-    // -----------------------------
-    // UPDATE
-    // -----------------------------
-    update(dt) {
-      if (!this.active || !S.running) return;
-
-      this.timer += dt;
-
-      // Pre-boss waves for ~25 seconds
-      if (!this.bossSpawned) {
-        this.spawnTimer -= dt;
-        if (this.spawnTimer <= 0) {
-          this.spawnWave();
-          this.spawnTimer = rand(0.4, 1.0);
-        }
-
-        if (this.timer >= 25) {
-          this.spawnBoss();
-        }
-      }
-
-      // Run generic shooter core (player, bullets, collisions)
-      if (typeof window.updateGameCore === "function") {
-        // Reuse shared shooter core (no intro logic)
-window.runCore(dt);
-      } else if (typeof window.updateGame === "function") {
-        window.updateGame(dt);
-      }
-
-      // Check if boss died
-      this._checkBossDefeated();
-    },
-
-    // -----------------------------
-    // DRAW
-    // -----------------------------
-    draw(ctx) {
-      if (!this.active) return;
-
-      // Background
-      if (this.bgLoaded && this.bg) {
-        ctx.drawImage(this.bg, 0, 0, S.W, S.H);
-      } else {
-        ctx.fillStyle = "#05010a";
-        ctx.fillRect(0, 0, S.W, S.H);
-      }
-
-      if (typeof window.drawRunway === "function") {
-        window.drawRunway(ctx);
-      }
-
-      if (typeof window.drawGameCore === "function") {
-        window.drawGameCore(ctx);
-      } else if (typeof window.drawGame === "function") {
-        window.drawGame(ctx);
-      }
-    },
+    time: 0,
+    phase: 0,
+    boss: null,
+    turrets: [],
+    escorts: [],
+    explosions: [],
+    damageFx: [],
+    bgVideo: null
   };
 
-  window.Level4 = Level4;
+  /* ============================================================
+     INITIALIZE LEVEL
+     ============================================================ */
+  function start() {
+    S.active = true;
+    S.time = 0;
+    S.phase = 0;
+
+    spawnBackgroundVideo();
+    spawnBossPhase1();
+
+    console.log("MISSION 3 START — SHATTERED ARMADA");
+  }
+
+  function stop() {
+    S.active = false;
+    stopBackgroundVideo();
+    clearAll();
+  }
+
+  function clearAll() {
+    S.boss = null;
+    S.turrets = [];
+    S.escorts = [];
+    S.explosions = [];
+    S.damageFx = [];
+  }
+
+  /* ============================================================
+     BACKGROUND VIDEO
+     ============================================================ */
+  function spawnBackgroundVideo() {
+    const url = window.Assets.mission3Video;
+    if (!url) return;
+
+    const vid = document.createElement("video");
+    vid.src = url;
+    vid.autoplay = true;
+    vid.loop = true;
+    vid.muted = true;
+    vid.style.position = "absolute";
+    vid.style.top = "0px";
+    vid.style.left = "0px";
+    vid.style.width = "100%";
+    vid.style.height = "100%";
+    vid.style.zIndex = "-10";
+
+    document.body.appendChild(vid);
+    S.bgVideo = vid;
+  }
+
+  function stopBackgroundVideo() {
+    if (S.bgVideo) {
+      S.bgVideo.pause();
+      S.bgVideo.remove();
+      S.bgVideo = null;
+    }
+  }
+
+  /* ============================================================
+     SPAWN FUNCTIONS
+     ============================================================ */
+
+  function spawnBossPhase1() {
+    S.phase = 1;
+
+    S.boss = {
+      x: renderer.width/2 - 200,
+      y: -400,
+      w: 400,
+      h: 350,
+      hp: 1600,
+      sprite: Assets.m3Boss,
+      vy: 0.4,
+      entering: true,
+      state: "enter",
+      damageTimer: 0
+    };
+
+    spawnTurrets();
+  }
+
+  function spawnTurrets() {
+    S.turrets = [];
+    for (let i = 0; i < 4; i++) {
+      S.turrets.push({
+        parent: "BOSS",
+        offsetX: (-150 + i * 90),
+        offsetY: 40,
+        angle: 0,
+        fireCooldown: 0,
+        firingRate: 900 + (i * 300),
+        sprite: Assets.m3TurretFrames[i]
+      });
+    }
+  }
+
+  function spawnEscortWave() {
+    for (let i = 0; i < 3; i++) {
+      S.escorts.push({
+        x: (renderer.width*0.25) + (i * 250),
+        y: -200 - (i * 60),
+        w: 140,
+        h: 120,
+        hp: 350,
+        vy: 0.6,
+        sprite: Assets.m3Escort,
+        damageTimer: 0
+      });
+    }
+  }
+
+  /* ============================================================
+     UPDATE LOOP
+     ============================================================ */
+  function update(dt) {
+    if (!S.active) return;
+
+    S.time += dt;
+
+    if (S.phase === 1) updatePhase1(dt);
+    if (S.phase === 2) updatePhase2(dt);
+    if (S.phase === 3) updatePhase3(dt);
+    if (S.phase === 4) updatePhase4(dt);
+
+    updateExplosions(dt);
+    updateDamageFx(dt);
+  }
+
+  /* ============================================================
+     PHASE 1 — Entry + Hull Fight
+     ============================================================ */
+  function updatePhase1(dt) {
+    const b = S.boss;
+    if (!b) return;
+
+    if (b.entering) {
+      b.y += b.vy;
+      if (b.y >= 150) {
+        b.entering = false;
+      }
+    }
+
+    updateBossDamageFx(b, dt);
+    updateTurrets(dt, b);
+
+    if (S.time > 12000) {
+      spawnEscortWave();
+      S.phase = 2;
+    }
+  }
+
+  /* ============================================================
+     PHASE 2 — Escorts Join
+     ============================================================ */
+  function updatePhase2(dt) {
+    const b = S.boss;
+    if (!b) return;
+
+    updateBossDamageFx(b, dt);
+    updateTurrets(dt, b);
+    updateEscorts(dt);
+
+    if (b.hp < 1000) {
+      S.phase = 3;
+    }
+  }
+
+  /* ============================================================
+     PHASE 3 — Core Awakens
+     ============================================================ */
+  function updatePhase3(dt) {
+    const b = S.boss;
+    if (!b) return;
+
+    updateBossDamageFx(b, dt);
+    updateTurrets(dt, b);
+
+    if (b.hp < 500) {
+      S.phase = 4;
+    }
+  }
+
+  /* ============================================================
+     PHASE 4 — Rage Mode
+     ============================================================ */
+  function updatePhase4(dt) {
+    const b = S.boss;
+    if (!b) return;
+
+    updateBossDamageFx(b, dt);
+    updateTurrets(dt, b, true);
+
+    if (b.hp <= 0) {
+      spawnBossDeathChain(b);
+      finishMission();
+    }
+  }
+
+  /* ============================================================
+     ESCORT LOGIC
+     ============================================================ */
+  function updateEscorts(dt) {
+    for (let i = S.escorts.length - 1; i >= 0; i--) {
+      const e = S.escorts[i];
+      e.y += e.vy;
+
+      updateEscortDamageFx(e, dt);
+
+      if (e.hp <= 0) {
+        spawnExplosion(e.x, e.y, true);
+        S.escorts.splice(i, 1);
+      }
+    }
+  }
+
+  /* ============================================================
+     TURRET LOGIC
+     ============================================================ */
+  function updateTurrets(dt, boss, rage=false) {
+    S.turrets.forEach(t => {
+      // Rotate toward player
+      if (window.Player) {
+        const dx = Player.x - (boss.x + t.offsetX);
+        const dy = Player.y - (boss.y + t.offsetY);
+        t.angle = Math.atan2(dy, dx);
+      }
+
+      // Fire
+      t.fireCooldown -= dt;
+      if (t.fireCooldown <= 0) {
+        fireTurretRocket(boss, t, rage);
+        t.fireCooldown = rage ? t.firingRate * 0.55 : t.firingRate;
+      }
+    });
+  }
+
+  function fireTurretRocket(boss, turret, rage) {
+    const px = boss.x + turret.offsetX;
+    const py = boss.y + turret.offsetY;
+    const spd = rage ? 1.5 : 1.0;
+
+    window.spawnEnemyBullet(px, py, turret.angle, "m3Rocket", spd);
+  }
+
+  /* ============================================================
+     DAMAGE FX
+     ============================================================ */
+  function updateBossDamageFx(boss, dt) {
+    if (!boss) return;
+    if (boss.damageTimer > 0) boss.damageTimer -= dt;
+
+    if (boss.hp < 900 && Math.random() < 0.02) {
+      S.damageFx.push({
+        x: boss.x + (Math.random()*boss.w),
+        y: boss.y + (Math.random()*boss.h),
+        frame: 0,
+        timer: 0
+      });
+    }
+  }
+
+  function updateEscortDamageFx(e, dt) {
+    if (!e) return;
+    if (e.damageTimer > 0) e.damageTimer -= dt;
+  }
+
+  function updateDamageFx(dt) {
+    for (let i = S.damageFx.length - 1; i >= 0; i--) {
+      const fx = S.damageFx[i];
+      fx.timer += dt;
+
+      if (fx.timer > 90) {
+        S.damageFx.splice(i, 1);
+      }
+    }
+  }
+
+  /* ============================================================
+     EXPLOSIONS (boss kill chain)
+     ============================================================ */
+  function spawnBossDeathChain(b) {
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => {
+        spawnExplosion(
+          b.x + (Math.random()*b.w),
+          b.y + (Math.random()*b.h),
+          false,
+          2.5 // scale for mega boss
+        );
+      }, i * 180);
+    }
+  }
+
+  function spawnExplosion(x, y, small=false, scale=1) {
+    S.explosions.push({
+      x, y, frame: 0,
+      small, scale,
+      timer: 0
+    });
+  }
+
+  function updateExplosions(dt) {
+    for (let i = S.explosions.length - 1; i >= 0; i--) {
+      const ex = S.explosions[i];
+      ex.timer += dt;
+      if (ex.timer > 60) {
+        ex.frame++;
+        ex.timer = 0;
+      }
+      if (ex.frame >= Assets.explosionFrames.length) {
+        S.explosions.splice(i, 1);
+      }
+    }
+  }
+
+  /* ============================================================
+     FINISH MISSION
+     ============================================================ */
+  function finishMission() {
+    setTimeout(() => {
+      window.unlockNextLevel(4);
+      window.gotoWorld();
+      stop();
+    }, 2200);
+  }
+
+  /* ============================================================
+     EXPORT API
+     ============================================================ */
+  return {
+    start,
+    stop,
+    update
+  };
+
 })();
