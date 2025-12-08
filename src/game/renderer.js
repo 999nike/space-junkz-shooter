@@ -76,22 +76,70 @@ window.drawEnemyBullets = function drawEnemyBullets(ctx) {
   const S = window.GameState;
   const yellow = S.sprites.enemyBullet;
   const blue   = S.sprites.playerBullet;
-  if (!yellow && !blue) return;
+  const A      = window.Assets || {};
+
+  // If we have none of the sprite sources, no-op
+  if (!yellow && !blue && !A.m3RocketSheet && !A.m3BombSheet) return;
 
   for (const b of S.enemyBullets) {
-    const img =
-      b.type === "bossClaw"
-        ? (blue || yellow)
-        : (yellow || blue);
+    let img = null;
 
-    if (!img) continue;
+    // Sheet-based bullets (Mission 3 rockets / bombs)
+    let sheet = null;
+    let useSheet = false;
+    let sx = 0, sy = 0, sw = 0, sh = 0;
+    let scale = b.scale || 1.0;
 
-    const w = img.width;
-    const h = img.height;
+    if (b.type === "m3Rocket" && A.m3RocketSheet) {
+      sheet = A.m3RocketSheet;
+
+      // AUTODETECT: assume square frames based on height
+      const frameSize = sheet.height || 1;
+      sw = frameSize;
+      sh = frameSize;
+      sx = 0;
+      sy = 0;
+      useSheet = true;
+      scale = b.scale || 0.5; // rockets slightly smaller
+    } else if (b.type === "m3Bomb" && A.m3BombSheet) {
+      sheet = A.m3BombSheet;
+
+      const frameSize = sheet.height || 1;
+      sw = frameSize;
+      sh = frameSize;
+      sx = 0;
+      sy = 0;
+      useSheet = true;
+      scale = b.scale || 0.6; // bombs a bit larger
+    } else {
+      // Fallback to classic bullets
+      img =
+        b.type === "bossClaw"
+          ? (blue || yellow)
+          : (yellow || blue);
+
+      if (!img) continue;
+    }
 
     ctx.save();
     ctx.translate(b.x, b.y);
-    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+
+    if (useSheet && sheet) {
+      // Draw central square frame from sheet
+      ctx.drawImage(
+        sheet,
+        sx, sy, sw, sh,
+        -sw * 0.5 * scale,
+        -sh * 0.5 * scale,
+        sw * scale,
+        sh * scale
+      );
+    } else if (img) {
+      const w = img.width;
+      const h = img.height;
+      ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    }
+
     ctx.restore();
   }
 };
@@ -412,25 +460,31 @@ window.drawGame = function drawGame() {
   const ctx = S.ctx;
 
   // -----------------------------------------------------
-  // LEVEL DRAW DISPATCH (Patch 2)
-  // Prevent intro draw from rendering during mission levels.
-  // -----------------------------------------------------
-  if (window.Level2 && window.Level2.active) {
-    if (typeof window.Level2.draw === "function") {
-      return window.Level2.draw(ctx);
-    }
+// LEVEL DRAW DISPATCH (Patch 3)
+// Prevent intro draw from rendering during mission levels.
+// -----------------------------------------------------
+if (window.Level2 && window.Level2.active) {
+  if (typeof window.Level2.draw === "function") {
+    return window.Level2.draw(ctx);
   }
+}
 
-  if (window.Level3 && window.Level3.active) {
-    if (typeof window.Level3.draw === "function") {
-      return window.Level3.draw(ctx);
-    }
+if (window.Level3 && window.Level3.active) {
+  if (typeof window.Level3.draw === "function") {
+    return window.Level3.draw(ctx);
   }
+}
 
-  // Future-level fallback
-  if (S.currentLevel && S.currentLevel > 3) {
-    return;
+if (window.Level4 && window.Level4.active) {
+  if (typeof window.Level4.draw === "function") {
+    return window.Level4.draw(ctx);
   }
+}
+
+// Future-level fallback (for levels beyond 4)
+if (S.currentLevel && S.currentLevel > 4) {
+  return;
+}
 
   // HOME BASE MODE
   if (window.HomeBase && window.HomeBase.active) {
