@@ -345,12 +345,34 @@ window.Level4 = (function() {
   }
 
   /* ============================================================
+     DRAW
+     ============================================================ */
+  function draw(ctx) {
+    // Only draw when this level is active
+    if (!S.active) return;
+
+    // Reuse your existing runway / core renderer so Mission 3
+    // draws consistently with other missions.
+    if (typeof window.drawRunway === "function") {
+      window.drawRunway(ctx);
+    }
+
+    if (typeof window.drawGameCore === "function") {
+      window.drawGameCore(ctx);
+    } else if (typeof window.drawGame === "function") {
+      // Fallback if drawGameCore isn't available
+      window.drawGame(ctx);
+    }
+  }
+
+  /* ============================================================
      EXPORT API
      ============================================================ */
   return {
     start,
     stop,
-    update
+    update,
+    draw
   };
 
 })();
