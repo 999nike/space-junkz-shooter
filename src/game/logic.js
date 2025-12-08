@@ -692,16 +692,30 @@ window.updateGameCore = function updateGameCore(dt) {
   if (window.Level2) window.Level2.active = false;
   if (window.Level3) window.Level3.active = false;
   if (window.Level4) window.Level4.active = false;
-  S.currentLevel = null;
 
-  // Run normal intro core safely
+  // Save boss flags so we can restore them after running the core
+  const origBossSpawned   = S.bossSpawned;
+  const origGeminiSpawned = S.geminiBossSpawned;
+  const origBossTimer     = S.bossTimer;
+
+  // Mark intro bosses as already spawned and force a mission level index
+  // so updateGame() will NOT run the intro boss timer.
+  S.bossSpawned       = true;
+  S.geminiBossSpawned = true;
+  S.currentLevel      = prevLevelIndex || 99;
+
+  // Run core safely – no Scorpion/Gemini spawn in this window
   window.updateGame(dt);
 
-  // Restore mission flags
+  // Restore boss flags, level, and mission activation states
+  S.bossSpawned       = origBossSpawned;
+  S.geminiBossSpawned = origGeminiSpawned;
+  S.bossTimer         = origBossTimer;
+  S.currentLevel      = prevLevelIndex;
+
   if (window.Level2) window.Level2.active = hadLevel2;
   if (window.Level3) window.Level3.active = hadLevel3;
   if (window.Level4) window.Level4.active = hadLevel4;
-  S.currentLevel = prevLevelIndex;
 };
 
 window.drawGameCore = function drawGameCore(ctx) {
@@ -769,19 +783,19 @@ window.updateGame = function updateGame(dt) {
   if (!S.running) return;
 
   const player = S.player;
+
   // ----- INTRO-ONLY BOSS SPAWN (SCORPION → GEMINI CHAIN) -----
-  // Only run this timer when we are in the intro run (no mission level).
-  // Mission levels set S.currentLevel >= 2 in their enter() functions.
-  if (!S.currentLevel || S.currentLevel === 1) {
-    // ----- Boss spawn timer -----
-    if (!S.bossSpawned) {
-      S.bossTimer = (S.bossTimer || 0) + dt;
-      if (S.bossTimer >= 60) { // ~1 min
-        window.spawnScorpionBoss();
-        S.bossSpawned = true;
-      }
+// Only run this timer when we are in the intro run (no mission level).
+if (!S.currentLevel || S.currentLevel === 1) {
+  // ----- Boss spawn timer -----
+  if (!S.bossSpawned) {
+    S.bossTimer = (S.bossTimer || 0) + dt;
+    if (S.bossTimer >= 60) {
+      window.spawnScorpionBoss();
+      S.bossSpawned = true;
     }
   }
+}
 
   // ----- Player movement (keyboard on top of pointer) -----
   let dx = 0;
