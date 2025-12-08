@@ -67,11 +67,19 @@ switch (e.type) {
     break;
 }
 
-    // Skip if sprite missing
+    // Allow special enemies to provide their own sprite/image
+    if (!img && e.sprite && S.sprites && S.sprites[e.sprite]) {
+      img = S.sprites[e.sprite];
+    }
+    if (!img && e.img) {
+      img = e.img;
+    }
+
+    // Skip if sprite still missing
     if (!img) continue;
 
     const w = img.width * scale;
-    const h = img.height * scale;
+    const h = img.height * scale; 
 
     ctx.save();
     ctx.translate(e.x, e.y);

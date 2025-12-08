@@ -9,12 +9,63 @@
 (function () {
   const S = window.GameState;
 
+  // Mission 2 multi-boss sequence (Backblaze bosses)
+  const MISSION2_BOSSES = [
+    {
+      id: "cancer",
+      phase: 0,
+      url: "https://f003.backblazeb2.com/file/space-junkz-assets/junkz-assets/bosses/oldCANCER2.png",
+      hp: 650,
+      radius: 90,
+      pattern: "cancer",
+      intro: "⚠ CANCER DREADNAUGHT INBOUND",
+    },
+    {
+      id: "fighter",
+      phase: 1,
+      url: "https://f003.backblazeb2.com/file/space-junkz-assets/junkz-assets/bosses/oldFIGHTER2.png",
+      hp: 580,
+      radius: 80,
+      pattern: "fighter",
+      intro: "⚠ DRAX FIGHTER ACE ARRIVING",
+    },
+    {
+      id: "leo",
+      phase: 2,
+      url: "https://f003.backblazeb2.com/file/space-junkz-assets/junkz-assets/bosses/oldLEO2.png",
+      hp: 720,
+      radius: 95,
+      pattern: "leo",
+      intro: "⚠ LEO SIEGE CRUISER APPROACHING",
+    },
+    {
+      id: "scorpio",
+      phase: 3,
+      url: "https://f003.backblazeb2.com/file/space-junkz-assets/junkz-assets/bosses/oldSCORPIO12.png",
+      hp: 780,
+      radius: 100,
+      pattern: "scorpio",
+      intro: "⚠ SCORPIO ASSAULT CARRIER DETECTED",
+    },
+    {
+      id: "virgo",
+      phase: 4,
+      url: "https://f003.backblazeb2.com/file/space-junkz-assets/junkz-assets/bosses/oldVIRGO2.png",
+      hp: 950,
+      radius: 110,
+      pattern: "virgo",
+      intro: "⚠⚠ VIRGO FLAGSHIP ARRIVING ⚠⚠",
+    },
+  ];
+
   window.Level3 = {
     active: false,
     timer: 0,
     spawnTimer: 0,
     midBossSpawned: false,
     finalBossSpawned: false,
+    bossPhaseIndex: 0,
+    bossPhaseTimer: 0,
     bg: null,
     bgLoaded: false,
     bossLogicAttached: false,
@@ -30,6 +81,8 @@
       this.spawnTimer = 0;
       this.midBossSpawned = false;
       this.finalBossSpawned = false;
+      this.bossPhaseIndex = 0;
+      this.bossPhaseTimer = 0;
 
       // Reset shooter core
       if (window.resetGameState) resetGameState();
@@ -70,31 +123,46 @@
       this.spawnTimer -= dt;
 
       // ---- PRE-BOSS WAVES ----
-      if (!this.midBossSpawned && this.timer < 45) {
+      // Keep some regular waves before the boss rush starts
+      if (this.bossPhaseIndex === 0 && this.timer < 28) {
         if (this.spawnTimer <= 0) {
           this.spawnWave();
           this.spawnTimer = Math.random() * 0.5 + 0.35;
         }
       }
 
-      // ---- MID BOSS ----
-      if (!this.midBossSpawned && this.timer >= 45) {
-        this.spawnMidBoss();
-        this.midBossSpawned = true;
-      }
+      // ---- MISSION 2 MULTI-BOSS SEQUENCE ----
+      const aliveBossCount = S.enemies.filter(
+        (e) => e.type === "mission2Boss" && e.hp > 0
+      ).length;
 
-      // ---- FINAL BOSS ----
-      if (this.midBossSpawned && !this.finalBossSpawned && this.timer >= 90) {
-        this.spawnFinalBoss();
-        this.finalBossSpawned = true;
+      // If no boss is alive and there are phases left, spawn the next one
+      if (aliveBossCount === 0 && this.bossPhaseIndex < MISSION2_BOSSES.length) {
+        this.bossPhaseTimer += dt;
+
+        // Small pause between bosses
+        if (this.bossPhaseTimer >= 2.0) {
+          this.spawnBossPhase(this.bossPhaseIndex);
+          this.bossPhaseIndex += 1;
+          this.bossPhaseTimer = 0;
+        }
+      } else {
+        // While a boss is alive, don't count up the inter-boss timer
+        this.bossPhaseTimer = 0;
       }
 
       // Core engine
       if (window.updateGameCore) updateGameCore(dt);
 
-      // Level completion
-      for (const e of S.enemies) {
-        if (e.type === "draxFinalBoss" && e.hp <= 0) {
+      // Level completion — after last boss in the sequence is dead
+      if (
+        this.bossPhaseIndex >= MISSION2_BOSSES.length &&
+        !this._finishing
+      ) {
+        const anyBossLeft = S.enemies.some(
+          (e) => e.type === "mission2Boss" && e.hp > 0
+        );
+        if (!anyBossLeft) {
           this.finishLevel();
         }
       }
@@ -136,40 +204,46 @@
     },
 
     // -----------------------------
-    // MID BOSS
+    // MISSION 2 BOSS SPAWN HELPERS
     // -----------------------------
-    spawnMidBoss() {
-      window.flashMsg("⚠ DRAX GUNSHIP DETECTED");
+    spawnBossPhase(phaseIndex) {
+      const def = MISSION2_BOSSES[phaseIndex];
+      if (!def) return;
+
+      if (window.flashMsg && def.intro) {
+        window.flashMsg(def.intro);
+      }
+
+      const img = new Image();
+      img.src = def.url;
 
       S.enemies.push({
-        type: "draxGunship",
+        type: "mission2Boss",
+        phase: def.phase,
+        pattern: def.pattern,
+        img,                     // used by enemies.js drawEnemies
         x: S.W / 2,
-        y: -160,
-        radius: 85,
-        hp: 600,
-        maxHp: 600,
+        y: -200,
+        radius: def.radius,
+        hp: def.hp,
+        maxHp: def.hp,
         enterComplete: false,
         timer: 0,
+        volleyTimer: 0,
+        spiralAngle: 0,
+        laserTimer: 0,
+        isMission2Boss: true,
       });
     },
 
-    // -----------------------------
-    // FINAL BOSS
-    // -----------------------------
-    spawnFinalBoss() {
-      window.flashMsg("⚠⚠ DRAX OVERSEER ARRIVING ⚠⚠");
+    // Legacy wrappers (kept so nothing else breaks if it calls them)
+    // They simply map to the first and last boss in the gauntlet.
+    spawnMidBoss() {
+      this.spawnBossPhase(0);
+    },
 
-      S.enemies.push({
-        type: "draxFinalBoss",
-        x: S.W / 2,
-        y: -200,
-        radius: 120,
-        hp: 1300,
-        maxHp: 1300,
-        enterComplete: false,
-        timer: 0,
-        laserTimer: 0,
-      });
+    spawnFinalBoss() {
+      this.spawnBossPhase(MISSION2_BOSSES.length - 1);
     },
 
     // -----------------------------
@@ -184,6 +258,121 @@
         const p = S.player;
 
         for (const e of S.enemies) {
+          // MISSION 2 – multi-boss gauntlet (Cancer, Fighter, Leo, Scorpio, Virgo)
+          if (e.type === "mission2Boss") {
+            // Entry: slide down then hold position
+            if (!e.enterComplete) {
+              e.y += 70 * dt;
+              if (e.y >= 170) e.enterComplete = true;
+            }
+
+            e.timer += dt;
+            e.volleyTimer = (e.volleyTimer || 0) + dt;
+            e.spiralAngle = (e.spiralAngle || 0) + dt * 1.5;
+            e.laserTimer = (e.laserTimer || 0) + dt;
+
+            const fireFan = (count, speed, spread, offsetAngle = 0) => {
+              const baseAngle = Math.atan2(p.y - e.y, p.x - e.x);
+              for (let i = 0; i < count; i++) {
+                const a =
+                  baseAngle +
+                  ((i - (count - 1) / 2) * spread) +
+                  offsetAngle;
+                S.enemyBullets.push({
+                  x: e.x,
+                  y: e.y + 20,
+                  vx: Math.cos(a) * speed,
+                  vy: Math.sin(a) * speed,
+                  radius: 6,
+                  colour: "#ffdd88",
+                });
+              }
+            };
+
+            const fireRing = (count, speed) => {
+              for (let i = 0; i < count; i++) {
+                const a = (i / count) * Math.PI * 2;
+                S.enemyBullets.push({
+                  x: e.x,
+                  y: e.y + 10,
+                  vx: Math.cos(a) * speed,
+                  vy: Math.sin(a) * speed,
+                  radius: 6,
+                  colour: "#88e0ff",
+                });
+              }
+            };
+
+            switch (e.phase) {
+              case 0: // Cancer – dense forward rain
+                if (e.volleyTimer > 1.1) {
+                  e.volleyTimer = 0;
+                  fireFan(7, 260, 0.12);
+                }
+                break;
+
+              case 1: // Fighter – fast aimed bursts
+                if (e.volleyTimer > 0.6) {
+                  e.volleyTimer = 0;
+                  fireFan(3, 340, 0.07);
+                }
+                break;
+
+              case 2: // Leo – big radial rings
+                if (e.volleyTimer > 1.6) {
+                  e.volleyTimer = 0;
+                  fireRing(18, 220);
+                }
+                break;
+
+              case 3: // Scorpio – twin spiral barrage
+                if (e.volleyTimer > 0.08) {
+                  e.volleyTimer = 0;
+                  const a = e.spiralAngle;
+                  S.enemyBullets.push({
+                    x: e.x,
+                    y: e.y + 10,
+                    vx: Math.cos(a) * 260,
+                    vy: Math.sin(a) * 260,
+                    radius: 6,
+                    colour: "#ff77aa",
+                  });
+                  S.enemyBullets.push({
+                    x: e.x,
+                    y: e.y + 10,
+                    vx: Math.cos(a + Math.PI) * 260,
+                    vy: Math.sin(a + Math.PI) * 260,
+                    radius: 6,
+                    colour: "#ff77aa",
+                  });
+                }
+                break;
+
+              case 4: // Virgo – spreads + occasional beam
+                if (e.volleyTimer > 1.4) {
+                  e.volleyTimer = 0;
+                  fireFan(9, 230, 0.10);
+                }
+
+                if (e.laserTimer > 7) {
+                  e.laserTimer = 0;
+                  S.enemyBullets.push({
+                    x: e.x,
+                    y: e.y + 80,
+                    vx: 0,
+                    vy: 520,
+                    radius: 18,
+                    colour: "#ff0044",
+                    beam: true,
+                  });
+                  if (window.flashMsg) {
+                    window.flashMsg("⚡ VIRGO BEAM STRIKE");
+                  }
+                }
+                break;
+            }
+          }
+
           // GUNSHIP
           if (e.type === "draxGunship") {
             if (!e.enterComplete) {
