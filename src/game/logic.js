@@ -769,12 +769,17 @@ window.updateGame = function updateGame(dt) {
   if (!S.running) return;
 
   const player = S.player;
-  // ----- Boss spawn timer -----
-  if (!S.bossSpawned) {
-    S.bossTimer = (S.bossTimer || 0) + dt;
-    if (S.bossTimer >= 60) { // ~1 min
-      window.spawnScorpionBoss();
-      S.bossSpawned = true;
+  // ----- INTRO-ONLY BOSS SPAWN (SCORPION → GEMINI CHAIN) -----
+  // Only run this timer when we are in the intro run (no mission level).
+  // Mission levels set S.currentLevel >= 2 in their enter() functions.
+  if (!S.currentLevel || S.currentLevel === 1) {
+    // ----- Boss spawn timer -----
+    if (!S.bossSpawned) {
+      S.bossTimer = (S.bossTimer || 0) + dt;
+      if (S.bossTimer >= 60) { // ~1 min
+        window.spawnScorpionBoss();
+        S.bossSpawned = true;
+      }
     }
   }
 
