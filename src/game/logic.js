@@ -765,6 +765,7 @@ window.drawGameCore = function drawGameCore(ctx) {
 // =========================================================
 
 window.updateGame = function updateGame(dt) {
+  const S = window.GameState || {};
 
   // -----------------------------------------------------
   // LEVEL DISPATCH GATE (Patch 2)
