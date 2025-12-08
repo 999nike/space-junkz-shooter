@@ -98,6 +98,32 @@ window.loadSprites = function loadSprites() {
 
   const sprites = (S.sprites = S.sprites || {});
 
+  // ---------- MISSION 3 (SHATTERED ARMADA) – BACKBLAZE URL TABLE ----------
+  const Assets = (window.Assets = window.Assets || {});
+  const B2_BASE = "https://f003.backblazeb2.com/file/space-junkz-assets/";
+
+  // Video background (Mission 3 only – DOES NOT replace intro/M1/M2)
+  Assets.mission3Video =
+    B2_BASE + "junkz-assets/background/mission3_bg.mp4";
+
+  // Mega boss + escorts + turrets
+  Assets.m3BossURL =
+    B2_BASE + "junkz-assets/bosses/075d2a4805f91a3137982e248ddf6a6d.jpg";
+  Assets.m3EscortURL =
+    B2_BASE + "junkz-assets/bosses/2e26f1ff3ab22cb18c43bf90d9fc3c9b.jpg";
+  Assets.m3TurretSheetURL =
+    B2_BASE + "junkz-assets/bosses/e6344f017d835a5cb8de571670912fac.jpg";
+
+  // Rocket + bomb sheets (used for new turret fire patterns)
+  Assets.m3RocketSheetURL =
+    B2_BASE + "junkz-assets/bullets/Free-Space-Shooter-Game-Objects.gif";
+  Assets.m3BombSheetURL =
+    B2_BASE + "junkz-assets/bullets/Free-Space-Shooter-Game-Objects4.gif";
+
+  // Explosion / flame frames folder (boss kill + damage FX)
+  Assets.m3ExplosionFolder =
+    B2_BASE + "junkz-assets/explosions1/";
+
   function makeImage(path) {
     const img = new Image();
     img.src = path;
@@ -178,4 +204,109 @@ sprites.nebulaBG = vid;
 
     console.log("🔥 Thruster frames loaded:", S.sprites.thrusterFrames.length);
   };
+
+  // ---------- MISSION 3 SPRITES (MEGA BOSS, ESCORTS, TURRETS, FX) ----------
+  (function initMission3Sprites() {
+    const A = (window.Assets = window.Assets || {});
+    if (!A.m3BossURL) return; // Mission 3 not configured
+
+    // Ensure arrays
+    A.m3TurretFrames = A.m3TurretFrames || [];
+    A.explosionFrames = A.explosionFrames || [];
+    A.flameFrames = A.flameFrames || [];
+
+    // Mega boss ship
+    if (!A.m3Boss && A.m3BossURL) {
+      const img = new Image();
+      img.src = A.m3BossURL;
+      img.onload = () => console.log("✅ Loaded Mission 3 boss:", img.src);
+      img.onerror = () => console.error("❌ Failed Mission 3 boss:", img.src);
+      A.m3Boss = img;
+    }
+
+    // Escort mini-bosses (all use same sprite)
+    if (!A.m3Escort && A.m3EscortURL) {
+      const img = new Image();
+      img.src = A.m3EscortURL;
+      img.onload = () => console.log("✅ Loaded Mission 3 escort:", img.src);
+      img.onerror = () => console.error("❌ Failed Mission 3 escort:", img.src);
+      A.m3Escort = img;
+    }
+
+    // Rocket / bomb sheets (frame layout handled by renderer)
+    if (A.m3RocketSheetURL && !A.m3RocketSheet) {
+      const img = new Image();
+      img.src = A.m3RocketSheetURL;
+      img.onload = () => console.log("✅ Loaded Mission 3 rocket sheet:", img.src);
+      img.onerror = () => console.error("❌ Failed Mission 3 rocket sheet:", img.src);
+      A.m3RocketSheet = img;
+    }
+
+    if (A.m3BombSheetURL && !A.m3BombSheet) {
+      const img = new Image();
+      img.src = A.m3BombSheetURL;
+      img.onload = () => console.log("✅ Loaded Mission 3 bomb sheet:", img.src);
+      img.onerror = () => console.error("❌ Failed Mission 3 bomb sheet:", img.src);
+      A.m3BombSheet = img;
+    }
+
+    // Turret sheet (4 frames stacked vertically)
+    if (A.m3TurretSheetURL && (!A.m3TurretFrames || !A.m3TurretFrames.length)) {
+      const sheet = new Image();
+      sheet.src = A.m3TurretSheetURL;
+
+      sheet.onload = () => {
+        const fw = sheet.width;
+        const fh = sheet.height / 4; // 4 turrets vertically
+
+        A.m3TurretFrames = [];
+        for (let i = 0; i < 4; i++) {
+          const c = document.createElement("canvas");
+          c.width = fw;
+          c.height = fh;
+
+          const ctx = c.getContext("2d");
+          ctx.drawImage(sheet, 0, -i * fh);
+
+          A.m3TurretFrames.push(c);
+        }
+
+        console.log("✅ Mission 3 turret frames:", A.m3TurretFrames.length);
+      };
+
+      sheet.onerror = () =>
+        console.error("❌ Failed Mission 3 turret sheet:", sheet.src);
+
+      A.m3TurretSheet = sheet;
+    }
+
+    // Explosion frames: boom01.png → boom08.png (scaled at render-time)
+    if (A.m3ExplosionFolder && (!A.explosionFrames || !A.explosionFrames.length)) {
+      A.explosionFrames = [];
+      for (let i = 1; i <= 8; i++) {
+        const num = String(i).padStart(2, "0");
+        const img = new Image();
+        img.src = A.m3ExplosionFolder + "boom" + num + ".png";
+        img.onload = () =>
+          console.log("✅ Loaded Mission 3 explosion frame:", img.src);
+        img.onerror = () =>
+          console.error("❌ Failed Mission 3 explosion frame:", img.src);
+        A.explosionFrames.push(img);
+      }
+    }
+
+    // Flame frames: flame0.png → flame5.png (engine / damage effect)
+    if (A.m3ExplosionFolder && (!A.flameFrames || !A.flameFrames.length)) {
+      A.flameFrames = [];
+      for (let i = 0; i <= 5; i++) {
+        const img = new Image();
+        img.src = A.m3ExplosionFolder + "flame" + i + ".png";
+        img.onload = () =>
+          console.log("✅ Loaded Mission 3 flame frame:", img.src);
+        img.onerror = () =>
+          console.error("❌ Failed Mission 3 flame frame:", img.src);
+        A.flameFrames.push(img);
+      }
+    }
+  })();
 };
