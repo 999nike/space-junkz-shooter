@@ -1,0 +1,486 @@
+// ---------- RENDERER ----------
+
+// STARFIELD (draw only)
+window.drawStars = function drawStars(ctx) {
+  const S = window.GameState;
+
+  ctx.save();
+  for (const s of S.stars) {
+    ctx.globalAlpha = s.alpha;
+    ctx.fillStyle = s.color;
+    ctx.fillRect(s.x, s.y, s.size, s.size);
+  }
+  ctx.restore();
+};
+
+// STARFIELD MOVEMENT (top-right → bottom-left, 30° tilt)
+window.updateStars = function updateStars(dt) {
+  const S = window.GameState;
+
+  const angle = (30 * Math.PI) / 180;
+  const dirX = -Math.sin(angle);   // left
+  const dirY =  Math.cos(angle);   // down
+
+  for (const s of S.stars) {
+    s.x += dirX * s.speed * dt;
+    s.y += dirY * s.speed * dt;
+
+    if (s.y > S.H + 50 || s.x < -50) {
+      s.x = rand(S.W * 0.55, S.W + 140);
+      s.y = rand(-160, S.H * 0.25);
+      s.size = rand(1, 3);
+      s.speed = rand(30, 110);
+      s.alpha = rand(0.4, 1);
+    }
+  }
+};
+
+// ---------- DIAGONAL / NEBULA BACKGROUND ----------
+window.drawRunway = function drawRunway(ctx) {
+  const S = window.GameState;
+  const nebula = S.sprites.nebulaBG;
+
+  // Nebula backdrop
+  ctx.save();
+  if (nebula) {
+    ctx.globalAlpha = 1.0;
+    ctx.drawImage(nebula, 0, 0, S.W, S.H);
+  }
+  ctx.restore();
+
+  ctx.globalAlpha = 1;
+};
+
+// ---------- BULLETS ----------
+window.drawBullets = function drawBullets(ctx) {
+  const S = window.GameState;
+
+  if (!S.sprites) return;
+
+  const img = S.sprites.playerBullet;
+  if (!img) return;
+
+  const w = img.width;
+  const h = img.height;
+
+  for (const b of S.bullets) {
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    ctx.restore();
+  }
+};
+
+// Enemy bullets renderer
+window.drawEnemyBullets = function drawEnemyBullets(ctx) {
+  const S = window.GameState;
+  const yellow = S.sprites.enemyBullet;
+  const blue   = S.sprites.playerBullet;
+  if (!yellow && !blue) return;
+
+  for (const b of S.enemyBullets) {
+    const img =
+      b.type === "bossClaw"
+        ? (blue || yellow)
+        : (yellow || blue);
+
+    if (!img) continue;
+
+    const w = img.width;
+    const h = img.height;
+
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    ctx.restore();
+  }
+};
+
+// ---------- POWER-UP RENDERER ----------
+window.drawPowerUps = function drawPowerUps(ctx) {
+  const S = window.GameState;
+  if (!S || !S.powerUps) return;
+
+  ///////-------POWER-UP-RENDER-------
+  for (const p of S.powerUps) {
+
+    // Shield Part A
+    if (p.type === "shieldA" && S.sprites && S.sprites.shieldPartA) {
+      const img = S.sprites.shieldPartA;
+      const scale = 0.25;
+      ctx.drawImage(
+        img,
+        p.x - (img.width * scale) / 2,
+        p.y - (img.height * scale) / 2,
+        img.width * scale,
+        img.height * scale
+      );
+      continue;
+    }
+
+    // Shield Part B
+    if (p.type === "shieldB" && S.sprites && S.sprites.shieldPartB) {
+      const img = S.sprites.shieldPartB;
+      const scale = 0.25;
+      ctx.drawImage(
+        img,
+        p.x - (img.width * scale) / 2,
+        p.y - (img.height * scale) / 2,
+        img.width * scale,
+        img.height * scale
+      );
+      continue;
+    }
+
+    // COIN PICKUP (green)
+    if (p.type === "coin") {
+      ctx.fillStyle = "#7dff99";
+    }
+
+    // WEAPON PICKUP (yellow or default)
+    else {
+      ctx.fillStyle = "#ffe66b";
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius || 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+};
+
+// Explosion renderer (sprite sheet)
+window.drawParticles = function drawParticles(ctx) {
+  const S = window.GameState;
+  const sheet = S.sprites.explosionSheet;
+  if (!sheet) return;
+
+  const rows = 4;
+  const cols = 4;   // 4x4 grid
+
+  const frameW = sheet.width / cols;
+  const frameH = sheet.height / rows;
+
+  for (const e of S.particles) {
+    const sx = e.frame * frameW;
+    const sy = e.row * frameH;
+
+    ctx.save();
+    ctx.translate(e.x, e.y);
+
+    const scale = e.scale || 1.0;
+
+    ctx.drawImage(
+      sheet,
+      sx, sy, frameW, frameH,
+      -frameW * 0.5 * scale,
+      -frameH * 0.5 * scale,
+      frameW * scale,
+      frameH * scale
+    );
+
+    ctx.restore();
+  }
+};
+
+// ---------- SIDEKICK RENDERER ----------
+window.drawSidekicks = function drawSidekicks(ctx) {
+  const S = window.GameState;
+  const img = S.sprites.sideShip;
+  if (!img || !S.sidekicks) return;
+
+  const scale = 0.6;
+  const w = img.width * scale;
+  const h = img.height * scale;
+
+  for (const s of S.sidekicks) {
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    // Rotate 180° so ship faces upward
+    ctx.rotate(Math.PI);
+    ctx.drawImage(img, -w * 0.5, -h * 0.5, w, h);
+    ctx.restore();
+  }
+};
+
+// ---------- ROCKET RENDERER ----------
+window.drawRockets = function drawRockets(ctx) {
+  const S = window.GameState;
+  const img = S.sprites.rocket;
+  if (!img || !S.rockets) return;
+
+  const w = img.width;
+  const h = img.height;
+  const scale = 2.0; // visible
+
+  for (const r of S.rockets) {
+    ctx.save();
+    ctx.translate(r.x, r.y);
+
+    const angle = Math.atan2(r.vy, r.vx);
+    ctx.rotate(angle); // rocket oriented along movement
+
+    ctx.drawImage(
+      img,
+      -w * 0.5 * scale,
+      -h * 0.5 * scale,
+      w * scale,
+      h * scale
+    );
+
+    ctx.restore();
+  }
+};
+
+// ---------- BOSS RENDERER ----------
+window.drawScorpionBoss = function drawScorpionBoss(ctx) {
+  const S = window.GameState;
+
+  if (!S.sprites) return;
+
+  const img = S.sprites.bossScorpion;
+  const beamImg = S.sprites.megaBeam;
+  if (!img) return;
+
+  const scale = 0.30;
+  const w = img.width * scale;
+  const h = img.height * scale;
+
+  for (const e of S.enemies) {
+    if (e.type !== "scorpionBoss") continue;
+
+    // Tail laser first so boss is on top
+    if ((e.laserCharging || e.laserActive) && beamImg) {
+      const tailX = e.x;
+      const tailY = e.y + h * 0.32;  // tail-tip anchor
+
+      const targetX = e.laserX;
+      const targetY = S.H + 60;
+
+      const dx = targetX - tailX;
+      const dy = targetY - tailY;
+      const angle = Math.atan2(dy, dx);
+      const length = Math.hypot(dx, dy);
+
+      ctx.save();
+      ctx.translate(tailX, tailY);
+      ctx.rotate(angle);
+
+      ctx.globalAlpha = e.laserActive ? 0.95 : 0.4;
+
+      ctx.drawImage(
+        beamImg,
+        0,
+        -beamImg.height * 0.5,
+        length,
+        beamImg.height
+      );
+
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    // Boss body
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    ctx.drawImage(
+      img,
+      -w * 0.5,
+      -h * 0.5,
+      w,
+      h
+    );
+    ctx.restore();
+
+    // HP bar
+    const barW = 160;
+    const barH = 10;
+    const pct = e.hp / e.maxHp;
+
+    const bx = e.x - barW / 2;
+    const by = e.y - h / 2 - 20;
+
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(bx, by, barW, barH);
+
+    ctx.fillStyle = "#3aff6b";
+    ctx.fillRect(bx, by, barW * pct, barH);
+  }
+};
+
+// ------ PATCH 5: Gemini Boss Renderer (N5) ------
+window.drawGeminiBoss = function drawGeminiBoss(ctx) {
+  const S = window.GameState;
+  if (!S.sprites) return;
+
+  const img = S.sprites.bossGemini;
+  if (!img) return;
+
+  const scale = 0.70; 
+  const w = img.width * scale;
+  const h = img.height * scale;
+
+  for (const e of S.enemies) {
+    if (e.type !== "geminiBoss") continue;
+
+    // Draw main ship
+    ctx.drawImage(img, e.x - w * 0.5, e.y - h * 0.5, w, h);
+
+    // HP bar
+    if (e.maxHp) {
+      const barWidth = 200;
+      const barHeight = 6;
+      const hpRatio = Math.max(0, Math.min(1, e.hp / e.maxHp));
+
+      const barX = e.x - barWidth / 2;
+      const barY = e.y - h * 0.5 - 20;
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+      ctx.fillRect(barX, barY, barWidth, barHeight);
+
+      ctx.fillStyle = "rgba(0, 255, 255, 0.7)";
+      ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
+
+      ctx.strokeStyle = "#00ffff";
+      ctx.strokeRect(barX, barY, barWidth, barHeight);
+    }
+  }
+};
+
+// --------------------------------------------------------
+//  PLAYER HEALTH + SHIELD BARS (LERP ANIMATED)
+// --------------------------------------------------------
+window.drawPlayerBars = function drawPlayerBars(ctx, S) {
+  const p = S.player;
+  if (!p) return;
+
+  // Limits
+  const maxHP = S.maxLives  || 100;
+  const maxSH = S.maxShield || 100;
+  const hp    = Math.max(0, S.lives);
+  const sh    = Math.max(0, S.shield || 0);
+
+  // Short bar width
+  const BAR_W = 40;
+  const BAR_H = 4;
+  const GAP   = 6;
+
+  // Position
+  const X = p.x - BAR_W / 2;
+  let   Y = p.y + 32;
+
+  // ---- HEALTH BAR (GREEN) ----
+  S._hpLerp = S._hpLerp ?? hp;
+  S._hpLerp += (hp - S._hpLerp) * 0.18;
+
+  ctx.fillStyle = "#00ff44"; // neon green
+  ctx.fillRect(X, Y, (S._hpLerp / maxHP) * BAR_W, BAR_H);
+
+  // ---- SHIELD BAR (BLUE) ----
+  if (S.shieldUnlocked) {
+    Y += BAR_H + 2;  // small gap
+
+    S._shLerp = S._shLerp ?? sh;
+    S._shLerp += (sh - S._shLerp) * 0.18;
+
+    ctx.fillStyle = "#00c8ff"; // neon blue
+    ctx.fillRect(X, Y, (S._shLerp / maxSH) * BAR_W, BAR_H);
+  }
+};
+
+// --------------------------------------------------------
+//  SIMPLE STARFIELD SYSTEM (RESTORE)
+// --------------------------------------------------------
+let _stars = [];
+
+window.initStars = function initStars() {
+  const S = window.GameState;
+  _stars = [];
+  for (let i = 0; i < 120; i++) {
+    _stars.push({
+      x: Math.random() * S.W,
+      y: Math.random() * S.H,
+      s: Math.random() * 2 + 1,
+      v: 0.2 + Math.random() * 0.4
+    });
+  }
+};
+
+
+// ---------- MAIN GAME DRAW ----------
+window.drawGame = function drawGame() {
+  const S = window.GameState;
+  const ctx = S.ctx;
+
+  // -----------------------------------------------------
+  // LEVEL DRAW DISPATCH (Patch 2)
+  // Prevent intro draw from rendering during mission levels.
+  // -----------------------------------------------------
+  if (window.Level2 && window.Level2.active) {
+    if (typeof window.Level2.draw === "function") {
+      return window.Level2.draw(ctx);
+    }
+  }
+
+  if (window.Level3 && window.Level3.active) {
+    if (typeof window.Level3.draw === "function") {
+      return window.Level3.draw(ctx);
+    }
+  }
+
+  // Future-level fallback
+  if (S.currentLevel && S.currentLevel > 3) {
+    return;
+  }
+
+  // HOME BASE MODE
+  if (window.HomeBase && window.HomeBase.active) {
+    window.HomeBase.draw(ctx);
+    return;
+  }
+
+  // WORLD MAP MODE
+  if (window.WorldMap && window.WorldMap.active) {
+    window.WorldMap.draw(ctx);
+    return;
+  }
+
+  ctx.clearRect(0, 0, S.W, S.H);
+
+  // Background first
+  window.drawRunway(ctx);
+  // Stars
+  drawStars(ctx);
+  // Enemies
+  window.drawEnemies(ctx);
+
+  // Boss
+  window.drawScorpionBoss(ctx);
+  window.drawGeminiBoss(ctx);   // PATCH 5B
+
+  // Sidekick ships
+  window.drawSidekicks(ctx);
+
+  // Rockets
+  window.drawRockets(ctx);
+
+  // Bullets
+  drawBullets(ctx);
+
+  // Enemy bullets
+  window.drawEnemyBullets(ctx);
+
+  // Power-ups
+  window.drawPowerUps(ctx);
+
+  // Particles
+window.drawParticles(ctx);
+
+// Player
+window.drawPlayer(ctx);
+
+// ------- PLAYER HEALTH + SHIELD BARS (N5) -------
+if (window.drawPlayerBars && S) {
+  window.drawPlayerBars(ctx, S);
+}
+};
+
