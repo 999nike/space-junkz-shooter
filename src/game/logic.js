@@ -80,6 +80,27 @@ window.spawnExplosion = function spawnExplosion(x, y, colour) {
   });
 };
 
+// ---------- ENEMY BULLET SPAWNER (used by bosses / missions) ----------
+window.spawnEnemyBullet = function spawnEnemyBullet(x, y, angle, type, speedScale) {
+  const S = window.GameState;
+  if (!S || !S.enemyBullets) return;
+
+  const baseSpeed = 260;
+  const speed = baseSpeed * (speedScale || 1);
+
+  const vx = Math.cos(angle) * speed;
+  const vy = Math.sin(angle) * speed;
+
+  S.enemyBullets.push({
+    x,
+    y,
+    vx,
+    vy,
+    radius: 6,
+    type: type || "enemy"
+  });
+};
+
 // =========================================================
 //  ENEMY SPAWNING
 // =========================================================
@@ -743,11 +764,8 @@ window.drawGameCore = function drawGameCore(ctx) {
 //  MAIN UPDATE – called from engine.js → updateGame(dt)
 // =========================================================
 
-window.updateGame = function updateGame(dt) {
-  const S = window.GameState;
-
   // -----------------------------------------------------
-  // LEVEL DISPATCH GATE (Patch 1)
+  // LEVEL DISPATCH GATE (Patch 2)
   // If a mission level is active, skip ALL intro logic.
   // -----------------------------------------------------
   if (window.Level2 && window.Level2.active) {
@@ -762,8 +780,14 @@ window.updateGame = function updateGame(dt) {
     }
   }
 
+  if (window.Level4 && window.Level4.active) {
+    if (typeof window.Level4.update === "function") {
+      return window.Level4.update(dt);
+    }
+  }
+
   // Future levels (safe fallback)
-  if (S.currentLevel && S.currentLevel > 3) {
+  if (S.currentLevel && S.currentLevel > 4) {
     // Do not run intro logic for any mission past L1
     return;
   }
