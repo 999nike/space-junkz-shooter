@@ -723,7 +723,9 @@ window.updateGameCore = function updateGameCore(dt) {
   // so updateGame() will NOT run the intro boss timer.
   S.bossSpawned       = true;
   S.geminiBossSpawned = true;
-  S.currentLevel      = prevLevelIndex || 99;
+  // Force currentLevel to a high number so updateGame() will skip intro logic.
+  // Using prevLevelIndex here is unsafe because mission levels (e.g. 4) are ≤ 4.
+  S.currentLevel = 99;
 
   // Run core safely – no Scorpion/Gemini spawn in this window
   window.updateGame(dt);

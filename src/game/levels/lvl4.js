@@ -72,6 +72,15 @@ window.Level4 = (function() {
     }
   }
 
+  // ------ MISSION 3 (lvl4.js) ------
+  // Support Level4 (Shattered Armada) dispatch. Without this block the mega boss
+  // will never update, so you only see normal waves.
+  if (window.Level4 && window.Level4.active) {
+    if (typeof window.Level4.update === "function") {
+      return window.Level4.update(dt);
+    }
+  }
+
   function stop() {
     S.active = false;
     stopBackgroundVideo();
@@ -553,6 +562,12 @@ window.Level4 = (function() {
   };
 
 })();
+
+// Auto‑spawn the boss if, for some reason, the level was entered without
+// start() being called (failsafe). Without a boss object nothing will draw.
+if (!S.boss) {
+  spawnBossPhase1();
+}
 
 // ============================================================
 //  ENGINE GATEWAY PATCH – LEVEL 4 (MISSION 3)
