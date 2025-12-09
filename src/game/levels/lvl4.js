@@ -124,13 +124,17 @@ window.Level4 = (function() {
   function spawnBossPhase1() {
     S.phase = 1;
 
+    const GS = window.GameState || {};
+    const W = GS.W || (GS.canvas ? GS.canvas.width : 1280);
+    const A = window.Assets || {};
+
     S.boss = {
-      x: renderer.width/2 - 200,
+      x: W * 0.5 - 200,
       y: -400,
       w: 400,
       h: 350,
       hp: 1600,
-      sprite: Assets.m3Boss,
+      sprite: A.m3Boss || null,
       vy: 0.4,
       entering: true,
       state: "enter",
@@ -175,6 +179,13 @@ window.Level4 = (function() {
      ============================================================ */
   function update(dt) {
     if (!S.active) return;
+
+    const GS = window.GameState || {};
+
+    // Run shared core (player, bullets, enemies, powerups, etc.)
+    if (GS.running && typeof window.updateGameCore === "function") {
+      window.updateGameCore(dt);
+    }
 
     S.time += dt;
 
