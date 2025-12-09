@@ -427,8 +427,9 @@ window.Level4 = (function() {
     // Only draw when this level is active
     if (!S.active) return;
 
-    // Reuse your existing runway / core renderer so Mission 3
-    // draws consistently with other missions.
+    const A = window.Assets || {};
+
+    // --- Base runway + shared core (player, normal enemies, bullets) ---
     if (typeof window.drawRunway === "function") {
       window.drawRunway(ctx);
     }
@@ -439,6 +440,96 @@ window.Level4 = (function() {
       // Fallback if drawGameCore isn't available
       window.drawGame(ctx);
     }
+
+    ctx.save();
+
+    // --- Boss hull ---
+    const b = S.boss;
+    if (b) {
+      if (b.sprite) {
+        ctx.drawImage(b.sprite, b.x, b.y, b.w, b.h);
+      } else {
+        // simple fallback box so we can SEE the boss even if sprite fails
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = "#ff3355";
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // --- Turrets mounted on the boss ---
+    if (b && S.turrets && S.turrets.length) {
+      for (const t of S.turrets) {
+        const sprite = t.sprite || null;
+        const cx = b.x + t.offsetX;
+        const cy = b.y + t.offsetY;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(t.angle || 0);
+
+        if (sprite) {
+          const w = sprite.width  || 64;
+          const h = sprite.height || 64;
+          ctx.drawImage(sprite, -w / 2, -h / 2, w, h);
+        } else {
+          ctx.fillStyle = "#ffaa00";
+          ctx.fillRect(-14, -14, 28, 28);
+        }
+
+        ctx.restore();
+      }
+    }
+
+    // --- Escort ships ---
+    if (S.escorts && S.escorts.length) {
+      for (const e of S.escorts) {
+        const sprite = e.sprite || null;
+        const x = e.x - e.w / 2;
+        const y = e.y - e.h / 2;
+
+        if (sprite) {
+          ctx.drawImage(sprite, x, y, e.w, e.h);
+        } else {
+          ctx.fillStyle = "#00ffff";
+          ctx.fillRect(x, y, e.w, e.h);
+        }
+      }
+    }
+
+    // --- Explosions (boss death chain, escort kills) ---
+    const frames = A.explosionFrames || [];
+    if (S.explosions && S.explosions.length) {
+      for (const ex of S.explosions) {
+        const size = ex.small ? 80 * (ex.scale || 0.8)
+                              : 140 * (ex.scale || 1.1);
+        const half = size / 2;
+        const frameImg = frames[ex.frame] || null;
+
+        if (frameImg) {
+          ctx.drawImage(frameImg, ex.x - half, ex.y - half, size, size);
+        } else {
+          ctx.globalAlpha = 0.8;
+          ctx.beginPath();
+          ctx.arc(ex.x, ex.y, size / 2, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffdd55";
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+
+    // --- Simple damage FX flickers on hull/escorts ---
+    if (S.damageFx && S.damageFx.length) {
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = "#ffffff";
+      for (const fx of S.damageFx) {
+        ctx.fillRect(fx.x - 8, fx.y - 8, 16, 16);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.restore();
   }
 
   /* ============================================================
