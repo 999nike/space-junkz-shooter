@@ -553,3 +553,28 @@ window.Level4 = (function() {
   };
 
 })();
+
+// ============================================================
+//  ENGINE GATEWAY PATCH – LEVEL 4 (MISSION 3)
+//  Ensures Level4.update(dt) runs whenever Level4.active is true,
+//  without breaking intro, Level2, or Level3 logic.
+// ============================================================
+(function () {
+  // If updateGame is not defined yet, bail out quietly.
+  if (typeof window.updateGame !== "function") return;
+
+  const coreUpdateGame = window.updateGame;
+
+  window.updateGame = function level4GatewayUpdate(dt) {
+    const L4 = window.Level4;
+
+    // When Mission 3 is active, delegate main update to Level4
+    // so its boss phases + turrets actually run.
+    if (L4 && L4.active && typeof L4.update === "function") {
+      return L4.update(dt);
+    }
+
+    // Otherwise use the original behaviour (intro + Level2/3 gateway)
+    return coreUpdateGame(dt);
+  };
+})();
