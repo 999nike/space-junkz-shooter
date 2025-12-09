@@ -170,7 +170,7 @@ window.loadSprites = function loadSprites() {
 
   // ---------- VIDEO BACKGROUND (MP4) ----------
 const vid = document.createElement("video");
-vid.src = "./src/game/assets/pismis24.mp4";
+vid.src = "https://f003.backblazeb2.com/file/space-junkz-assets/junkz-assets/background/background_video2.mp4";
 vid.autoplay = true;
 vid.loop = true;
 vid.muted = true;         // REQUIRED for autoplay
