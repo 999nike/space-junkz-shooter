@@ -135,7 +135,7 @@ window.Level4 = (function() {
       h: 350,
       hp: 1600,
       sprite: A.m3Boss || null,
-      vy: 0.4,
+      vy: 80, // pixels per second (similar to other bosses)
       entering: true,
       state: "enter",
       damageTimer: 0
@@ -213,8 +213,10 @@ window.Level4 = (function() {
     if (!b) return;
 
     if (b.entering) {
-      b.y += b.vy;
+      // Move boss down at vy pixels per second
+      b.y += b.vy * dt;
       if (b.y >= 150) {
+        b.y = 150;
         b.entering = false;
       }
     }
@@ -222,7 +224,8 @@ window.Level4 = (function() {
     updateBossDamageFx(b, dt);
     updateTurrets(dt, b);
 
-    if (S.time > 12000) {
+    // After ~12 seconds in phase 1, bring in the escort wave
+    if (S.time > 12) {
       spawnEscortWave();
       S.phase = 2;
     }
