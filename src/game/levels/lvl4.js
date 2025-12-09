@@ -4,6 +4,8 @@
    Fully rebuilt — independent logic, no intro bleed-through
    ============================================================ */
 
+   console.log("LVL4 ARMADA FILE LOADED v1.0");
+
 window.Level4 = (function() {
   const S = {
     active: false,
