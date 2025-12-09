@@ -20,6 +20,42 @@ window.Level4 = (function() {
   /* ============================================================
      INITIALIZE LEVEL
      ============================================================ */
+
+  // Entry point used by the world map when you click MISSION 3
+  function enter() {
+    const GS = window.GameState || {};
+
+    console.log("Entering LEVEL 4 — Mission 3 (Shattered Armada)");
+
+    // Reset shared shooter state (enemies, bullets, timers, etc.)
+    if (typeof window.resetGameState === "function") {
+      window.resetGameState();
+    }
+
+    // Mark mission as running
+    GS.running = true;
+    GS.currentLevel = 4;
+
+    // Spawn player near bottom centre if we have one
+    if (GS.player) {
+      GS.player.x = GS.W * 0.5;
+      GS.player.y = GS.H - 90;
+      GS.player.invuln = 1.3;
+    }
+
+    // Hide world map / home base while in the mission
+    if (window.WorldMap) window.WorldMap.active = false;
+    if (window.HomeBase) window.HomeBase.active = false;
+
+    // Refresh parallax stars if available
+    if (typeof window.initStars === "function") {
+      window.initStars();
+    }
+
+    // Now start the internal boss state machine
+    start();
+  }
+
   function start() {
     S.active = true;
     S.time = 0;
@@ -29,6 +65,11 @@ window.Level4 = (function() {
     spawnBossPhase1();
 
     console.log("MISSION 3 START — SHATTERED ARMADA");
+
+    // Make sure logic.js sees this level as active
+    if (window.Level4) {
+      window.Level4.active = true;
+    }
   }
 
   function stop() {
@@ -369,10 +410,20 @@ window.Level4 = (function() {
      EXPORT API
      ============================================================ */
   return {
+    // main controls
+    enter,
     start,
     stop,
     update,
-    draw
+    draw,
+
+    // bridge active flag to internal state S.active
+    get active() {
+      return S.active;
+    },
+    set active(v) {
+      S.active = !!v;
+    }
   };
 
 })();
