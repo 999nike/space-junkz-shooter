@@ -297,10 +297,12 @@ window.Level4 = (function() {
      ============================================================ */
   function updateTurrets(dt, boss, rage=false) {
     S.turrets.forEach(t => {
-      // Rotate toward player
-      if (window.Player) {
-        const dx = Player.x - (boss.x + t.offsetX);
-        const dy = Player.y - (boss.y + t.offsetY);
+      // Rotate toward player (GameState.player)
+      const GS = window.GameState || {};
+      const P = GS.player;
+      if (P) {
+        const dx = P.x - (boss.x + t.offsetX);
+        const dy = P.y - (boss.y + t.offsetY);
         t.angle = Math.atan2(dy, dx);
       }
 
@@ -386,7 +388,9 @@ window.Level4 = (function() {
         ex.frame++;
         ex.timer = 0;
       }
-      if (ex.frame >= Assets.explosionFrames.length) {
+      const A = window.Assets || {};
+      const frames = A.explosionFrames || [];
+      if (!frames.length || ex.frame >= frames.length) {
         S.explosions.splice(i, 1);
       }
     }
@@ -396,9 +400,22 @@ window.Level4 = (function() {
      FINISH MISSION
      ============================================================ */
   function finishMission() {
+    const GS = window.GameState || {};
     setTimeout(() => {
-      window.unlockNextLevel(4);
-      window.gotoWorld();
+
+      // Unlock next level on galaxy map
+      if (typeof window.unlockNextLevel === "function") {
+        window.unlockNextLevel(4);
+      }
+
+      // Stop mission 3
+      GS.running = false;
+
+      // Return to world map
+      if (window.WorldMap && typeof window.WorldMap.enter === "function") {
+        window.WorldMap.enter();
+      }
+
       stop();
     }, 2200);
   }
