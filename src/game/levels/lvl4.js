@@ -145,6 +145,9 @@ window.Level4 = (function() {
   }
 
   function spawnTurrets() {
+    const A = window.Assets || {};
+    const frames = A.m3TurretFrames || [];
+
     S.turrets = [];
     for (let i = 0; i < 4; i++) {
       S.turrets.push({
@@ -154,21 +157,25 @@ window.Level4 = (function() {
         angle: 0,
         fireCooldown: 0,
         firingRate: 900 + (i * 300),
-        sprite: Assets.m3TurretFrames[i]
+        sprite: frames[i] || null
       });
     }
   }
 
   function spawnEscortWave() {
+    const GS = window.GameState || {};
+    const W = GS.W || (GS.canvas ? GS.canvas.width : 1280);
+    const A = window.Assets || {};
+
     for (let i = 0; i < 3; i++) {
       S.escorts.push({
-        x: (renderer.width*0.25) + (i * 250),
+        x: W * 0.25 + (i * 250),
         y: -200 - (i * 60),
         w: 140,
         h: 120,
         hp: 350,
         vy: 0.6,
-        sprite: Assets.m3Escort,
+        sprite: A.m3Escort || null,
         damageTimer: 0
       });
     }
