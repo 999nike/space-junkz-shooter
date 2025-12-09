@@ -299,7 +299,7 @@
     startLevel("Level3", 3, "Level2");
     return;
   }
-  // ------ MISSION 3  (Level4 clone test) ------
+  // ------ MISSION 3  (Level4 nob test) ------
   if (node.id === "lvl4") {
     startLevel("Level4", 4, "Level2");
     return;
