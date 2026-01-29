@@ -30,12 +30,18 @@ window.initEngine = function initEngine() {
   S.canvas = document.getElementById("game");
   S.ctx = S.canvas.getContext("2d");
 
-  // Match viewport exactly
-  S.canvas.width  = window.innerWidth;
-  S.canvas.height = window.innerHeight;
-  S.W = S.canvas.width;
-  S.H = S.canvas.height;
+  // Match viewport with 15% reduction (UI + input safe)
+const SCALE = 0.85;
 
+S.canvas.width  = Math.floor(window.innerWidth  * SCALE);
+S.canvas.height = Math.floor(window.innerHeight * SCALE);
+
+// Center canvas visually (CSS-safe)
+S.canvas.style.display = "block";
+S.canvas.style.margin  = "auto";
+
+S.W = S.canvas.width;
+S.H = S.canvas.height;
   // HUD elements
   S.scoreEl  = document.getElementById("score");
   S.livesEl  = document.getElementById("lives");
