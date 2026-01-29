@@ -219,6 +219,21 @@ function pollGamepad() {
   const pads = navigator.getGamepads && navigator.getGamepads();
   if (!pads) return;
 
+  // --- DEBUG: confirm whether browser exposes a real Gamepad ---
+  if (!S._gpDebugT) S._gpDebugT = 0;
+  S._gpDebugT++;
+
+  // every ~60 frames, log what the browser sees
+  if (S._gpDebugT % 60 === 0) {
+    const list = [];
+    for (let i = 0; i < pads.length; i++) {
+      const p = pads[i];
+      if (p) list.push({ i, id: p.id, buttons: p.buttons?.length, axes: p.axes?.length });
+    }
+    console.log("🎮 getGamepads()", { length: pads.length, detected: list });
+    if (list.length === 0) console.warn("🎮 NO GAMEPAD DETECTED (controller likely in mouse/remote mode)");
+  }
+
   // pick the first connected pad (pads[0] is NOT guaranteed)
 let gp = null;
 for (let i = 0; i < pads.length; i++) {
