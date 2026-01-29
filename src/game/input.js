@@ -208,5 +208,45 @@
     window.addEventListener("mouseup", () => {
       S.firing = false;
     });
+
+    // ---------------------------
+    // GAMEPAD (PS5 / STANDARD GAMEPAD API)
+    // Mirrors into S.moveX / S.moveY / S.firing
+    // ---------------------------
+const GAMEPAD_DEADZONE = 0.18;
+
+function pollGamepad() {
+  const pads = navigator.getGamepads && navigator.getGamepads();
+  if (!pads) return;
+
+  const gp = pads[0];
+  if (!gp) return;
+
+  // Left stick
+  let lx = gp.axes[0] || 0;
+  let ly = gp.axes[1] || 0;
+
+  if (Math.abs(lx) < GAMEPAD_DEADZONE) lx = 0;
+  if (Math.abs(ly) < GAMEPAD_DEADZONE) ly = 0;
+
+  // Feed into same movement path as mobile joystick
+  S.moveX = lx;
+  S.moveY = ly;
+
+  // Fire: X (0) or R2 (7)
+  const fire =
+    gp.buttons[0]?.pressed || // X
+    gp.buttons[7]?.pressed;   // R2
+
+  S.firing = !!fire;
+}
+
+// poll once per frame using RAF (safe + isolated)
+function gamepadLoop() {
+  pollGamepad();
+  requestAnimationFrame(gamepadLoop);
+}
+gamepadLoop();
+
   };
 })();
