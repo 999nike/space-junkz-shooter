@@ -219,8 +219,12 @@ function pollGamepad() {
   const pads = navigator.getGamepads && navigator.getGamepads();
   if (!pads) return;
 
-  const gp = pads[0];
-  if (!gp) return;
+  // pick the first connected pad (pads[0] is NOT guaranteed)
+let gp = null;
+for (let i = 0; i < pads.length; i++) {
+  if (pads[i]) { gp = pads[i]; break; }
+}
+if (!gp) return;
 
   // Left stick
   let lx = gp.axes[0] || 0;
