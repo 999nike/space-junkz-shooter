@@ -84,8 +84,24 @@
       this.bossPhaseIndex = 0;
       this.bossPhaseTimer = 0;
 
-      // Reset shooter core
-      if (window.resetGameState) resetGameState();
+     // ---- PRESERVE SHIELD STATE ACROSS RESET ----
+const shieldSnapshot = {
+  shield: S.shield,
+  maxShield: S.maxShield,
+  shieldUnlocked: S.shieldUnlocked,
+  hasShieldA: S.hasShieldA,
+  hasShieldB: S.hasShieldB,
+};
+
+// Reset shooter core (enemies, bullets, etc)
+if (window.resetGameState) resetGameState();
+
+// Restore shield state
+S.shield = shieldSnapshot.shield || 0;
+S.maxShield = shieldSnapshot.maxShield || 100;
+S.shieldUnlocked = shieldSnapshot.shieldUnlocked || false;
+S.hasShieldA = shieldSnapshot.hasShieldA || false;
+S.hasShieldB = shieldSnapshot.hasShieldB || false;
       S.running = true;
       S.currentLevel = 3;
 
