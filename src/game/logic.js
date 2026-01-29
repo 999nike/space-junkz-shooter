@@ -114,40 +114,46 @@ window.spawnEnemy = function spawnEnemy() {
   if (roll < 0.55) {
     // GRUNT – small, fast, 1 HP
     const size = rand(10, 16);
-    e = {
-      type: "grunt",
-      x: rand(size, S.W - size),
-      y: -size,
-      radius: size,
-      speedY: rand(120, 200),
-      hp: 1,
-      maxHp: 1,
-      hitFlash: 0,
-      colour: "#6bffb2",
-      score: 100,
-      dropChance: 0.05
-    };
+   e = {
+  type: "grunt",
+  x: rand(size, S.W - size),
+  y: -size,
+  radius: size,
+  speedY: rand(120, 200),
+  hp: 1,
+  maxHp: 1,
+  hitFlash: 0,
+  colour: "#6bffb2",
+  score: 100,
+  dropChance: 0.05,
+
+  // ✅ FIX: allow grunt to shoot
+  shootTimer: rand(1.6, 3.0)
+};
   } else if (roll < 0.85) {
     // ZIGZAG – medium, wavy path, 2 HP
     const size = rand(14, 20);
     const baseX = rand(size, S.W - size);
-    e = {
-      type: "zigzag",
-      x: baseX,
-      y: -size,
-      baseX,
-      radius: size,
-      speedY: rand(80, 140),
-      hp: 2,
-      maxHp: 2,
-      colour: "#ff9bf5",
-      score: 200,
-      dropChance: 0.08,
-      phase: Math.random() * Math.PI * 2,
-      waveAmp: rand(18, 32),
-      waveSpeed: rand(3, 5),
-      hitFlash: 0
-    };
+   e = {
+  type: "zigzag",
+  x: baseX,
+  y: -size,
+  baseX,
+  radius: size,
+  speedY: rand(80, 140),
+  hp: 2,
+  maxHp: 2,
+  colour: "#ff9bf5",
+  score: 200,
+  dropChance: 0.08,
+  phase: Math.random() * Math.PI * 2,
+  waveAmp: rand(18, 32),
+  waveSpeed: rand(3, 5),
+  hitFlash: 0,
+
+  // ✅ FIX: allow zigzag to shoot
+  shootTimer: rand(1.2, 2.6)
+};
   } else if (roll < 0.95) {
     // SHOOTER – fires bullets downward
     const size = rand(16, 24);
@@ -163,24 +169,27 @@ window.spawnEnemy = function spawnEnemy() {
       colour: "#ffd36b",
       score: 250,
       dropChance: 0.08,
-      shootTimer: rand(1.0, 2.2)
+      shootTimer: rand(1.2, 2.6)
     };
   } else {
     // TANK – big, slow, 3 HP, better drop
     const size = rand(22, 30);
     e = {
-      type: "tank",
-      x: rand(size, S.W - size),
-      y: -size,
-      radius: size,
-      speedY: rand(40, 70),
-      hp: 3,
-      maxHp: 3,
-      hitFlash: 0,
-      colour: "#ff6b7b",
-      score: 350,
-      dropChance: 0.15
-    };
+  type: "tank",
+  x: rand(size, S.W - size),
+  y: -size,
+  radius: size,
+  speedY: rand(40, 70),
+  hp: 3,
+  maxHp: 3,
+  hitFlash: 0,
+  colour: "#ff6b7b",
+  score: 350,
+  dropChance: 0.15,
+
+  // ✅ FIX: tanks shoot too (slightly faster)
+  shootTimer: rand(0.9, 1.8)
+   };
   }
 
   S.enemies.push(e);
@@ -957,20 +966,51 @@ if (!S.currentLevel || S.currentLevel === 1) {
             e.x += Math.sin(e.phase) * e.waveAmp * dt;
         }
 
-        // ------- ALL ENEMIES SHOOT -------
+        // ------- ALL ENEMIES SHOOT (FIX: init timer + sprite bullets) -------
+if (typeof e.shootTimer !== "number" || !isFinite(e.shootTimer)) {
+  // fallback-safe defaults (covers older enemies already spawned)
+  if (e.type === "grunt")  e.shootTimer = rand(1.6, 3.0);
+  else if (e.type === "zigzag") e.shootTimer = rand(1.2, 2.6);
+  else if (e.type === "tank")   e.shootTimer = rand(0.9, 1.8);
+  else if (e.type === "shooter") e.shootTimer = rand(1.0, 2.2);
+  else e.shootTimer = rand(1.4, 2.8);
+}
+
 e.shootTimer -= dt;
+
 if (e.shootTimer <= 0) {
+  // Aim at player (so it feels like “enemy AI”, not just rain)
+  const ang = Math.atan2(S.player.y - e.y, S.player.x - e.x);
 
+  // Slightly different speeds per type
+  const speedScale =
+    e.type === "grunt" ? 0.85 :
+    e.type === "zigzag" ? 0.95 :
+    e.type === "tank" ? 1.05 :
+    1.0;
+
+  // Use the dedicated spawner so renderer uses Laser.png consistently
+  if (window.spawnEnemyBullet) {
+    window.spawnEnemyBullet(e.x, e.y + e.radius, ang, "enemy", speedScale);
+  } else {
+    // hard fallback (shouldn’t hit, but safe)
+    const speed = 260 * speedScale;
     S.enemyBullets.push({
-        x: e.x,
-        y: e.y + e.radius,
-        vy: 260,             // fast downward
-        vx: 0,               // straight
-        radius: 3,           // small bullet
-        colour: "#61d6ff"    // cyan-blue
+      x: e.x,
+      y: e.y + e.radius,
+      vx: Math.cos(ang) * speed,
+      vy: Math.sin(ang) * speed,
+      radius: 6,
+      type: "enemy"
     });
+  }
 
-    e.shootTimer = 2.0;      // shoot every 2 seconds
+  // Reset timer per type
+  if (e.type === "grunt") e.shootTimer = rand(1.6, 3.0);
+  else if (e.type === "zigzag") e.shootTimer = rand(1.2, 2.6);
+  else if (e.type === "tank") e.shootTimer = rand(0.9, 1.8);
+  else if (e.type === "shooter") e.shootTimer = rand(1.0, 2.2);
+  else e.shootTimer = rand(1.4, 2.8);
 }
 
         // Reset when off screen
