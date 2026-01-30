@@ -243,5 +243,8 @@ body {
     left: 30px !important;
   }
 }
+body {
+  zoom: 0.9;
+}
 
 /* End of file — Wizz cleaned */
