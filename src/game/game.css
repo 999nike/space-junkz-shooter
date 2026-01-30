@@ -255,11 +255,12 @@ html, body {
   position: fixed;
   inset: 0;
   width: 100%;
-  height: 100dvh;          /* REAL visible viewport */
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: black;
+  z-index: 0;              /* canvas base layer */
 }
 
 #game {
