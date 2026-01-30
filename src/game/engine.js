@@ -30,18 +30,26 @@ window.initEngine = function initEngine() {
   S.canvas = document.getElementById("game");
   S.ctx = S.canvas.getContext("2d");
 
-  // Match viewport with 15% reduction (UI + input safe)
-const SCALE = 0.85;
+  // ---- SMART CANVAS SIZE (DeX / Chrome STABLE) ----
+  // First pass may be wrong on load; second pass fixes it.
+  window.resizeGameCanvas = function resizeGameCanvas() {
+    const SCALE = 0.85;
 
-S.canvas.width  = Math.floor(window.innerWidth  * SCALE);
-S.canvas.height = Math.floor(window.innerHeight * SCALE);
+    S.canvas.width  = Math.floor(window.innerWidth  * SCALE);
+    S.canvas.height = Math.floor(window.innerHeight * SCALE);
 
-// Center canvas visually (CSS-safe)
-S.canvas.style.display = "block";
-S.canvas.style.margin  = "auto";
+    S.canvas.style.display = "block";
+    S.canvas.style.margin  = "0 auto";
 
-S.W = S.canvas.width;
-S.H = S.canvas.height;
+    S.W = S.canvas.width;
+    S.H = S.canvas.height;
+  };
+
+  // Initial size
+  window.resizeGameCanvas();
+
+  // Second pass after viewport settles (fixes "refresh to correct size")
+  setTimeout(window.resizeGameCanvas, 180);
   // HUD elements
   S.scoreEl  = document.getElementById("score");
   S.livesEl  = document.getElementById("lives");
