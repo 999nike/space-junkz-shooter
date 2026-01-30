@@ -277,7 +277,8 @@ html, body {
   pointer-events: none;
 }
 
-#hud * {
-  pointer-events: auto;
+/* ---- CANVAS SHOULD NOT BLOCK UI ---- */
+#game {
+  pointer-events: none;
 }
 /* End of file — Wizz cleaned */
