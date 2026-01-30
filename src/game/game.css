@@ -244,7 +244,8 @@ body {
   }
 }
 body {
-  zoom: 0.9;
+  transform: scaleY(0.9);
+  transform-origin: top center;
 }
 
 /* End of file — Wizz cleaned */
